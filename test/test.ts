@@ -65,7 +65,7 @@ describe('Maybe', () => {
     })
 
     it('map over none', () => {
-        const f = (a) => {
+        const f = (_) => {
             throw new Error("should not be called")
         }
 
@@ -84,7 +84,7 @@ describe('Maybe', () => {
     })
 
     it('evaluate a lifted with none', () => {
-        const f = (a) => {
+        const f = (_) => {
             throw new Error("should not be called")
         }
 
