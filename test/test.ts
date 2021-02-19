@@ -24,7 +24,7 @@ function maybe_none<T>(): Maybe<T> {
 }
 
 function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
-    let value = maybe_value(maybe, undefined);
+    const value = maybe_value(maybe, undefined);
     if (value !== undefined) {
         return maybe_of(f(value))
     } else {
@@ -33,14 +33,7 @@ function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
 }
 
 function maybe_lift<T, U>(f: (a: T) => U): ((a: Maybe<T>) => Maybe<U>) {
-    return (a: Maybe<T>) => {
-        let value = maybe_value(a, undefined);
-        if (value !== undefined) {
-            return maybe_of(f(value))
-        } else {
-            return maybe_none()
-        }
-    }
+    return (a: Maybe<T>) => maybe_map(a, f)
 }
 
 describe('Maybe', () => {
