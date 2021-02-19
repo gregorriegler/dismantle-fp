@@ -14,7 +14,7 @@ describe('Maybe', () => {
 
     it('map over maybe', () => {
         const maybeOne = maybe_of(1)
-        const f = (a) => a + 1
+        const f = (a: number) => a + 1
 
         let maybeTwo = maybe_map(maybeOne, f);
 
@@ -22,7 +22,7 @@ describe('Maybe', () => {
     })
 
     it('map over none', () => {
-        const f = (_) => {
+        const f = (_: any) => {
             throw new Error("should not be called")
         }
 
@@ -32,7 +32,7 @@ describe('Maybe', () => {
     })
 
     it('lift', () => {
-        const f = (a) => a + 1
+        const f = (a: number) => a + 1
 
         let liftedF = maybe_lift(f);
 
@@ -41,7 +41,7 @@ describe('Maybe', () => {
     })
 
     it('evaluate a lifted with none', () => {
-        const f = (_) => {
+        const f = (_: any) => {
             throw new Error("should not be called")
         }
 
@@ -50,6 +50,4 @@ describe('Maybe', () => {
         let maybeTwo = liftedF(maybe_none());
         expect(maybe_value(maybeTwo, 3)).to.equal(3)
     })
-
-
 })
