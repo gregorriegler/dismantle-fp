@@ -13,10 +13,22 @@ function maybe_of<T>(value: T): Maybe<T> {
     return {value}
 }
 
-function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
+function fold<T, U>(maybe: Maybe<T>, f: (a: T) => U, g: () => U): U {
     const privateMaybe = maybe as PrivateMaybe<T>;
-    if (privateMaybe.value) return privateMaybe.value // can we avoid this if?
-    else return defaultValue
+
+    if (privateMaybe.value) {
+        return f(privateMaybe.value)
+    } else {
+        return g()
+    }
+}
+
+function identity<T> (a: T) {
+    return a
+}
+
+function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
+    return fold(maybe, identity, () => defaultValue)
 }
 
 function maybe_none<T>(): Maybe<T> {
