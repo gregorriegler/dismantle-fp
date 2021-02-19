@@ -5,7 +5,6 @@ export interface Maybe<T> {
 
 export function maybe_of<T>(value: T): Maybe<T> {
     return {value}
-
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
