@@ -1,0 +1,26 @@
+name: CI Workflow TS NPM
+
+on: [push, pull_request]
+
+jobs:
+
+  matrix_build:
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest]
+        node-version: [10.x, 15.x]
+    name: Node.js ${{ matrix.node-version }} Build on ${{ matrix.operating-system }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: test
+      run: |
+        npm i
+        npm test
