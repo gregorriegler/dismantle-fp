@@ -3,15 +3,19 @@ import { expect } from "chai"
 interface Maybe<T> {
 }
 
-const NONE: Maybe<any> = {value: undefined};
+interface PrivateMaybe<T> extends Maybe<T> {
+    value?:T
+}
+
+const NONE: PrivateMaybe<any> = {value: undefined}
 
 function maybe_of<T>(value: T): Maybe<T> {
     return {value}
 }
 
 function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
-    const asAny = maybe as any;
-    if (asAny.value) return asAny.value // can we avoid this if?
+    const privateMaybe = maybe as PrivateMaybe<T>;
+    if (privateMaybe.value) return privateMaybe.value // can we avoid this if?
     else return defaultValue
 }
 
