@@ -13,17 +13,18 @@ function maybe_of<T>(value: T): Maybe<T> {
     return {value}
 }
 
-function fold<T, U>(maybe: Maybe<T>, f: (a: T) => U, g: () => U): U {
+function fold<T, U>(maybe: Maybe<T>, some: (a: T) => U, none: () => U): U {
     const privateMaybe = maybe as PrivateMaybe<T>;
 
     if (privateMaybe.value) {
-        return f(privateMaybe.value)
+        return some(privateMaybe.value)
     } else {
-        return g()
+        // if we are empty we use the initial value
+        return none()
     }
 }
 
-function identity<T> (a: T) {
+function identity<T>(a: T) {
     return a
 }
 
@@ -36,12 +37,7 @@ function maybe_none<T>(): Maybe<T> {
 }
 
 function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
-    const value = maybe_value(maybe, undefined);
-    if (value !== undefined) {
-        return maybe_of(f(value))
-    } else {
-        return maybe_none()
-    }
+    return fold(maybe, (a) => maybe_of(f(a)), maybe_none);
 }
 
 function maybe_lift<T, U>(f: (a: T) => U): ((a: Maybe<T>) => Maybe<U>) {
