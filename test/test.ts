@@ -24,11 +24,23 @@ function maybe_none<T>(): Maybe<T> {
 }
 
 function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
-    return maybe_of(f(maybe_value(maybe, undefined)))
+    let value = maybe_value(maybe, undefined);
+    if (value !== undefined) {
+        return maybe_of(f(value))
+    } else {
+        return maybe_none()
+    }
 }
 
-function maybe_lift<T, U>(f: (a : T) => U) : ((a : Maybe<T>) => Maybe<U>) {
-    return (a : Maybe<T>) => maybe_of(f(maybe_value(a, undefined)))
+function maybe_lift<T, U>(f: (a: T) => U): ((a: Maybe<T>) => Maybe<U>) {
+    return (a: Maybe<T>) => {
+        let value = maybe_value(a, undefined);
+        if (value !== undefined) {
+            return maybe_of(f(value))
+        } else {
+            return maybe_none()
+        }
+    }
 }
 
 describe('Maybe', () => {
@@ -52,7 +64,9 @@ describe('Maybe', () => {
     })
 
     it('map over none', () => {
-        const f = (a) => a + 1
+        const f = (a) => {
+            throw new Error("should not be called")
+        }
 
         let maybeTwo = maybe_map(maybe_none(), f);
 
@@ -67,5 +81,17 @@ describe('Maybe', () => {
         let maybeTwo = liftedF(maybe_of(1));
         expect(maybe_value(maybeTwo, 3)).to.equal(2)
     })
+
+    it('evaluate a lifted with none', () => {
+        const f = (a) => {
+            throw new Error("should not be called")
+        }
+
+        let liftedF = maybe_lift(f);
+
+        let maybeTwo = liftedF(maybe_none());
+        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+    })
+
 
 })
