@@ -3,7 +3,7 @@ import { expect } from "chai"
 interface Maybe<T> {
 }
 
-const NONE: Maybe<any> = {};
+const NONE: Maybe<any> = {value: undefined};
 
 function maybe_of<T>(value: T): Maybe<T> {
     return {value}
@@ -42,4 +42,13 @@ describe('Maybe', () => {
 
         expect(maybe_value(maybeTwo, 3)).to.equal(2)
     })
+
+    it('map over none', () => {
+        const f = (a) => a + 1
+
+        let maybeTwo = maybe_map(maybe_none(), f);
+
+        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+    })
+
 })
