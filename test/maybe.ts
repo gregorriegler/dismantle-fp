@@ -19,6 +19,10 @@ export function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
     return maybe_fold(maybe, (a) => maybe_of(f(a)), maybe_none);
 }
 
+export function maybe_map_unary<T, U>(maybe: Maybe<T>) {
+    return (f: (a: T) => U): Maybe<U> => maybe_lift(f)(maybe)
+}
+
 export function maybe_lift<T, U>(f: (a: T) => U): ((a: Maybe<T>) => Maybe<U>) {
     return (a: Maybe<T>) => maybe_map(a, f)
 }

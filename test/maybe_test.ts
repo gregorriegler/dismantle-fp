@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { maybe_lift, maybe_map, maybe_none, maybe_of, maybe_value } from "./maybe";
+import { Maybe, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, maybe_value } from "./maybe";
 
 describe('Maybe', () => {
     it('maybe of a value contains value', () => {
@@ -27,6 +27,25 @@ describe('Maybe', () => {
         }
 
         let maybeTwo = maybe_map(maybe_none(), f);
+
+        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+    })
+
+    it('unary map over maybe', () => {
+        const maybeOne = maybe_of(1)
+        const f = (a: number) => a + 1
+
+        let maybeTwo = maybe_map_unary(maybeOne)(f);
+
+        expect(maybe_value(maybeTwo, 3)).to.equal(2)
+    })
+
+    it('unary map over none', () => {
+        const f = (_: any) => {
+            throw new Error("should not be called")
+        }
+
+        let maybeTwo = maybe_map_unary(maybe_none())(f);
 
         expect(maybe_value(maybeTwo, 3)).to.equal(3)
     })
