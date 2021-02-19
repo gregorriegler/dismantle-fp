@@ -4,7 +4,7 @@ interface Maybe<T> {
 }
 
 interface PrivateMaybe<T> extends Maybe<T> {
-    value?:T
+    value?: T
 }
 
 const NONE: PrivateMaybe<any> = {value: undefined}
@@ -25,6 +25,10 @@ function maybe_none<T>(): Maybe<T> {
 
 function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
     return maybe_of(f(maybe_value(maybe, undefined)))
+}
+
+function maybe_lift<T, U>(f: (a : T) => U) : ((a : Maybe<T>) => Maybe<U>) {
+    return (a : Maybe<T>) => maybe_of(f(maybe_value(a, undefined)))
 }
 
 describe('Maybe', () => {
@@ -53,6 +57,15 @@ describe('Maybe', () => {
         let maybeTwo = maybe_map(maybe_none(), f);
 
         expect(maybe_value(maybeTwo, 3)).to.equal(3)
+    })
+
+    it('lift', () => {
+        const f = (a) => a + 1
+
+        let liftedF = maybe_lift(f);
+
+        let maybeTwo = liftedF(maybe_of(1));
+        expect(maybe_value(maybeTwo, 3)).to.equal(2)
     })
 
 })
