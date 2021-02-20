@@ -11,6 +11,18 @@ export function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
     return maybe_fold(maybe, identity, () => defaultValue)
 }
 
+export function maybe_value_unary<T>(maybe: Maybe<T>) : ((a: T) => T) {
+    return a => {
+        const privateMaybe = maybe as PrivateMaybe<T>;
+
+        if (privateMaybe.value) {
+            return privateMaybe.value
+        } else {
+            return a
+        }
+    }
+}
+
 export function maybe_none<T>(): Maybe<T> {
     return NONE
 }
