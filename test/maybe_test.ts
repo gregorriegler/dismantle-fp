@@ -92,7 +92,7 @@ describe("Maybe", () => {
         expectEmpty(maybeTwo)
     })
 
-    xit("flatMaps over value", () => {
+    it("flatMaps over value", () => {
         const maybeOne = maybe_of(1)
         const f = maybe_f(inc)
 
