@@ -60,3 +60,11 @@ export function curry3<T, U, V, R>(f: F3<T, U, V, R>): F1<T, F1<U, F1<V, R>>> {
 export function apply1<T, R>(f: F1<T, R>, value: T): R {
     return f(value)
 }
+
+export function should_not_call0<R>(): R {
+    throw new Error("should not be called")
+}
+
+export function should_not_call1<T, R>(t: T): R {
+    throw new Error("should not be called")
+}

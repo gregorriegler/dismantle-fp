@@ -2,7 +2,7 @@ import { Maybe, maybe_lift, maybe_map, maybe_none, maybe_of, maybe_value } from 
 import "./func"
 
 import { expect } from "chai"
-import { partial2_2 } from "./func"
+import { partial2_2, should_not_call0 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -89,13 +89,12 @@ function seq_flat_map<T, U>(seq: Seq<T>, f: (n: T) => Seq<U>): Seq<U> {
 // test
 
 function expectEmpty(first: Maybe<number>) {
-    expect(maybe_value(first, () => -1)).to.equal(-1)
+    const defaultValue = -1
+    expect(maybe_value(first, () => defaultValue)).to.equal(defaultValue)
 }
 
-function expectValue<T>(first: Maybe<T>, value: T) {
-    expect(maybe_value(first, () => {
-        throw new Error("should not be called")
-    })).to.equal(value)
+function expectValue<T>(maybe: Maybe<T>, expected: T) {
+    expect(maybe_value(maybe, should_not_call0)).to.equal(expected)
 }
 
 describe('Seq', () => {
