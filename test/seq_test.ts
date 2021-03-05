@@ -37,9 +37,11 @@ describe('Seq', () => {
     it('Seq with 1 element', () => {
         const seq: Seq<number> = seq_singleton(1)
 
-        let {first} = seq_first(seq);
+        let {first, remainder} = seq_first(seq);
+        let {first: second} = seq_first(remainder);
 
         expect(maybe_value(first, () => 2)).to.equal(1)
+        expect(maybe_value(second, () => 2)).to.equal(2)
     })
 
     // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
