@@ -15,7 +15,7 @@ export function maybe_value_unary<T>(maybe: Maybe<T>): (f: () => T) => T {
     return partial1(maybe_fold1(maybe), identity)
 }
 
-function maybe_what_is_this<T>(maybe: Maybe<T>, defaultValue: () => T): (f: (t: T) => T) => T {
+function maybe_what_is_this<T>(maybe: Maybe<T>, defaultValue: () => T): (f: (t:T) => T) => T {
     // maybe start of fold with given start value
     return partial2(maybe_fold1(maybe), defaultValue)
 }
