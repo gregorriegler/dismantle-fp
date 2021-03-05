@@ -39,6 +39,10 @@ export function maybe_map_unary<T, U>(maybe: Maybe<T>): F1<F1<T, U>, Maybe<U>> {
     // return (f: F1<T, U>) => maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
+export function maybe_flat_map<T, U>(maybe: Maybe<T>, f: F1<T, Maybe<U>>): Maybe<U> {
+    return maybe_none
+}
+
 export function maybe_lift<T, U>(f: F1<T, U>): F1<Maybe<T>, Maybe<U>> {
     return partial2_2(maybe_map, f)
     // return (maybe: Maybe<T>) => maybe_fold(maybe, maybe_f(f), maybe_none)

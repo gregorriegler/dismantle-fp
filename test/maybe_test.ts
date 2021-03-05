@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import { inc, lazy, should_not_call0, should_not_call1 } from "./func"
-import { Maybe, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, maybe_value, maybe_value_unary } from "./maybe"
+import { F1, inc, lazy, should_not_call0, should_not_call1 } from "./func"
+import { Maybe, maybe_f, maybe_flat_map, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, maybe_value, maybe_value_unary } from "./maybe"
 
 function expectEmpty(maybe: Maybe<number>) {
     const defaultValue = -1
@@ -83,4 +83,22 @@ describe("Maybe", () => {
         const maybeTwo = liftedF(maybe_none())
         expectEmpty(maybeTwo)
     })
+
+    it("flatMaps over none", () => {
+        const f: F1<number, Maybe<number>> = should_not_call1
+
+        const maybeTwo = maybe_flat_map(maybe_none(), f)
+
+        expectEmpty(maybeTwo)
+    })
+
+    xit("flatMaps over value", () => {
+        const maybeOne = maybe_of(1)
+        const f = maybe_f(inc)
+
+        const maybeTwo = maybe_flat_map(maybeOne, f)
+
+        expectValue(maybeTwo, 2)
+    })
+
 })
