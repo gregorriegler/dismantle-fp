@@ -74,6 +74,13 @@ function seq_lift<T, U>(f: (a: T) => U): ((a: Seq<T>) => Seq<U>) {
     return partial2_2(seq_map, f)
 }
 
+function seq_flat_map<T, U>(seq: Seq<T>, f: (n: T) => Seq<U>): Seq<U> {
+    return {
+        head: () => maybe_map(seq_head(seq), f),
+        tail: () => seq_flat_map(seq_tail(seq), f)
+    }
+}
+
 // test
 
 function expectEmpty(first: Maybe<number>) {
@@ -157,6 +164,27 @@ describe('Seq', () => {
 
         const { head: first } = seq_first(mapped)
         expectValue(first, 2)
+    })
+
+    it('flatMap unpacks elements', () => {
+        const seq: Seq<number> = seq_of_singleton(3)
+
+        const mapped = seq_flat_map(seq, (n) => seq_of_singleton(n + 1))
+
+        const { head: first } = seq_first(mapped)
+        expectValue(first, 4)
+    })
+
+    xit('flatMap flattens multiple elements', () => {
+        const seq: Seq<number> = seq_of_singleton(3)
+
+        const mapped = seq_flat_map(seq, (n) => seq_of_array([n + 1, n + 2]))
+
+        const { head: first, tail } = seq_first(mapped)
+        const { head: second } = seq_first(tail)
+
+        expectValue(first, 4)
+        expectValue(second, 5)
     })
 
 })
