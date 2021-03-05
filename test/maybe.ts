@@ -13,6 +13,7 @@ export function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
 
 export function maybe_value_unary<T>(maybe: Maybe<T>): ((defaultValue: T) => T) {
     return (defaultValue) => maybe_fold(maybe, identity, () => defaultValue)
+    // return partial1(maybe_fold1(maybe), identity)
 }
 
 export function maybe_none<T>(): Maybe<T> {
@@ -23,20 +24,21 @@ export function maybe_map<T, U>(maybe: Maybe<T>, f: (a: T) => U): Maybe<U> {
     return maybe_fold(maybe, (a) => maybe_of(f(a)), maybe_none);
 }
 
-// maybe map partially applied on first argument
-export function maybe_map_unary<T, U>(maybe: Maybe<T>) {
-    return (f: (a: T) => U): Maybe<U> => maybe_lift(f)(maybe)
+export function maybe_map_unary<T, U>(maybe: Maybe<T>): (f: (a: T) => U) => Maybe<U> {
+    return partial1(maybe_map, maybe)
 }
 
-// maybe map partially applied on second argument
 export function maybe_lift<T, U>(f: (a: T) => U): ((a: Maybe<T>) => Maybe<U>) {
-    return (a: Maybe<T>) => maybe_map(a, f)
+    return partial2(maybe_map, f)
 }
 
 export function maybe_fold<T, U>(maybe: Maybe<T>, some: (a: T) => U, none: () => U): U {
-    const privateMaybe = maybe as PrivateMaybe<T>;
+    return maybe_fold1<T, U>(maybe)(some, none)
+}
 
-    return privateMaybe.value ? some(privateMaybe.value) : none();
+export function maybe_fold1<T, U>(maybe: Maybe<T>): (some: (a: T) => U, none: () => U) => U {
+    const privateMaybe = maybe as PrivateMaybe<T>;
+    return (some: (a: T) => U, none: () => U) => privateMaybe.value ? some(privateMaybe.value) : none();
 }
 
 interface PrivateMaybe<T> extends Maybe<T> {
