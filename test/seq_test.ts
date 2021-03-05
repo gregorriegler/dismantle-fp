@@ -92,8 +92,10 @@ function expectEmpty(first: Maybe<number>) {
     expect(maybe_value(first, () => -1)).to.equal(-1)
 }
 
-function expectValue(first: Maybe<number>, value: number) {
-    expect(maybe_value(first, () => -1)).to.equal(value)
+function expectValue<T>(first: Maybe<T>, value: T) {
+    expect(maybe_value(first, () => {
+        throw new Error("should not be called")
+    })).to.equal(value)
 }
 
 describe('Seq', () => {

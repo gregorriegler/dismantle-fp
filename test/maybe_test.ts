@@ -1,83 +1,92 @@
 import { expect } from "chai"
 import { Maybe, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, maybe_value, maybe_value_unary } from "./maybe"
 
+function expectEmpty(first: Maybe<number>) {
+    expect(maybe_value(first, () => -1)).to.equal(-1)
+}
 
-describe('Maybe', () => {
-    it('maybe of a value contains value', () => {
+function expectValue<T>(first: Maybe<T>, value: T) {
+    expect(maybe_value(first, () => {
+        throw new Error("should not be called")
+    })).to.equal(value)
+}
+
+describe("Maybe", () => {
+    it("of a value contains value", () => {
         const result = maybe_of(1)
-        expect(maybe_value(result, () => 2)).to.equal(1)
+        expectValue(result, 1)
     })
 
-    it('maybe of none is empty', () => {
+    it("of none is empty", () => {
         const result = maybe_none()
-        expect(maybe_value(result, () => 2)).to.equal(2)
+        expectEmpty(result)
     })
 
-    it('unary value of a maybe ', () => {
+    it("unary value", () => {
         const result = maybe_of(1)
         expect(maybe_value_unary(result)(() => 2)).to.equal(1)
     })
 
-    it('unary maybe of none is empty', () => {
+    it("unary value of none is empty", () => {
         const result = maybe_none()
         expect(maybe_value_unary(result)(() => 2)).to.equal(2)
     })
 
-    it('map over maybe', () => {
+    it("maps over value", () => {
         const maybeOne = maybe_of(1)
         const f = (a: number) => a + 1
 
-        let maybeTwo = maybe_map(maybeOne, f)
+        const maybeTwo = maybe_map(maybeOne, f)
 
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
+        expectValue(maybeTwo, 2)
     })
 
-    it('map over none', () => {
+    it("maps over none", () => {
         const f = (_: any) => {
             throw new Error("should not be called")
         }
 
-        let maybeTwo = maybe_map(maybe_none(), f)
+        const maybeTwo = maybe_map(maybe_none(), f)
 
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
+        expectEmpty(maybeTwo)
     })
 
-    it('unary map over maybe', () => {
+    it("unary maps over value", () => {
         const maybeOne = maybe_of(1)
         const f = (a: number) => a + 1
 
-        let maybeTwo = maybe_map_unary(maybeOne)(f)
+        const maybeTwo = maybe_map_unary(maybeOne)(f)
 
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
+        expectValue(maybeTwo, 2)
     })
 
-    it('unary map over none', () => {
+    it("unary maps over none", () => {
         const f = (_: any) => {
             throw new Error("should not be called")
         }
 
-        let maybeTwo = maybe_map_unary(maybe_none())(f)
+        const maybeTwo = maybe_map_unary(maybe_none())(f)
 
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
+        expectEmpty(maybeTwo)
     })
 
-    it('lift', () => {
+    it("lifts", () => {
         const f = (a: number) => a + 1
 
-        let liftedF = maybe_lift(f)
+        const liftedF = maybe_lift(f)
 
-        let maybeTwo = liftedF(maybe_of(1))
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
+        const maybeTwo = liftedF(maybe_of(1))
+        expectValue(maybeTwo, 2)
     })
 
-    it('evaluate a lifted with none', () => {
+    it("evaluates a lifted with none", () => {
         const f = (_: any) => {
             throw new Error("should not be called")
         }
 
-        let liftedF = maybe_lift(f)
+        const liftedF = maybe_lift(f)
 
-        let maybeTwo = liftedF(maybe_none())
-        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
+        const maybeTwo = liftedF(maybe_none())
+        expectEmpty(maybeTwo)
     })
 })
