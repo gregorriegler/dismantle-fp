@@ -40,6 +40,13 @@ function seq_of_array<T>(elements: T[]): Seq<T> {
     }
 }
 
+function seq_of_supplier<T>(supplier: () => Maybe<T>): Seq<T> {
+    return {
+        head: () => supplier(),
+        tail: () => seq_of_supplier(supplier)
+    }
+}
+
 function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
     return { head: privateSeq.head(), tail: privateSeq.tail() }
@@ -96,6 +103,17 @@ describe('Seq', () => {
         expectValue(first, 1)
         expectValue(second, 2)
         expectEmpty(third)
+    })
+
+    it('Seq with supplier function', () => {
+        let i = 0;
+        const seq: Seq<number> = seq_of_supplier(() => maybe_of(++i))
+
+        const { head: first, tail } = seq_first(seq)
+        const { head: second } = seq_first(tail)
+
+        expectValue(first, 1)
+        expectValue(second, 2)
     })
 
     // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
