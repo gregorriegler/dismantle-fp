@@ -16,11 +16,13 @@ interface SeqElement<T> {
     tail: Seq<T>
 }
 
+const EMPTY: PrivateSeq<any> = {
+    head: maybe_none,
+    tail: seq_of_empty
+}
+
 function seq_of_empty<T>(): Seq<T> {
-    return {
-        head: maybe_none,
-        tail: seq_of_empty
-    }
+    return EMPTY
 }
 
 function seq_of_singleton<T>(value: Seq<T>): Seq<T> {
@@ -31,7 +33,7 @@ function seq_of_singleton<T>(value: Seq<T>): Seq<T> {
 }
 
 function seq_of_array<T>(elements: T[]): Seq<T> {
-    if (elements.length == 0) {
+    if (elements.length == 0) { // complete look ahead
         return seq_of_empty()
     }
     return {
@@ -43,7 +45,7 @@ function seq_of_array<T>(elements: T[]): Seq<T> {
 function seq_of_supplier<T>(supplier: () => Maybe<T>): Seq<T> {
     return {
         head: () => supplier(),
-        tail: () => seq_of_supplier(supplier)
+        tail: () => seq_of_supplier(supplier) // infinite creation of wrappers :-(
     }
 }
 
@@ -127,6 +129,4 @@ describe('Seq', () => {
         expectEmpty(second)
     })
 
-    // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
-    // seq_from
 })
