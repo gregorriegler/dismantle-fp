@@ -1,5 +1,5 @@
-import { Maybe, maybe_lift, maybe_map, maybe_none, maybe_of, maybe_value } from "./maybe"
-import { partial2_2 } from "./func"
+import { Maybe, maybe_lift, maybe_map, maybe_none, maybe_of } from "./maybe"
+import { F0, F1, partial2_2 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -40,9 +40,9 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     }
 }
 
-export function seq_of_supplier<T>(supplier: () => Maybe<T>): Seq<T> {
+export function seq_of_supplier<T>(supplier: F0<Maybe<T>>): Seq<T> {
     return {
-        head: () => supplier(),
+        head: supplier,
         tail: () => seq_of_supplier(supplier) // infinite creation of wrappers :-(
     }
 }
@@ -60,18 +60,18 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-export function seq_map<T, U>(seq: Seq<T>, f: (n: T) => U): Seq<U> {
+export function seq_map<T, U>(seq: Seq<T>, f: F1<T, U>): Seq<U> {
     return {
         head: () => maybe_map(seq_head(seq), f),
         tail: () => seq_map(seq_tail(seq), f)
     }
 }
 
-export function seq_lift<T, U>(f: (a: T) => U): ((a: Seq<T>) => Seq<U>) {
+export function seq_lift<T, U>(f: F1<T, U>): F1<Seq<T>, Seq<U>> {
     return partial2_2(seq_map, f)
 }
 
-export function seq_flat_map<T, U>(seq: Seq<T>, f: (n: T) => Seq<U>): Seq<U> {
+export function seq_flat_map<T, U>(seq: Seq<T>, f: F1<T, Seq<U>>): Seq<U> {
     return {
         head: () => {
             const f_for_maybe = maybe_lift(f)
