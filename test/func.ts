@@ -61,6 +61,10 @@ export function apply1<T, R>(f: F1<T, R>, value: T): R {
     return f(value)
 }
 
+export function compose1<T, U, R>(a: F1<T, U>, b: F1<U, R>): F1<T, R> {
+    return (t: T) => b(a(t))
+}
+
 export function lazy<R>(value: R): F0<R> {
     return () => value
 }

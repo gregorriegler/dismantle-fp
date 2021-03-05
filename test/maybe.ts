@@ -1,4 +1,4 @@
-import { F0, F1, identity1, partial2_1, partial2_2 } from "./func"
+import { compose1, F0, F1, identity1, partial2_1, partial2_2 } from "./func"
 
 const NONE: PrivateMaybe<any> = { value: undefined }
 
@@ -7,6 +7,10 @@ export interface Maybe<T> {
 
 export function maybe_of<T>(value: T): Maybe<T> {
     return { value }
+}
+
+export function maybe_f<T, U>(f: F1<T, U>): F1<T, Maybe<U>> {
+    return compose1(f, maybe_of)
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, defaultValue: F0<T>): T {
@@ -27,17 +31,17 @@ export function maybe_none<T>(): Maybe<T> {
 }
 
 export function maybe_map<T, U>(maybe: Maybe<T>, f: F1<T, U>): Maybe<U> {
-    return maybe_fold(maybe, (a) => maybe_of(f(a)), maybe_none)
+    return maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
 export function maybe_map_unary<T, U>(maybe: Maybe<T>): F1<F1<T, U>, Maybe<U>> {
-    // return partial2_1(maybe_map, maybe)
-    return (f: F1<T, U>) => maybe_fold(maybe, (a) => maybe_of(f(a)), maybe_none)
+    return partial2_1(maybe_map, maybe)
+    // return (f: F1<T, U>) => maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
 export function maybe_lift<T, U>(f: F1<T, U>): F1<Maybe<T>, Maybe<U>> {
-    // return partial2_2(maybe_map, f)
-    return (maybe: Maybe<T>) => maybe_fold(maybe, (a) => maybe_of(f(a)), maybe_none)
+    return partial2_2(maybe_map, f)
+    // return (maybe: Maybe<T>) => maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
 export function maybe_fold<T, U>(maybe: Maybe<T>, some: F1<T, U>, none: F0<U>): U {
