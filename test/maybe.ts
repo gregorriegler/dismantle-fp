@@ -46,3 +46,11 @@ interface PrivateMaybe<T> extends Maybe<T> {
 function identity<T>(a: T) {
     return a
 }
+
+function partial1<T, U, V> (f: (t:T, u:U) => V, first: T): (u: U) => V {
+    return (u: U) => f(first, u)
+}
+
+function partial2<T, U, V> (f: (t:T, u:U) => V, second: U): (t: T) => V {
+    return (t: T) => f(t, second)
+}
