@@ -1,23 +1,26 @@
 import { expect } from "chai"
-import { Maybe, maybe_none, maybe_value } from "./maybe"
+import { Maybe, maybe_none, maybe_of, maybe_value } from "./maybe"
 
 import "./func"
 
-const EMPTY: PrivateSeq<any> = { value: [] }
-
 interface PrivateSeq<T> extends Seq<T> {
-    value: T[]
+    next: () => Maybe<T>
 }
 
 interface Seq<T> {
 }
 
 function seq_empty() {
-    return EMPTY;
+    return {next: () => maybe_none()};
+}
+
+function seq_singleton<T>(value: Seq<T>) {
+    return {next: () => maybe_of(value)};
 }
 
 function seq_first<T>(seq: Seq<T>) {
-    return maybe_none()
+    const privateSeq = seq as PrivateSeq<T>;
+    return privateSeq.next()
 }
 
 describe('Seq', () => {
@@ -30,4 +33,15 @@ describe('Seq', () => {
 
         expect(maybe_value(first, () => 2)).to.equal(2)
     })
+
+    it('Seq with 1 element', () => {
+        const seq: Seq<number> = seq_singleton(1)
+
+        let first = seq_first(seq);
+
+        expect(maybe_value(first, () => 2)).to.equal(1)
+    })
+
+    // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
+    // seq_from
 })
