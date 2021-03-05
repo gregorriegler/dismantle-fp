@@ -1,4 +1,4 @@
-import { Maybe, maybe_lift, maybe_map, maybe_none, maybe_of } from "./maybe"
+import { Maybe, maybe_flat_map, maybe_lift, maybe_map, maybe_none, maybe_of } from "./maybe"
 import { F0, F1, partial2_2 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
@@ -76,8 +76,7 @@ export function seq_flat_map<T, U>(seq: Seq<T>, f: F1<T, Seq<U>>): Seq<U> {
         head: () => {
             const f_for_maybe = maybe_lift(f)
             const mapped_seq: Maybe<Seq<U>> = f_for_maybe(seq_head(seq))
-            // TODO return maybe_flat_map(mapped_seq, seq_head)
-            return maybe_map(mapped_seq, seq_head)
+            return maybe_flat_map(mapped_seq, seq_head)
         },
         tail: () => seq_flat_map(seq_tail(seq), f)
     }

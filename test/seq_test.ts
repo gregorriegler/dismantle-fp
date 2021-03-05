@@ -86,7 +86,7 @@ describe("Seq", () => {
         expectValue(first, 2)
     })
 
-    xit("flatMaps and unpacks elements", () => {
+    it("flatMaps and unpacks elements", () => {
         const seq = seq_of_singleton(3)
 
         const mapped = seq_flat_map(seq, compose1(inc, seq_of_singleton))
