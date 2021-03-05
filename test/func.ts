@@ -18,8 +18,12 @@ export interface F3<T, U, V, R> {
     (t: T, u: U, v: V): R
 }
 
-export function identity1<T>(a: T) {
+export function identity1<T>(a: T): T {
     return a
+}
+
+export function inc(a: number): number {
+    return a + 1
 }
 
 /**

@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { lazy, should_not_call0 } from "./func"
+import { compose1, inc, lazy, should_not_call0 } from "./func"
 import { Maybe, maybe_none, maybe_of, maybe_value } from "./maybe"
 import { seq_first, seq_flat_map, seq_lift, seq_map, seq_of_array, seq_of_empty, seq_of_singleton, seq_of_supplier } from "./seq"
 
@@ -70,7 +70,7 @@ describe("Seq", () => {
     it("maps elements", () => {
         const seq = seq_of_singleton(1)
 
-        const mapped = seq_map(seq, (n) => n + 1)
+        const mapped = seq_map(seq, inc)
 
         const { head: first } = seq_first(mapped)
         expectValue(first, 2)
@@ -79,8 +79,7 @@ describe("Seq", () => {
     it("lifts functions", () => {
         const seq = seq_of_singleton(1)
 
-        const adder = (n: number): number => n + 1
-        const lifted = seq_lift(adder)
+        const lifted = seq_lift(inc)
         const mapped = lifted(seq)
 
         const { head: first } = seq_first(mapped)
@@ -90,7 +89,7 @@ describe("Seq", () => {
     xit("flatMaps and unpacks elements", () => {
         const seq = seq_of_singleton(3)
 
-        const mapped = seq_flat_map(seq, (n) => seq_of_singleton(n + 1))
+        const mapped = seq_flat_map(seq, compose1(inc, seq_of_singleton))
 
         const { head: first } = seq_first(mapped)
         expectValue(first, 4)
