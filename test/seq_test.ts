@@ -2,6 +2,7 @@ import { Maybe, maybe_map, maybe_none, maybe_of, maybe_value } from "./maybe"
 import "./func"
 
 import { expect } from "chai"
+import { partial2_2 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -54,6 +55,14 @@ function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
+function seq_head<T>(seq: Seq<T>): Maybe<T> {
+    return seq_first(seq).head
+}
+
+function seq_tail<T>(seq: Seq<T>): Seq<T> {
+    return seq_first(seq).tail
+}
+
 function seq_map<T, U>(seq: Seq<T>, f: (n: T) => U): Seq<U> {
     return {
         head: () => maybe_map(seq_head(seq), f),
@@ -61,12 +70,8 @@ function seq_map<T, U>(seq: Seq<T>, f: (n: T) => U): Seq<U> {
     }
 }
 
-function seq_head<T>(seq: Seq<T>): Maybe<T> {
-    return seq_first(seq).head
-}
-
-function seq_tail<T>(seq: Seq<T>): Seq<T> {
-    return seq_first(seq).tail
+function seq_lift<T, U>(f: (a: T) => U): ((a: Seq<T>) => Seq<U>) {
+    return partial2_2(seq_map, f)
 }
 
 // test
@@ -138,6 +143,17 @@ describe('Seq', () => {
         const seq: Seq<number> = seq_of_singleton(1)
 
         const mapped = seq_map(seq, (n) => n + 1)
+
+        const { head: first } = seq_first(mapped)
+        expectValue(first, 2)
+    })
+
+    it('lift functions', () => {
+        const seq: Seq<number> = seq_of_singleton(1)
+
+        const adder = (n: number): number => n + 1
+        const lifted = seq_lift(adder)
+        const mapped = lifted(seq)
 
         const { head: first } = seq_first(mapped)
         expectValue(first, 2)
