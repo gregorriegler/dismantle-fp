@@ -61,10 +61,14 @@ export function apply1<T, R>(f: F1<T, R>, value: T): R {
     return f(value)
 }
 
+export function lazy<R>(value: R): F0<R> {
+    return () => value
+}
+
 export function should_not_call0<R>(): R {
     throw new Error("should not be called")
 }
 
-export function should_not_call1<T, R>(t: T): R {
+export function should_not_call1<T, R>(_: T): R {
     throw new Error("should not be called")
 }

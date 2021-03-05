@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { apply1, curry2, curry3 } from "./func"
+import { apply1, curry2, curry3, lazy } from "./func"
 
 describe("Func Tools", () => {
     it("curry binary", () => {
@@ -18,5 +18,9 @@ describe("Func Tools", () => {
         const adder = (a: number) => a + 1
 
         expect(apply1(adder, 1)).to.equal(2)
+    })
+
+    it("lazy", () => {
+        expect(lazy(1)()).to.equal(1)
     })
 })
