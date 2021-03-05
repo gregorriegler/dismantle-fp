@@ -5,12 +5,12 @@ import { Maybe, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, ma
 describe('Maybe', () => {
     it('maybe of a value contains value', () => {
         const result = maybe_of(1)
-        expect(maybe_value(result, 2)).to.equal(1)
+        expect(maybe_value(result, () => 2)).to.equal(1)
     })
 
     it('maybe of none is empty', () => {
         const result = maybe_none()
-        expect(maybe_value(result, 2)).to.equal(2)
+        expect(maybe_value(result, () => 2)).to.equal(2)
     })
 
     it('unary value of a maybe ', () => {
@@ -29,7 +29,7 @@ describe('Maybe', () => {
 
         let maybeTwo = maybe_map(maybeOne, f);
 
-        expect(maybe_value(maybeTwo, 3)).to.equal(2)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
     })
 
     it('map over none', () => {
@@ -39,7 +39,7 @@ describe('Maybe', () => {
 
         let maybeTwo = maybe_map(maybe_none(), f);
 
-        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
     })
 
     it('unary map over maybe', () => {
@@ -48,7 +48,7 @@ describe('Maybe', () => {
 
         let maybeTwo = maybe_map_unary(maybeOne)(f);
 
-        expect(maybe_value(maybeTwo, 3)).to.equal(2)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
     })
 
     it('unary map over none', () => {
@@ -58,7 +58,7 @@ describe('Maybe', () => {
 
         let maybeTwo = maybe_map_unary(maybe_none())(f);
 
-        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
     })
 
     it('lift', () => {
@@ -67,7 +67,7 @@ describe('Maybe', () => {
         let liftedF = maybe_lift(f);
 
         let maybeTwo = liftedF(maybe_of(1));
-        expect(maybe_value(maybeTwo, 3)).to.equal(2)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(2)
     })
 
     it('evaluate a lifted with none', () => {
@@ -78,6 +78,6 @@ describe('Maybe', () => {
         let liftedF = maybe_lift(f);
 
         let maybeTwo = liftedF(maybe_none());
-        expect(maybe_value(maybeTwo, 3)).to.equal(3)
+        expect(maybe_value(maybeTwo, () => 3)).to.equal(3)
     })
 })

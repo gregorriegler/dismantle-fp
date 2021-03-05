@@ -7,8 +7,8 @@ export function maybe_of<T>(value: T): Maybe<T> {
     return { value }
 }
 
-export function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
-    return maybe_fold(maybe, identity, () => defaultValue)
+export function maybe_value<T>(maybe: Maybe<T>, defaultValue: () => T): T {
+    return maybe_fold(maybe, identity, defaultValue)
 }
 
 export function maybe_value_unary<T>(maybe: Maybe<T>): (f: () => T) => T {
