@@ -20,15 +20,19 @@ function seq_singleton<T>(value: Seq<T>): Seq<T> {
 
 function seq_first<T>(seq: Seq<T>): { first: Maybe<T>, remainder: Seq<T> } { // todo use Pair<T,U>
     const privateSeq = seq as PrivateSeq<T>;
-    return { first: privateSeq.next(), remainder: seq_empty() }
+    return {first: privateSeq.next(), remainder: seq_empty()}
 }
 
 function expectEmpty(first: Maybe<number>) {
-    expect(maybe_value(first, () => 2)).to.equal(2)
+    expect(maybe_value(first, () => -1)).to.equal(-1)
 }
 
 function expectValue(first: Maybe<number>, value: number) {
-    expect(maybe_value(first, () => 2)).to.equal(value)
+    expect(maybe_value(first, () => -1)).to.equal(value)
+}
+
+function seq_of<T>(elements: T[]): Seq<T> {
+    return {next: () => maybe_of(elements[0])};
 }
 
 describe('Seq', () => {
@@ -50,6 +54,18 @@ describe('Seq', () => {
 
         expectValue(first, 1);
         expectEmpty(second)
+    })
+
+    it('Seq with 2 elements', () => {
+        const seq: Seq<number> = seq_of([1, 2])
+
+        const {first, remainder} = seq_first(seq);
+        const {first: second, remainder: second_remainder} = seq_first(remainder);
+        const {first: third} = seq_first(second_remainder);
+
+        expectValue(first, 1);
+        expectValue(second, 2);
+        expectEmpty(third);
     })
 
     // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
