@@ -116,6 +116,17 @@ describe('Seq', () => {
         expectValue(second, 2)
     })
 
+    it('Seq with limited supplier function', () => {
+        let i = 10;
+        const seq: Seq<number> = seq_of_supplier(() => i > 10 ? maybe_none : maybe_of(++i))
+
+        const { head: first, tail } = seq_first(seq)
+        const { head: second } = seq_first(tail)
+
+        expectValue(first, 11)
+        expectEmpty(second)
+    })
+
     // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
     // seq_from
 })
