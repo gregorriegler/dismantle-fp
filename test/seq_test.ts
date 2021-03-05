@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { lazy, should_not_call0 } from "./func"
 import { Maybe, maybe_none, maybe_of, maybe_value } from "./maybe"
-import { Seq, seq_first, seq_flat_map, seq_lift, seq_map, seq_of_array, seq_of_empty, seq_of_singleton, seq_of_supplier } from "./seq"
+import { seq_first, seq_flat_map, seq_lift, seq_map, seq_of_array, seq_of_empty, seq_of_singleton, seq_of_supplier } from "./seq"
 
 function expectEmpty(maybe: Maybe<number>) {
     const defaultValue = -1
@@ -15,16 +15,16 @@ function expectValue<T>(maybe: Maybe<T>, expected: T) {
 describe("Seq", () => {
     // TODO flatMap, fold, reduce, forEach
 
-    it("Empty Seq", () => {
-        const seq: Seq<number> = seq_of_empty()
+    it("is empty", () => {
+        const seq = seq_of_empty()
 
         const { head: first } = seq_first(seq)
 
         expectEmpty(first)
     })
 
-    it("Seq with 1 element", () => {
-        const seq: Seq<number> = seq_of_singleton(1)
+    it("with singleton element", () => {
+        const seq = seq_of_singleton(1)
 
         const { head: first, tail } = seq_first(seq)
         const { head: second } = seq_first(tail)
@@ -33,8 +33,8 @@ describe("Seq", () => {
         expectEmpty(second)
     })
 
-    it("Seq with 2 elements", () => {
-        const seq: Seq<number> = seq_of_array([1, 2])
+    it("with 2 elements", () => {
+        const seq = seq_of_array([1, 2])
 
         const { head: first, tail } = seq_first(seq)
         const { head: second, tail: second_tail } = seq_first(tail)
@@ -45,9 +45,9 @@ describe("Seq", () => {
         expectEmpty(third)
     })
 
-    it("Seq with supplier function", () => {
+    it("with supplier function", () => {
         let i = 0
-        const seq: Seq<number> = seq_of_supplier(() => maybe_of(++i))
+        const seq = seq_of_supplier(() => maybe_of(++i))
 
         const { head: first, tail } = seq_first(seq)
         const { head: second } = seq_first(tail)
@@ -56,9 +56,9 @@ describe("Seq", () => {
         expectValue(second, 2)
     })
 
-    it("Seq with limited supplier function", () => {
+    it("with limited supplier function", () => {
         let i = 10
-        const seq: Seq<number> = seq_of_supplier(() => i > 10 ? maybe_none : maybe_of(++i))
+        const seq = seq_of_supplier(() => i > 10 ? maybe_none : maybe_of(++i))
 
         const { head: first, tail } = seq_first(seq)
         const { head: second } = seq_first(tail)
@@ -67,8 +67,8 @@ describe("Seq", () => {
         expectEmpty(second)
     })
 
-    it("map elements", () => {
-        const seq: Seq<number> = seq_of_singleton(1)
+    it("maps elements", () => {
+        const seq = seq_of_singleton(1)
 
         const mapped = seq_map(seq, (n) => n + 1)
 
@@ -76,8 +76,8 @@ describe("Seq", () => {
         expectValue(first, 2)
     })
 
-    it("lift functions", () => {
-        const seq: Seq<number> = seq_of_singleton(1)
+    it("lifts functions", () => {
+        const seq = seq_of_singleton(1)
 
         const adder = (n: number): number => n + 1
         const lifted = seq_lift(adder)
@@ -87,8 +87,8 @@ describe("Seq", () => {
         expectValue(first, 2)
     })
 
-    xit("flatMap unpacks elements", () => {
-        const seq: Seq<number> = seq_of_singleton(3)
+    xit("flatMaps and unpacks elements", () => {
+        const seq = seq_of_singleton(3)
 
         const mapped = seq_flat_map(seq, (n) => seq_of_singleton(n + 1))
 
@@ -96,8 +96,8 @@ describe("Seq", () => {
         expectValue(first, 4)
     })
 
-    xit("flatMap flattens multiple elements", () => {
-        const seq: Seq<number> = seq_of_singleton(3)
+    xit("flatMaps and flattens multiple elements", () => {
+        const seq = seq_of_singleton(3)
 
         const mapped = seq_flat_map(seq, (n) => seq_of_array([n + 1, n + 2]))
 

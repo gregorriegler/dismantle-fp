@@ -23,7 +23,7 @@ export function seq_of_empty<T>(): Seq<T> {
     return EMPTY
 }
 
-export function seq_of_singleton<T>(value: Seq<T>): Seq<T> {
+export function seq_of_singleton<T>(value: T): Seq<T> {
     return {
         head: () => maybe_of(value),
         tail: seq_of_empty
