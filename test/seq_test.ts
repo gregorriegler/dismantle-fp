@@ -5,22 +5,39 @@ import "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     next: () => Maybe<T>
+    remainder: () => Seq<T>
 }
 
 interface Seq<T> {
 }
 
 function seq_empty<T>(): Seq<T> {
-    return {next: () => maybe_none()};
+    return {
+        next: () => maybe_none(),
+        remainder: seq_empty
+    };
 }
 
 function seq_singleton<T>(value: Seq<T>): Seq<T> {
-    return {next: () => maybe_of(value)};
+    return {
+        next: () => maybe_of(value),
+        remainder: seq_empty
+    };
+}
+
+function seq_of<T>(elements: T[]): Seq<T> {
+    if (elements.length == 0) {
+        return seq_empty()
+    }
+    return {
+        next: () => maybe_of(elements[0]),
+        remainder: () => seq_of(elements.slice(1))
+    }
 }
 
 function seq_first<T>(seq: Seq<T>): { first: Maybe<T>, remainder: Seq<T> } { // todo use Pair<T,U>
     const privateSeq = seq as PrivateSeq<T>;
-    return {first: privateSeq.next(), remainder: seq_empty()}
+    return { first: privateSeq.next(), remainder: privateSeq.remainder() }
 }
 
 function expectEmpty(first: Maybe<number>) {
@@ -31,17 +48,13 @@ function expectValue(first: Maybe<number>, value: number) {
     expect(maybe_value(first, () => -1)).to.equal(value)
 }
 
-function seq_of<T>(elements: T[]): Seq<T> {
-    return {next: () => maybe_of(elements[0])};
-}
-
 describe('Seq', () => {
     // empty, of, getNext, map, flatMap, lift, fold, reduce, head, tail, forEach
 
     it('Empty Seq', () => {
         const seq: Seq<number> = seq_empty()
 
-        const {first} = seq_first(seq);
+        const { first } = seq_first(seq);
 
         expectEmpty(first);
     })
@@ -49,8 +62,8 @@ describe('Seq', () => {
     it('Seq with 1 element', () => {
         const seq: Seq<number> = seq_singleton(1)
 
-        const {first, remainder} = seq_first(seq);
-        const {first: second} = seq_first(remainder);
+        const { first, remainder } = seq_first(seq);
+        const { first: second } = seq_first(remainder);
 
         expectValue(first, 1);
         expectEmpty(second)
@@ -59,9 +72,9 @@ describe('Seq', () => {
     it('Seq with 2 elements', () => {
         const seq: Seq<number> = seq_of([1, 2])
 
-        const {first, remainder} = seq_first(seq);
-        const {first: second, remainder: second_remainder} = seq_first(remainder);
-        const {first: third} = seq_first(second_remainder);
+        const { first, remainder } = seq_first(seq);
+        const { first: second, remainder: second_remainder } = seq_first(remainder);
+        const { first: third } = seq_first(second_remainder);
 
         expectValue(first, 1);
         expectValue(second, 2);
