@@ -15,12 +15,12 @@ describe('Maybe', () => {
 
     it('unary value of a maybe ', () => {
         const result = maybe_of(1)
-        expect(maybe_value_unary(result)(2)).to.equal(1)
+        expect(maybe_value_unary(result)(() => 2)).to.equal(1)
     })
 
     it('unary maybe of none is empty', () => {
         const result = maybe_none()
-        expect(maybe_value_unary(result)( 2)).to.equal(2)
+        expect(maybe_value_unary(result)(() => 2)).to.equal(2)
     })
 
     it('map over maybe', () => {

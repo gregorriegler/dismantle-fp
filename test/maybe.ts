@@ -1,18 +1,18 @@
-const NONE: PrivateMaybe<any> = {value: undefined}
+const NONE: PrivateMaybe<any> = { value: undefined }
 
 export interface Maybe<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return {value}
+    return { value }
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, defaultValue: T): T {
     return maybe_fold(maybe, identity, () => defaultValue)
 }
 
-export function maybe_value_unary<T>(maybe: Maybe<T>): ((defaultValue: T) => T) {
-    return (defaultValue) => maybe_fold(maybe, identity, () => defaultValue)
+export function maybe_value_unary<T>(maybe: Maybe<T>): (f: () => T) => T {
+    return (defaultValue: () => T) => maybe_fold(maybe, identity, defaultValue)
     // return partial1(maybe_fold1(maybe), identity)
 }
 
@@ -36,7 +36,7 @@ export function maybe_fold<T, U>(maybe: Maybe<T>, some: (a: T) => U, none: () =>
     return maybe_fold1<T, U>(maybe)(some, none)
 }
 
-export function maybe_fold1<T, U>(maybe: Maybe<T>): (some: (a: T) => U, none: () => U) => U {
+function maybe_fold1<T, U>(maybe: Maybe<T>): (some: (a: T) => U, none: () => U) => U {
     const privateMaybe = maybe as PrivateMaybe<T>;
     return (some: (a: T) => U, none: () => U) => privateMaybe.value ? some(privateMaybe.value) : none();
 }
@@ -49,10 +49,10 @@ function identity<T>(a: T) {
     return a
 }
 
-function partial1<T, U, V> (f: (t:T, u:U) => V, first: T): (u: U) => V {
+function partial1<T, U, V>(f: (t: T, u: U) => V, first: T): (u: U) => V {
     return (u: U) => f(first, u)
 }
 
-function partial2<T, U, V> (f: (t:T, u:U) => V, second: U): (t: T) => V {
+function partial2<T, U, V>(f: (t: T, u: U) => V, second: U): (t: T) => V {
     return (t: T) => f(t, second)
 }
