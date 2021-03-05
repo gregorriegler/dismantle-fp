@@ -10,17 +10,17 @@ interface PrivateSeq<T> extends Seq<T> {
 interface Seq<T> {
 }
 
-function seq_empty() {
+function seq_empty<T>(): Seq<T> {
     return {next: () => maybe_none()};
 }
 
-function seq_singleton<T>(value: Seq<T>) {
+function seq_singleton<T>(value: Seq<T>): Seq<T> {
     return {next: () => maybe_of(value)};
 }
 
-function seq_first<T>(seq: Seq<T>) {
+function seq_first<T>(seq: Seq<T>): { first: Maybe<T>, remainder: Seq<T> } { // todo use Pair<T,U>
     const privateSeq = seq as PrivateSeq<T>;
-    return privateSeq.next()
+    return { first: privateSeq.next(), remainder: seq_empty() }
 }
 
 describe('Seq', () => {
@@ -29,7 +29,7 @@ describe('Seq', () => {
     it('Empty Seq', () => {
         const seq: Seq<number> = seq_empty()
 
-        let first = seq_first(seq);
+        let {first} = seq_first(seq);
 
         expect(maybe_value(first, () => 2)).to.equal(2)
     })
@@ -37,7 +37,7 @@ describe('Seq', () => {
     it('Seq with 1 element', () => {
         const seq: Seq<number> = seq_singleton(1)
 
-        let first = seq_first(seq);
+        let {first} = seq_first(seq);
 
         expect(maybe_value(first, () => 2)).to.equal(1)
     })
