@@ -1,4 +1,4 @@
-import { Maybe, maybe_none, maybe_of, maybe_value } from "./maybe"
+import { Maybe, maybe_map, maybe_none, maybe_of, maybe_value } from "./maybe"
 import "./func"
 
 import { expect } from "chai"
@@ -54,7 +54,13 @@ function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
-/*
+function seq_map<T, U>(seq: Seq<T>, f: (n: T) => U): Seq<U> {
+    return {
+        head: () => maybe_map(seq_head(seq), f),
+        tail: () => seq_map(seq_tail(seq), f)
+    }
+}
+
 function seq_head<T>(seq: Seq<T>): Maybe<T> {
     return seq_first(seq).head
 }
@@ -62,7 +68,6 @@ function seq_head<T>(seq: Seq<T>): Maybe<T> {
 function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
-*/
 
 // test
 
@@ -127,6 +132,15 @@ describe('Seq', () => {
 
         expectValue(first, 11)
         expectEmpty(second)
+    })
+
+    it('map elements', () => {
+        const seq: Seq<number> = seq_of_singleton(1)
+
+        const mapped = seq_map(seq, (n) => n + 1)
+
+        const { head: first } = seq_first(mapped)
+        expectValue(first, 2)
     })
 
 })
