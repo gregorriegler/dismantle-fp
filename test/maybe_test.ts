@@ -2,9 +2,9 @@ import { expect } from "chai"
 import { lazy, should_not_call0, should_not_call1 } from "./func"
 import { Maybe, maybe_lift, maybe_map, maybe_map_unary, maybe_none, maybe_of, maybe_value, maybe_value_unary } from "./maybe"
 
-function expectEmpty(first: Maybe<number>) {
+function expectEmpty(maybe: Maybe<number>) {
     const defaultValue = -1
-    expect(maybe_value(first, lazy(defaultValue))).to.equal(defaultValue)
+    expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
 }
 
 function expectValue<T>(maybe: Maybe<T>, expected: T) {
