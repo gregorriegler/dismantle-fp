@@ -23,25 +23,33 @@ function seq_first<T>(seq: Seq<T>): { first: Maybe<T>, remainder: Seq<T> } { // 
     return { first: privateSeq.next(), remainder: seq_empty() }
 }
 
+function expectEmpty(first: Maybe<number>) {
+    expect(maybe_value(first, () => 2)).to.equal(2)
+}
+
+function expectValue(first: Maybe<number>, value: number) {
+    expect(maybe_value(first, () => 2)).to.equal(value)
+}
+
 describe('Seq', () => {
     // empty, of, getNext, map, flatMap, lift, fold, reduce, head, tail, forEach
 
     it('Empty Seq', () => {
         const seq: Seq<number> = seq_empty()
 
-        let {first} = seq_first(seq);
+        const {first} = seq_first(seq);
 
-        expect(maybe_value(first, () => 2)).to.equal(2)
+        expectEmpty(first);
     })
 
     it('Seq with 1 element', () => {
         const seq: Seq<number> = seq_singleton(1)
 
-        let {first, remainder} = seq_first(seq);
-        let {first: second} = seq_first(remainder);
+        const {first, remainder} = seq_first(seq);
+        const {first: second} = seq_first(remainder);
 
-        expect(maybe_value(first, () => 2)).to.equal(1)
-        expect(maybe_value(second, () => 2)).to.equal(2)
+        expectValue(first, 1);
+        expectEmpty(second)
     })
 
     // seq_of(generator_func <- gibt immer maybe zurück, am ende maybe_none)
