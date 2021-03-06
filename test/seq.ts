@@ -60,22 +60,22 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-export function seq_map<T, U>(seq: Seq<T>, f: F1<T, U>): Seq<U> {
+export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
     return {
         head: () => maybe_map(seq_head(seq), f),
         tail: () => seq_map(seq_tail(seq), f)
     }
 }
 
-export function seq_lift<T, U>(f: F1<T, U>): F1<Seq<T>, Seq<U>> {
+export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
     return partial2_2(seq_map, f)
 }
 
-export function seq_flat_map<T, U>(seq: Seq<T>, f: F1<T, Seq<U>>): Seq<U> {
+export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return {
         head: () => {
             const f_for_maybe = maybe_lift(f)
-            const mapped_seq: Maybe<Seq<U>> = f_for_maybe(seq_head(seq))
+            const mapped_seq: Maybe<Seq<R>> = f_for_maybe(seq_head(seq))
             return maybe_flat_map(mapped_seq, seq_head)
         },
         tail: () => seq_flat_map(seq_tail(seq), f)

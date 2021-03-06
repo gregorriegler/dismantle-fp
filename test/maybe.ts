@@ -9,7 +9,7 @@ export function maybe_of<T>(value: T): Maybe<T> {
     return { value }
 }
 
-export function maybe_f<T, U>(f: F1<T, U>): F1<T, Maybe<U>> {
+export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
     return compose1(f, maybe_of)
 }
 
@@ -30,35 +30,35 @@ export function maybe_none<T>(): Maybe<T> {
     return NONE
 }
 
-export function maybe_map<T, U>(maybe: Maybe<T>, f: F1<T, U>): Maybe<U> {
+export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
     return maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
-export function maybe_map_unary<T, U>(maybe: Maybe<T>): F1<F1<T, U>, Maybe<U>> {
+export function maybe_map_unary<T, R>(maybe: Maybe<T>): F1<F1<T, R>, Maybe<R>> {
     return partial2_1(maybe_map, maybe)
     // return (f: F1<T, U>) => maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
-export function maybe_flat_map<T, U>(maybe: Maybe<T>, f: F1<T, Maybe<U>>): Maybe<U> {
+export function maybe_flat_map<T, R>(maybe: Maybe<T>, f: F1<T, Maybe<R>>): Maybe<R> {
     return maybe_fold(maybe, f, maybe_none)
 }
 
-export function maybe_flat_map_unary<T, U>(maybe: Maybe<T>): F1<F1<T, Maybe<U>>, Maybe<U>> {
+export function maybe_flat_map_unary<T, R>(maybe: Maybe<T>): F1<F1<T, Maybe<R>>, Maybe<R>> {
     return partial2_1(maybe_flat_map, maybe)
 }
 
-export function maybe_lift<T, U>(f: F1<T, U>): F1<Maybe<T>, Maybe<U>> {
+export function maybe_lift<T, R>(f: F1<T, R>): F1<Maybe<T>, Maybe<R>> {
     return partial2_2(maybe_map, f)
     // return (maybe: Maybe<T>) => maybe_fold(maybe, maybe_f(f), maybe_none)
 }
 
-export function maybe_fold<T, U>(maybe: Maybe<T>, some: F1<T, U>, none: F0<U>): U {
-    return maybe_fold1<T, U>(maybe)(some, none)
+export function maybe_fold<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): R {
+    return maybe_fold1<T, R>(maybe)(some, none)
 }
 
-function maybe_fold1<T, U>(maybe: Maybe<T>): (some: F1<T, U>, none: F0<U>) => U {
+function maybe_fold1<T,  R>(maybe: Maybe<T>): (some: F1<T, R>, none: F0<R>) => R {
     const privateMaybe = maybe as PrivateMaybe<T>
-    return (some: F1<T, U>, none: F0<U>) => privateMaybe.value ? some(privateMaybe.value) : none()
+    return (some: F1<T, R>, none: F0<R>) => privateMaybe.value ? some(privateMaybe.value) : none()
 }
 
 interface PrivateMaybe<T> extends Maybe<T> {
