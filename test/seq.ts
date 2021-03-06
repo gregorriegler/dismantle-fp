@@ -52,14 +52,6 @@ export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
-function seq_head<T>(seq: Seq<T>): Maybe<T> {
-    return seq_first(seq).head
-}
-
-function seq_tail<T>(seq: Seq<T>): Seq<T> {
-    return seq_first(seq).tail
-}
-
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
     return {
         head: () => maybe_map(seq_head(seq), f),
@@ -80,4 +72,12 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
         },
         tail: (): Seq<R> => seq_flat_map(seq_tail(seq), f)
     }
+}
+
+function seq_head<T>(seq: Seq<T>): Maybe<T> {
+    return seq_first(seq).head
+}
+
+function seq_tail<T>(seq: Seq<T>): Seq<T> {
+    return seq_first(seq).tail
 }
