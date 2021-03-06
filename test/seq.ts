@@ -73,11 +73,11 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
 
 export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return {
-        head: () => {
-            const f_for_maybe = maybe_lift(f)
+        head: (): Maybe<R> => {
+            const f_for_maybe: F1<Maybe<T>, Maybe<Seq<R>>> = maybe_lift(f)
             const mapped_seq: Maybe<Seq<R>> = f_for_maybe(seq_head(seq))
             return maybe_flat_map(mapped_seq, seq_head)
         },
-        tail: () => seq_flat_map(seq_tail(seq), f)
+        tail: (): Seq<R> => seq_flat_map(seq_tail(seq), f)
     }
 }
