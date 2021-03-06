@@ -40,6 +40,8 @@ export function maybe_map_unary<T, R>(maybe: Maybe<T>): F1<F1<T, R>, Maybe<R>> {
 }
 
 export function maybe_flat_map<T, R>(maybe: Maybe<T>, f: F1<T, Maybe<R>>): Maybe<R> {
+    // could be implemented by using bind(f) which would return a F1<Maybe<T>, Maybe<R>>
+    // then we could bind(f)(maybe)
     return maybe_fold(maybe, f, maybe_none)
 }
 
