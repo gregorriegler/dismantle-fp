@@ -53,10 +53,7 @@ export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
-    return {
-        head: () => maybe_map(seq_head(seq), f),
-        tail: () => seq_map(seq_tail(seq), f)
-    }
+    return seq_lift(f)(seq)
 }
 
 export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
@@ -66,8 +63,6 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
             tail: () => seq_lift(f)(seq_tail(seq))
         }
     }
-
-    //return partial2_2(seq_map, f)
 }
 
 export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
