@@ -1,7 +1,8 @@
 import { expect } from "chai"
-import { compose1, inc, lazy, should_not_call0 } from "./func"
-import { Maybe, maybe_none, maybe_of, maybe_value } from "./maybe"
+import { compose1, inc, should_not_call0 } from "./func"
+import { Maybe, maybe_is_none, maybe_none, maybe_of, maybe_value } from "./maybe_union"
 import {
+    Seq,
     seq_first,
     seq_flat_map,
     seq_lift,
@@ -9,12 +10,12 @@ import {
     seq_of_array,
     seq_of_empty,
     seq_of_singleton,
-    seq_of_supplier
+    seq_of_supplier,
+    SeqElement
 } from "./seq"
 
-function expectEmpty(maybe: Maybe<number>) {
-    const defaultValue = -1
-    expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
+function expectEmpty(maybe: Maybe<any>) {
+    expect(maybe_is_none(maybe)).to.be.true
 }
 
 function expectValue<T>(maybe: Maybe<T>, expected: T) {
@@ -67,7 +68,7 @@ describe("Seq", () => {
 
     it("with limited supplier function", () => {
         let i = 10
-        const seq = seq_of_supplier(() => i > 10 ? maybe_none : maybe_of(++i))
+        const seq: Seq<number> = seq_of_supplier(() => i > 10 ? maybe_none() : maybe_of(++i))
 
         const {head: first, tail} = seq_first(seq)
         const {head: second} = seq_first(tail)
@@ -110,9 +111,9 @@ describe("Seq", () => {
     it("flatMaps and unpacks elements", () => {
         const seq = seq_of_singleton(3)
 
-        const mapped = seq_flat_map(seq, compose1(inc, seq_of_singleton))
+        const mapped: Seq<number> = seq_flat_map(seq, compose1(inc, seq_of_singleton))
 
-        const {head: first} = seq_first(mapped)
+        const {head: first}: SeqElement<number> = seq_first(mapped)
         expectValue(first, 4)
     })
 

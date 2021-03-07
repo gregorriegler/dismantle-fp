@@ -1,5 +1,5 @@
-import { Maybe, maybe_flat_map, maybe_lift, maybe_map, maybe_none, maybe_of } from "./maybe"
-import { F0, F1, partial2_2 } from "./func"
+import { Maybe, maybe_bind, maybe_lift, maybe_none, maybe_of } from "./maybe_union"
+import { F0, F1} from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -40,7 +40,7 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     }
 }
 
-export function seq_of_supplier<T>(supplier: F0<Maybe<T>>): Seq<T> {
+export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
     return {
         head: supplier,
         tail: () => seq_of_supplier(supplier) // infinite creation of wrappers :-(
@@ -66,14 +66,17 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
 }
 
 export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
-    return {
-        head: (): Maybe<R> => {
-            const lifted_f_to_maybe: F1<Maybe<T>, Maybe<Seq<R>>> = maybe_lift(f)
-            const mapped_head: Maybe<Seq<R>> = lifted_f_to_maybe(seq_head(seq))
-            // maybe_map(mapped_head, seq_head) would lead to Maybe<Maybe<R>> therefore we have to flatten
-            return maybe_flat_map(mapped_head, seq_head)
-        },
-        tail: (): Seq<R> => seq_flat_map(seq_tail(seq), f)
+    return seq_bind(f)(seq)
+}
+
+export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
+    return (seq): Seq<R> => {
+        const f1: F1<Maybe<T>, Maybe<Seq<R>>> = maybe_lift(f);
+        const bound_head: F1<Maybe<Seq<T>>, Maybe<T>> = maybe_bind(seq_head);
+        return {
+            head: (): Maybe<Seq<R>> => bound_head(f1(seq_head(seq))),
+            tail: () => seq_bind(f)(seq_tail(seq))
+        }
     }
 }
 
