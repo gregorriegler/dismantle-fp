@@ -60,7 +60,14 @@ export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
 }
 
 export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
-    return partial2_2(seq_map, f)
+    return (seq): Seq<R> => {
+        return {
+            head: () => maybe_lift(f)(seq_head(seq)),
+            tail: () => seq_lift(f)(seq_tail(seq))
+        }
+    }
+
+    //return partial2_2(seq_map, f)
 }
 
 export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
