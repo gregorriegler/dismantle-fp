@@ -71,19 +71,26 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
-        const seqHead: Maybe<T> = seq_head(seq)
-        const firstEvaluated: Maybe<Seq<R>> = maybe_lift(f)(seqHead)
-        const bound_seq_head: F1<Maybe<Seq<R>>, Maybe<R>> = maybe_bind(seq_head)
-        const flattenedSeqHead: Maybe<R> = bound_seq_head(firstEvaluated)
-
-        const maybeFirstTail: Maybe<Seq<R>> = maybe_lift(seq_tail)(firstEvaluated)
-        const firstTail: Seq<R> = maybe_value(maybeFirstTail, seq_of_empty)
-        const bound_f: F1<Seq<T>, Seq<R>> = seq_bind(f);
-        // const evaluatedTail: Seq<R> = bound_f(seq_tail(seq));
-
         return {
-            head: (): Maybe<R> => flattenedSeqHead,
-            tail: (): Seq<R> => firstTail
+            head: (): Maybe<R> => {
+                const seqHead: Maybe<T> = seq_head(seq)
+                const firstEvaluated: Maybe<Seq<R>> = maybe_lift(f)(seqHead)
+                const bound_seq_head: F1<Maybe<Seq<R>>, Maybe<R>> = maybe_bind(seq_head)
+                const flattenedSeqHead: Maybe<R> = bound_seq_head(firstEvaluated)
+
+                return flattenedSeqHead
+            },
+            tail: (): Seq<R> => {
+                const seqHead: Maybe<T> = seq_head(seq)
+                const firstEvaluated: Maybe<Seq<R>> = maybe_lift(f)(seqHead)
+
+                const maybeFirstTail: Maybe<Seq<R>> = maybe_lift(seq_tail)(firstEvaluated)
+                const firstTail: Seq<R> = maybe_value(maybeFirstTail, seq_of_empty)
+
+                const bound_f: F1<Seq<T>, Seq<R>> = seq_bind(f);
+                const evaluatedTail: Seq<R> = bound_f(seq_tail(seq));
+                return seq_join(firstTail, evaluatedTail);
+            }
         }
 
         // const lifted_f: F1<Seq<T>, Seq<Seq<R>>> = seq_lift(f)
