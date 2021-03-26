@@ -128,7 +128,7 @@ describe("Seq", () => {
         expectValue(first, 4)
     })
 
-    it("flatMaps and unpacks many elements", () => {
+    it("flatMaps many elements to single", () => {
         const seq = seq_of_array([3, 4])
         const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
 
@@ -140,7 +140,19 @@ describe("Seq", () => {
         expectValue(second, 5)
     })
 
-    xit("flatMaps and flattens multiple elements", () => {
+    it("flatMaps many elements to empty", () => {
+        const seq = seq_of_array([3, 4])
+        const makeEmptyList: F1<number, Seq<number>> = (_: number) => seq_of_empty()
+
+        const mapped: Seq<number> = seq_flat_map(seq, makeEmptyList)
+
+        const {head: first, tail} = seq_first(mapped)
+        const {head: second} = seq_first(tail)
+        expectEmpty(first)
+        expectEmpty(second)
+    })
+
+    xit("flatMaps a single elements to many", () => {
         const seq = seq_of_singleton(3)
         const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2]);
 
