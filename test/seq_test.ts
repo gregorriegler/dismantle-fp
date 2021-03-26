@@ -6,6 +6,7 @@ import {
     seq_first,
     seq_flat_map,
     seq_lift,
+    seq_join,
     seq_map,
     seq_of_array,
     seq_of_empty,
@@ -154,7 +155,7 @@ describe("Seq", () => {
 
     it("flatMaps a single element to many", () => {
         const seq = seq_of_singleton(3)
-        const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2]);
+        const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
         const mapped = seq_flat_map(seq, nextTwoNumbers)
 
@@ -162,6 +163,42 @@ describe("Seq", () => {
         const {head: second} = seq_first(tail)
         expectValue(first, 4)
         expectValue(second, 5)
+    })
+
+    it("joins two empty seqs", () => {
+        const seq1 = seq_of_empty()
+        const seq2 = seq_of_empty()
+
+        const joined = seq_join(seq1, seq2)
+
+        const {head: first, tail} = seq_first(joined)
+        const {head: second} = seq_first(tail)
+        expectEmpty(first)
+        expectEmpty(second)
+    })
+
+    it("joins seq with an empty seq", () => {
+        const seq1 = seq_of_singleton(3)
+        const seq2 = seq_of_empty()
+
+        const joined = seq_join(seq1, seq2)
+
+        const {head: first, tail} = seq_first(joined)
+        const {head: second} = seq_first(tail)
+        expectValue(first, 3)
+        expectEmpty(second)
+    })
+
+    it("joins empty seqs with a value", () => {
+        const seq1 = seq_of_empty()
+        const seq2 = seq_of_singleton(2)
+
+        const joined = seq_join(seq1, seq2)
+
+        const {head: first, tail} = seq_first(joined)
+        const {head: second} = seq_first(tail)
+        expectValue(first, 2)
+        expectEmpty(second)
     })
 
 })

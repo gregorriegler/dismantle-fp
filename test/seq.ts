@@ -1,4 +1,4 @@
-import { Maybe, maybe_bind, maybe_lift, maybe_none, maybe_of, maybe_value } from "./maybe_union"
+import { Maybe, maybe_bind, maybe_is_none, maybe_lift, maybe_none, maybe_of, maybe_value } from "./maybe_union"
 import { F0, F1} from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
@@ -96,6 +96,25 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
         //     head: (): Maybe<Seq<R>> => bound_head(transformed_head),
         //     tail: () => seq_bind(f)(seq_tail(seq))
         // }
+    }
+}
+
+export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
+    return {
+        head: () => {
+            if (!maybe_is_none(seq_head(first))) {
+                return seq_head(first)
+            } else {
+                return seq_head(second)
+            }
+        },
+        tail: () => {
+            if (!maybe_is_none(seq_head(first))) {
+                return seq_join(seq_tail(first), second)
+            } else {
+                return seq_tail(second)
+            }
+        }
     }
 }
 
