@@ -160,9 +160,11 @@ describe("Seq", () => {
         const mapped = seq_flat_map(seq, nextTwoNumbers)
 
         const {head: first, tail} = seq_first(mapped)
-        const {head: second} = seq_first(tail)
+        const {head: second, tail: secondTail} = seq_first(tail)
+        const {head: third} = seq_first(secondTail)
         expectValue(first, 4)
         expectValue(second, 5)
+        expectEmpty(third)
     })
 
     // TODO flatMaps many elements to many elements
