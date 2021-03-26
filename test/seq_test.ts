@@ -152,7 +152,7 @@ describe("Seq", () => {
         expectEmpty(second)
     })
 
-    xit("flatMaps a single elements to many", () => {
+    it("flatMaps a single element to many", () => {
         const seq = seq_of_singleton(3)
         const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2]);
 
