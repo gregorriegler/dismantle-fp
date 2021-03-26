@@ -78,10 +78,12 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
 
         const maybeFirstTail: Maybe<Seq<R>> = maybe_lift(seq_tail)(firstEvaluated)
         const firstTail: Seq<R> = maybe_value(maybeFirstTail, seq_of_empty)
+        const bound_f: F1<Seq<T>, Seq<R>> = seq_bind(f);
+        // const evaluatedTail: Seq<R> = bound_f(seq_tail(seq));
 
         return {
-            head: (): Maybe<Seq<R>> => flattenedSeqHead,
-            tail: () => firstTail
+            head: (): Maybe<R> => flattenedSeqHead,
+            tail: (): Seq<R> => firstTail
         }
 
         // const lifted_f: F1<Seq<T>, Seq<Seq<R>>> = seq_lift(f)

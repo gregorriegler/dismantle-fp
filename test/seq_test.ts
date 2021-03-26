@@ -128,7 +128,7 @@ describe("Seq", () => {
         expectValue(first, 4)
     })
 
-    it("flatMaps many elements to single", () => {
+    xit("flatMaps many elements to single", () => {
         const seq = seq_of_array([3, 4])
         const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
 
