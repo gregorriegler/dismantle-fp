@@ -99,17 +99,21 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     }
 }
 
+export function seq_is_empty<T>(seq: Seq<T>): boolean {
+    return maybe_is_none(seq_head(seq));
+}
+
 export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     return {
         head: () => {
-            if (!maybe_is_none(seq_head(first))) {
+            if (!seq_is_empty(first)) {
                 return seq_head(first)
             } else {
                 return seq_head(second)
             }
         },
         tail: () => {
-            if (!maybe_is_none(seq_head(first))) {
+            if (!seq_is_empty(first)) {
                 return seq_join(seq_tail(first), second)
             } else {
                 return seq_tail(second)
