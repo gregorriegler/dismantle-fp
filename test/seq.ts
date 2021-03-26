@@ -71,10 +71,10 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
-        const f1: F1<Maybe<T>, Maybe<Seq<R>>> = maybe_lift(f);
+        const lifted_f: F1<Maybe<T>, Maybe<Seq<R>>> = maybe_lift(f);
         const bound_head: F1<Maybe<Seq<T>>, Maybe<T>> = maybe_bind(seq_head);
         return {
-            head: (): Maybe<Seq<R>> => bound_head(f1(seq_head(seq))),
+            head: (): Maybe<Seq<R>> => bound_head(lifted_f(seq_head(seq))),
             tail: () => seq_bind(f)(seq_tail(seq))
         }
     }

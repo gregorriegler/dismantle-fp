@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { compose1, inc, should_not_call0 } from "./func"
+import { compose1, F1, inc, should_not_call0 } from "./func"
 import { Maybe, maybe_is_none, maybe_none, maybe_of, maybe_value } from "./maybe_union"
 import {
     Seq,
@@ -108,23 +108,46 @@ describe("Seq", () => {
         expectValue(second, 3)
     })
 
-    it("flatMaps and unpacks elements", () => {
-        const seq = seq_of_singleton(3)
+    it("flatMaps an empty seq", () => {
+        const emptySeq = seq_of_empty()
 
-        const mapped: Seq<number> = seq_flat_map(seq, compose1(inc, seq_of_singleton))
+        const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
+        const mapped: Seq<number> = seq_flat_map(emptySeq, increaseToSequenceOfNumbers)
+
+        const {head}: SeqElement<number> = seq_first(mapped)
+        expectEmpty(head)
+    })
+
+    it("flatMaps and unpacks a single element", () => {
+        const seq = seq_of_singleton(3)
+        const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
+
+        const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 
         const {head: first}: SeqElement<number> = seq_first(mapped)
         expectValue(first, 4)
     })
 
-    xit("flatMaps and flattens multiple elements", () => {
-        const seq = seq_of_singleton(3)
+    it("flatMaps and unpacks many elements", () => {
+        const seq = seq_of_array([3, 4])
+        const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
 
-        const mapped = seq_flat_map(seq, (n) => seq_of_array([n + 1, n + 2]))
+        const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 
         const {head: first, tail} = seq_first(mapped)
         const {head: second} = seq_first(tail)
+        expectValue(first, 4)
+        expectValue(second, 5)
+    })
 
+    xit("flatMaps and flattens multiple elements", () => {
+        const seq = seq_of_singleton(3)
+        const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2]);
+
+        const mapped = seq_flat_map(seq, nextTwoNumbers)
+
+        const {head: first, tail} = seq_first(mapped)
+        const {head: second} = seq_first(tail)
         expectValue(first, 4)
         expectValue(second, 5)
     })
