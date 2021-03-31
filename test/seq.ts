@@ -41,8 +41,10 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
 }
 
 export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
+    // TODO problem: if head is not called, tail is wrong
+    const s = supplier(); // eager evaluated
     return {
-        head: supplier,
+        head: () => s,
         tail: () => seq_of_supplier(supplier) // infinite creation of wrappers :-(
     }
 }

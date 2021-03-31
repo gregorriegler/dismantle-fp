@@ -167,7 +167,7 @@ describe("Seq", () => {
         expectEmpty(third)
     })
 
-    // TODO flatMaps many elements to many elements
+    // TODO flatMaps many elements to many elements - BROKEN!
 
     // TODO are tests for join missing
     // - empty in middle?
