@@ -1,5 +1,6 @@
 import { expect } from "chai"
-import { inc, lazy, should_not_call0, should_not_call1 } from "./func"
+import { inc, should_not_call1 } from "./func"
+import { expectEmpty, expectValue } from "./maybe_expects"
 import {
     Maybe, maybe_bind,
     maybe_f,
@@ -8,24 +9,14 @@ import {
     maybe_lift,
     maybe_map,
     maybe_none,
-    maybe_of,
-    maybe_value
+    maybe_of
 } from "./maybe_union"
 
-function expectEmpty(maybe: Maybe<number>) {
-    const defaultValue = -1
-    expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
-}
-
-function expectValue<T>(maybe: Maybe<T>, expected: T) {
-    expect(maybe_value(maybe, should_not_call0)).to.equal(expected)
-}
-
-describe("Maybe", () => {
+describe("Maybe (second version)", () => {
 
     it("is none", () => {
         const maybe = maybe_none()
-        expect(maybe_is_none(maybe)).to.be.true
+        expectEmpty(maybe)
     })
 
     it("with a value is not none", () => {
@@ -44,15 +35,15 @@ describe("Maybe", () => {
     })
 
     it("lifts a func", () => {
-        let one = maybe_of(1);
+        const one = maybe_of(1)
 
-        let lifted = maybe_lift(inc);
+        const lifted = maybe_lift(inc)
 
         expectValue(lifted(one), 2)
     })
 
     it("lifted not evaluated with none", () => {
-        let none = maybe_none();
+        const none = maybe_none()
 
         const lifted = maybe_lift(should_not_call1)
 
@@ -60,13 +51,13 @@ describe("Maybe", () => {
     })
 
     it("binds a func", () => {
-        let bound = maybe_bind(maybe_of);
+        const bound = maybe_bind(maybe_of)
 
         expectValue(bound(maybe_of(2)), 2)
     })
 
     it("bound not evaluated with none", () => {
-        let bound = maybe_bind(maybe_of);
+        const bound = maybe_bind(maybe_of)
 
         expectEmpty(bound(maybe_none()))
     })
