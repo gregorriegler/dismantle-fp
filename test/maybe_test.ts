@@ -13,16 +13,19 @@ import {
     maybe_value_unary
 } from "./maybe"
 
-function expectEmpty(maybe: Maybe<number>) {
+function expectEmpty(maybe: Maybe<any>) {
     const defaultValue = -1
     expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
 }
 
 function expectValue<T>(maybe: Maybe<T>, expected: T) {
-    expect(maybe_value(maybe, should_not_call0)).to.equal(expected)
+    expect(maybe_value(maybe, () => {
+        throw new Error("expect value " + expected + ", found none")
+    }
+    )).to.equal(expected)
 }
 
-describe("Maybe", () => {
+describe("Maybe (first version)", () => {
     it("of a value contains value", () => {
         const maybe = maybe_of(1)
         expectValue(maybe, 1)
