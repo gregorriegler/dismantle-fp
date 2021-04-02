@@ -1,5 +1,6 @@
-import { compose1, F1, inc } from "./func"
+import { compose1, F1 } from "./func"
 import { expectValue } from "./maybe_expects"
+import { inc } from "./math"
 import { maybe_none, maybe_of } from "./maybe_union"
 import {
     Seq,

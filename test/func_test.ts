@@ -1,5 +1,6 @@
 import { expect } from "chai"
-import { apply1, curry2, curry3, inc, lazy } from "./func"
+import { apply1, curry2, curry3, lazy } from "./func"
+import { inc } from "./math"
 
 describe("Func Tools", () => {
     it("curry binary", () => {

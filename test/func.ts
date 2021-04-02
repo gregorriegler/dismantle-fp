@@ -22,10 +22,6 @@ export function identity1<T>(a: T): T {
     return a
 }
 
-export function inc(a: number): number {
-    return a + 1
-}
-
 /**
  * Partially apply a binary function on the first argument.
  */
