@@ -91,7 +91,8 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
 }
 
 // TODO duplicate interface with seq_supplier
-interface BindSeq<R> extends PrivateSeq<R> {
+interface BindSeq<T, R> extends PrivateSeq<R> {
+    currentSeq: Seq<T>,
     cachedEvaluatedHead: Maybe<Seq<R>> | undefined,
     evaluatedHead: () => Maybe<Seq<R>>
 }
@@ -100,16 +101,24 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
         // TODO gemeinsame Function rausziehen
         return {
+            currentSeq: seq,
             cachedEvaluatedHead: undefined,
             evaluatedHead: function() {
                 if (this.cachedEvaluatedHead == undefined) {
-                    const x = seq_head(seq);
-                    this.cachedEvaluatedHead = maybe_lift(f)(x)
-                    if (!maybe_is_none(x) && maybe_is_none(this.cachedEvaluatedHead)) {
-                        const foo = this.tail()
-                        const y = seq_head(foo)
-                        this.cachedEvaluatedHead = y
+                    const head = seq_head(this.currentSeq);
+                    if (maybe_is_none(head)) {
+                        // finished
+                        this.cachedEvaluatedHead = maybe_none()
+                        return this.cachedEvaluatedHead
                     }
+
+                    const evaluatedHead = maybe_lift(f)(head)
+                    if (seq_is_empty(maybe_value(evaluatedHead, seq_of_empty))) {
+                        this.currentSeq = seq_tail(this.currentSeq)
+                        return this.evaluatedHead();
+                    }
+
+                    this.cachedEvaluatedHead = evaluatedHead;
                 }
                 return this.cachedEvaluatedHead
             },
@@ -119,10 +128,10 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
             tail: function (): Seq<R> {
                 const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(this.evaluatedHead())
                 const tail_of_head_or_empty: Seq<R> = maybe_value(tail_of_head, seq_of_empty)
-                const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(seq));
+                const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(this.currentSeq));
                 return seq_join(tail_of_head_or_empty, evaluated_tail);
             }
-        } as BindSeq<R>
+        } as BindSeq<T, R>
     }
 }
 
