@@ -47,8 +47,8 @@ describe("Seq", () => {
         let i = 0
         const seq = seq_of_supplier(() => maybe_of(++i))
 
-        const { head: first, tail } = seq_first(seq)
-        const { head: second } = seq_first(tail)
+        const {head: first, tail} = seq_first(seq)
+        const {head: second} = seq_first(tail)
 
         expectValue(first, 1)
         expectValue(second, 2)
@@ -139,6 +139,23 @@ describe("Seq", () => {
         const mapped = seq_flat_map(seq, nextTwoNumbers)
 
         expect_seq_four_values(mapped, 2, 3, 3, 4)
+    })
+
+    xit("flatMaps many elements to many elements with different mutations in supplier", () => {
+        let i = 1
+        const seq = seq_of_supplier(() =>
+            i >= 3
+                ? maybe_none()
+                : maybe_of(i++)
+        )
+        const nextTwoNumbers: (n: number) => Seq<number> = (n) =>
+            n == 1
+                ? seq_of_singleton(1)
+                : seq_of_array([n, n])
+
+        const mapped = seq_flat_map(seq, nextTwoNumbers)
+
+        expect_seq_three_values(mapped, 1, 2, 2)
     })
 
     // TODO are tests for join missing
