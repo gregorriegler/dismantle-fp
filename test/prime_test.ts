@@ -38,7 +38,7 @@ describe("PrimeFactors", () => {
         expect_seq_one_value(seq, 2)
     })
 
-    xit("debug of 3", () => {
+    it("debug of 3", () => {
         const candidates = seq_of_supplier(range_supplier(2, 3))
         expect_seq_two_values(candidates, 2, 3)
 
