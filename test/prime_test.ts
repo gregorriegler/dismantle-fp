@@ -12,6 +12,10 @@ function divisors_of(number: number, prime: number): Seq<number> {
     }
 }
 
+/**
+ * PrimeFactors kata
+ * Constraint: lazy, no mutations, unary functions only, point free.
+ */
 function prime_factors_generate(n: number): Seq<number> {
     const candidate = seq_of_supplier(range_supplier(2, n))
     return seq_flat_map(candidate, p => {

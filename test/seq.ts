@@ -97,6 +97,7 @@ interface BindSeq<T, R> extends CachedValueSeq<Maybe<Seq<R>>, R> {
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
         // TODO gemeinsame Function rausziehen
+        // TODO umschreiben auf Functions only ("point free", nur compose)
         return {
             currentSeq: seq,
             value: undefined,

@@ -27,7 +27,7 @@ export function expect_seq_three_values<T>(seq: Seq<T>, a: T, b: T, c: T) {
     expect_seq_two_values(tail, b, c)
 }
 
-// todo: can we write this with less duplication?
+// TODO can we write expects_seq_* with less duplication?
 export function expect_seq_four_values<T>(seq: Seq<T>, a: T, b: T, c: T, d: T) {
     const { head: first, tail } = seq_first(seq)
     expectValue(first, a)
