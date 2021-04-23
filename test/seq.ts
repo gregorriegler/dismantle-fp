@@ -103,7 +103,13 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
             cachedEvaluatedHead: undefined,
             evaluatedHead: function() {
                 if (this.cachedEvaluatedHead == undefined) {
-                    this.cachedEvaluatedHead = maybe_lift(f)(seq_head(seq))
+                    const x = seq_head(seq);
+                    this.cachedEvaluatedHead = maybe_lift(f)(x)
+                    if (!maybe_is_none(x) && maybe_is_none(this.cachedEvaluatedHead)) {
+                        const foo = this.tail()
+                        const y = seq_head(foo)
+                        this.cachedEvaluatedHead = y
+                    }
                 }
                 return this.cachedEvaluatedHead
             },
