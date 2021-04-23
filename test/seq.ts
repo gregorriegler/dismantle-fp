@@ -40,13 +40,32 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     }
 }
 
+interface SuppliedSeq<R> extends PrivateSeq<R> {
+    supplied: Maybe<R> | undefined,
+    supplyOnce: () => Maybe<R>
+}
+
 export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
-    // TODO problem: if head is not called, tail is wrong
-    const s = supplier(); // eager evaluated
     return {
-        head: () => s,
-        tail: () => seq_of_supplier(supplier) // infinite creation of wrappers :-(
-    }
+        supplied: undefined,
+        supplyOnce: function(): Maybe<R> {
+            if (this.supplied) {
+                return this.supplied;
+            }
+            this.supplied = supplier();
+            return this.supplied;
+        },
+        head: function() {
+            return this.supplyOnce()
+        },
+        tail: function() {
+            const value: Maybe<R> = this.supplyOnce()
+            if (maybe_is_none(value)) {
+                return EMPTY
+            }
+            return seq_of_supplier(supplier)
+        }
+    } as SuppliedSeq<R>
 }
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
@@ -84,6 +103,15 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
 
             return cachedEvaluatedHead
         }
+
+        /*
+         debuggen
+         mit test isolieren aus Primefactors
+         noch mehr Tests und Tests und Tests
+
+         fokus auf bestehenden supplier und richten
+         auf andere supply refactoren
+        */
 
         return {
             cachedEvaluatedHead: undefined,

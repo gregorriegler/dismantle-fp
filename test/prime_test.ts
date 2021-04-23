@@ -38,7 +38,7 @@ describe("PrimeFactors", () => {
         expect_seq_one_value(seq, 2)
     })
 
-    it("of 4", () => {
+    xit("of 4", () => {
         const seq = prime_factors_generate(4)
         expect_seq_two_values(seq, 2, 2)
     })
@@ -59,7 +59,7 @@ describe("PrimeFactors", () => {
 
     })
 
-    it("of 8", () => {
+    xit("of 8", () => {
         const seq = prime_factors_generate(8)
         expect_seq_three_values(seq, 2, 2, 2)
     })
