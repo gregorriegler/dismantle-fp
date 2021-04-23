@@ -55,6 +55,23 @@ describe("Seq", () => {
     })
 
     it("with limited supplier function", () => {
+        let i = 1
+        const seq = seq_of_supplier(() =>
+            i >= 3
+                ? maybe_none()
+                : maybe_of(i++)
+        )
+
+        expect_seq_two_values(seq, 1, 2)
+    })
+
+    it("with empty supplier function", () => {
+        const seq = seq_of_supplier(() => maybe_none())
+
+        expect_seq_empty(seq)
+    })
+
+    it("with limited supplier function", () => {
         let i = 10
         const seq: Seq<number> = seq_of_supplier(() => i > 10 ? maybe_none() : maybe_of(++i))
 
