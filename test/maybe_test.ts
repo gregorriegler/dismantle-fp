@@ -15,15 +15,17 @@ import {
 } from "./maybe"
 
 function expectEmpty(maybe: Maybe<any>) {
-    const defaultValue = -1
-    expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
+    maybe_map(maybe, (value) => {
+        throw new Error("expect maybe empty, found value " + value)
+    })
+    // const defaultValue = -1
+    // expect(maybe_value(maybe, lazy(defaultValue))).to.equal(defaultValue)
 }
 
 function expectValue<T>(maybe: Maybe<T>, expected: T) {
     expect(maybe_value(maybe, () => {
         throw new Error("expect value " + expected + ", found none")
-    }
-    )).to.equal(expected)
+    })).to.equal(expected)
 }
 
 describe("Maybe (first version)", () => {
