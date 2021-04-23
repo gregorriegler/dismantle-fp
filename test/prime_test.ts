@@ -1,14 +1,26 @@
+import { expect } from "chai"
 import { it } from "mocha"
 import { is_divided, range_supplier } from "./math"
 import { Seq, seq_flat_map, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "./seq"
 import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "./seq_expects"
 
-function divisors_of(number: number, prime: number): Seq<number> {
-    if (is_divided(number, prime)) {
-        const remaining_factors = divisors_of(number / prime, prime)
-        return seq_join(seq_of_singleton(prime), remaining_factors)
+interface DividedByFactor {
+    factors: Seq<number>,
+    remaining: number
+}
+
+function divisors_of(n: number, prime: number): DividedByFactor {
+    if (is_divided(n, prime)) {
+        const remaining_factors = divisors_of(n / prime, prime)
+        return {
+            factors: seq_join(seq_of_singleton(prime), remaining_factors.factors),
+            remaining: remaining_factors.remaining
+        }
     } else {
-        return seq_of_empty()
+        return {
+            factors: seq_of_empty(),
+            remaining: n
+        }
     }
 }
 
@@ -18,8 +30,9 @@ function divisors_of(number: number, prime: number): Seq<number> {
  */
 function prime_factors_generate(n: number): Seq<number> {
     const candidate = seq_of_supplier(range_supplier(2, n))
+    let remainder = n
     return seq_flat_map(candidate, p => {
-        return divisors_of(n, p)
+        return divisors_of(remainder, p).factors
     })
 }
 
@@ -28,7 +41,9 @@ function prime_factors_generate(n: number): Seq<number> {
 describe("PrimeFactors", () => {
     describe("divisors_of", () => {
         it("divisors of 4", () => {
-            const seq: Seq<number> = divisors_of(4 * 3, 2)
+            const divisors = divisors_of(4 * 3, 2)
+            expect(divisors.remaining).to.equals(3)
+            const seq: Seq<number> = divisors.factors
             expect_seq_two_values(seq, 2, 2)
         })
     })
@@ -49,9 +64,9 @@ describe("PrimeFactors", () => {
             const candidates = seq_of_supplier(range_supplier(2, n))
             expect_seq_two_values(candidates, 2, n)
 
-            let divisors = divisors_of(n, 2)
+            let divisors = divisors_of(n, 2).factors
             expect_seq_empty(divisors)
-            divisors = divisors_of(n, n)
+            divisors = divisors_of(n, n).factors
             expect_seq_one_value(divisors, n)
 
             const seq = prime_factors_generate(n)
