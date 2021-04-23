@@ -22,65 +22,67 @@ function prime_factors_generate(n: number): Seq<number> {
 // -------- test ---------
 
 describe("PrimeFactors", () => {
-
-    it("divisors", () => {
-        const seq: Seq<number> = divisors_of(4 * 3, 2)
-        expect_seq_two_values(seq, 2, 2)
-    })
-
-    it("of 1", () => {
-        const seq = prime_factors_generate(1)
-        expect_seq_empty(seq)
-    })
-
-    it("of 2", () => {
-        const seq = prime_factors_generate(2)
-        expect_seq_one_value(seq, 2)
-    })
-
-    it("debug of 3", () => {
-        const candidates = seq_of_supplier(range_supplier(2, 3))
-        expect_seq_two_values(candidates, 2, 3)
-
-        let divisors = divisors_of(3, 2)
-        expect_seq_empty(divisors)
-        divisors = divisors_of(3, 3)
-        expect_seq_one_value(divisors, 3)
-
-        const seq = prime_factors_generate(3)
-        expect_seq_one_value(seq, 3)
-    })
-
-    xit("of 4", () => {
-        const seq = prime_factors_generate(4)
-        expect_seq_two_values(seq, 2, 2)
-    })
-
-    xit("debug 4", () => {
-        const n = 4
-        const candidate = seq_of_supplier(range_supplier(2, 2))
-        expect_seq_one_value(candidate, 2)
-
-        const mapped = divisors_of(n, 2)
-        expect_seq_two_values(mapped, 2, 2)
-
-        const seq = seq_flat_map(seq_of_singleton(2), p => {
-            return mapped
-            // return seq_of_array([2, 2])
+    describe("divisors_of", () => {
+        it("divisors of 4", () => {
+            const seq: Seq<number> = divisors_of(4 * 3, 2)
+            expect_seq_two_values(seq, 2, 2)
         })
-        expect_seq_two_values(seq, 2, 2)
-
     })
 
-    xit("of 8", () => {
-        const seq = prime_factors_generate(8)
-        expect_seq_three_values(seq, 2, 2, 2)
-    })
+    describe("factors of", () => {
+        it("of 1", () => {
+            const seq = prime_factors_generate(1)
+            expect_seq_empty(seq)
+        })
 
-    xit("of multiple", () => {
-        // TODO fix it
-        const seq = prime_factors_generate(2 * 2 * 11)
-        expect_seq_three_values(seq, 2, 2, 11)
-    })
+        it("of 2", () => {
+            const seq = prime_factors_generate(2)
+            expect_seq_one_value(seq, 2)
+        })
 
+        it("debug of 3", () => {
+            const n = 3
+            const candidates = seq_of_supplier(range_supplier(2, n))
+            expect_seq_two_values(candidates, 2, n)
+
+            let divisors = divisors_of(n, 2)
+            expect_seq_empty(divisors)
+            divisors = divisors_of(n, n)
+            expect_seq_one_value(divisors, n)
+
+            const seq = prime_factors_generate(n)
+            expect_seq_one_value(seq, n)
+        })
+
+        xit("of 4", () => {
+            const seq = prime_factors_generate(4)
+            expect_seq_two_values(seq, 2, 2)
+        })
+
+        xit("debug of 4", () => {
+            const n = 4
+            const candidate = seq_of_supplier(range_supplier(2, 2))
+            expect_seq_one_value(candidate, 2)
+
+            const mapped = divisors_of(n, 2)
+            expect_seq_two_values(mapped, 2, 2)
+
+            const seq = seq_flat_map(seq_of_singleton(2), p => {
+                return mapped
+                // return seq_of_array([2, 2])
+            })
+            expect_seq_two_values(seq, 2, 2)
+        })
+
+        xit("of 8", () => {
+            const seq = prime_factors_generate(8)
+            expect_seq_three_values(seq, 2, 2, 2)
+        })
+
+        xit("of multiple", () => {
+            // TODO fix it
+            const seq = prime_factors_generate(2 * 2 * 11)
+            expect_seq_three_values(seq, 2, 2, 11)
+        })
+    })
 })
