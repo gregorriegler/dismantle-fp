@@ -90,56 +90,33 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return seq_bind(f)(seq)
 }
 
+// TODO duplicate interface with seq_supplier
+interface BindSeq<R> extends PrivateSeq<R> {
+    cachedEvaluatedHead: Maybe<Seq<R>> | undefined,
+    evaluatedHead: () => Maybe<Seq<R>>
+}
+
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
         // TODO gemeinsame Function rausziehen
-
-        let cachedEvaluatedHead: Maybe<Seq<R>> | null = null
-
-        function evaluatedHead() {
-            if (cachedEvaluatedHead == null) {
-                cachedEvaluatedHead = maybe_lift(f)(seq_head(seq))
-            }
-
-            return cachedEvaluatedHead
-        }
-
-        /*
-         debuggen
-         mit test isolieren aus Primefactors
-         noch mehr Tests und Tests und Tests
-
-         fokus auf bestehenden supplier und richten
-         auf andere supply refactoren
-        */
-
         return {
             cachedEvaluatedHead: undefined,
-            cachedEvaluatedHead2: undefined,
-            head: function (): Maybe<R> {
-                // @ts-ignore
+            evaluatedHead: function() {
                 if (this.cachedEvaluatedHead == undefined) {
-                    // @ts-ignore
                     this.cachedEvaluatedHead = maybe_lift(f)(seq_head(seq))
                 }
-                // @ts-ignore
-                const evaluated_head: Maybe<Seq<R>> = this.cachedEvaluatedHead
-                return maybe_bind(seq_head)(evaluated_head)
+                return this.cachedEvaluatedHead
+            },
+            head: function (): Maybe<R> {
+                return maybe_bind(seq_head)(this.evaluatedHead())
             },
             tail: function (): Seq<R> {
-                // @ts-ignore
-                if (this.cachedEvaluatedHead2 == undefined) {
-                    // @ts-ignore
-                    this.cachedEvaluatedHead2 = maybe_lift(f)(seq_head(seq))
-                }
-                // @ts-ignore
-                const evaluated_head: Maybe<Seq<R>> = this.cachedEvaluatedHead2
-                const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(evaluated_head)
+                const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(this.evaluatedHead())
                 const tail_of_head_or_empty: Seq<R> = maybe_value(tail_of_head, seq_of_empty)
                 const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(seq));
                 return seq_join(tail_of_head_or_empty, evaluated_tail);
             }
-        }
+        } as BindSeq<R>
     }
 }
 

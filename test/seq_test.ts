@@ -158,7 +158,8 @@ describe("Seq", () => {
         expect_seq_four_values(mapped, 2, 3, 3, 4)
     })
 
-    xit("flatMaps many elements to many elements with different mutations in supplier", () => {
+    it("flatMaps many elements to many elements with different mutations in supplier", () => {
+        // redundant after supplier got fixed
         let i = 1
         const seq = seq_of_supplier(() =>
             i >= 3
