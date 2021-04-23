@@ -14,7 +14,13 @@ import {
     seq_of_singleton,
     seq_of_supplier
 } from "./seq"
-import { expect_seq_empty, expect_seq_one_value, expect_seq_two_values } from "./seq_expects"
+import {
+    expect_seq_empty,
+    expect_seq_four_values,
+    expect_seq_one_value,
+    expect_seq_three_values,
+    expect_seq_two_values
+} from "./seq_expects"
 
 describe("Seq", () => {
     // TODO fold, reduce, forEach
@@ -126,7 +132,14 @@ describe("Seq", () => {
         expect_seq_two_values(mapped, 4, 5)
     })
 
-    // TODO flatMaps many elements to many elements - BROKEN!
+    it("flatMaps many elements to many elements", () => {
+        const seq = seq_of_array([1, 2])
+        const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
+
+        const mapped = seq_flat_map(seq, nextTwoNumbers)
+
+        expect_seq_four_values(mapped, 2, 3, 3, 4)
+    })
 
     // TODO are tests for join missing
     // - empty in middle?
