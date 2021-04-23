@@ -47,8 +47,8 @@ describe("Seq", () => {
         let i = 0
         const seq = seq_of_supplier(() => maybe_of(++i))
 
-        const {head: first, tail} = seq_first(seq)
-        const {head: second} = seq_first(tail)
+        const { head: first, tail } = seq_first(seq)
+        const { head: second } = seq_first(tail)
 
         expectValue(first, 1)
         expectValue(second, 2)
@@ -178,7 +178,7 @@ describe("Seq", () => {
 
     it("flatMaps many elements to empty and non empty (bug from PrimeFactors n=3)", () => {
         const seq = seq_of_array([1, 2])
-        function first_empty(p:number) {
+        function first_empty(p: number) {
             if (p == 2) {
                 return seq_of_singleton(2)
             }

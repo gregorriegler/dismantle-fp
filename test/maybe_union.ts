@@ -1,16 +1,16 @@
 import { compose1, F0, F1, identity1 } from "./func"
 
-const NONE: Maybe<never> = {hint: 'None'}
+const NONE: Maybe<never> = { hint: "None" }
 
 export type Maybe<T> = Value<T> | None<T>
 
 export interface Value<T> {
     readonly value: T
-    readonly hint: 'Value'
+    readonly hint: "Value"
 }
 
 export interface None<T> {
-    readonly hint: 'None'
+    readonly hint: "None"
 }
 
 export function maybe_none<T>(): Maybe<T> {
@@ -18,11 +18,11 @@ export function maybe_none<T>(): Maybe<T> {
 }
 
 export function maybe_is_none<T>(value: Maybe<T>): value is None<T> {
-    return value.hint === 'None'
+    return value.hint === "None"
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return {value: value, hint: 'Value'}
+    return { value: value, hint: "Value" }
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {

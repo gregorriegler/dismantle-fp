@@ -58,7 +58,7 @@ export function maybe_fold<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): 
     return maybe_fold1<T, R>(maybe)(some, none)
 }
 
-function maybe_fold1<T,  R>(maybe: Maybe<T>): (some: F1<T, R>, none: F0<R>) => R {
+function maybe_fold1<T, R>(maybe: Maybe<T>): (some: F1<T, R>, none: F0<R>) => R {
     const privateMaybe = maybe as PrivateMaybe<T>
     return (some: F1<T, R>, none: F0<R>) => privateMaybe.value ? some(privateMaybe.value) : none()
 }
