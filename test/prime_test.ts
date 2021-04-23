@@ -29,10 +29,13 @@ function divisors_of(n: number, prime: number): DividedByFactor {
  * Constraint: lazy, no mutations, unary functions only, point free.
  */
 function prime_factors_generate(n: number): Seq<number> {
-    const candidate = seq_of_supplier(range_supplier(2, n))
+    const candidates = seq_of_supplier(range_supplier(2, n))
+    // TODO this has mutation, also the divisors_of is not lazy
     let remainder = n
-    return seq_flat_map(candidate, p => {
-        return divisors_of(remainder, p).factors
+    return seq_flat_map(candidates, p => {
+        const divisors = divisors_of(remainder, p)
+        remainder = divisors.remaining
+        return divisors.factors
     })
 }
 
@@ -73,33 +76,22 @@ describe("PrimeFactors", () => {
             expect_seq_one_value(seq, n)
         })
 
-        xit("of 4", () => {
+        it("of 4", () => {
             const seq = prime_factors_generate(4)
             expect_seq_two_values(seq, 2, 2)
         })
 
-        xit("debug of 4", () => {
-            const n = 4
-            const candidate = seq_of_supplier(range_supplier(2, 2))
-            expect_seq_one_value(candidate, 2)
-
-            const mapped = divisors_of(n, 2)
-            expect_seq_two_values(mapped, 2, 2)
-
-            const seq = seq_flat_map(seq_of_singleton(2), p => {
-                return mapped
-                // return seq_of_array([2, 2])
-            })
-            expect_seq_two_values(seq, 2, 2)
-        })
-
-        xit("of 8", () => {
+        it("of 8", () => {
             const seq = prime_factors_generate(8)
             expect_seq_three_values(seq, 2, 2, 2)
         })
 
-        xit("of multiple", () => {
-            // TODO fix it
+        it("of 9", () => {
+            const seq = prime_factors_generate(9)
+            expect_seq_two_values(seq, 3, 3)
+        })
+
+        it("of multiple", () => {
             const seq = prime_factors_generate(2 * 2 * 11)
             expect_seq_three_values(seq, 2, 2, 11)
         })
