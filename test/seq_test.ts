@@ -113,7 +113,7 @@ describe("Seq", () => {
         expect_seq_empty(mapped)
     })
 
-    it("flatMaps many elements to empty", () => {
+    it("flatMaps (all) many elements to empty", () => {
         const seq = seq_of_array([3, 4])
         const makeEmptyList: F1<number, Seq<number>> = (_: number) => seq_of_empty()
 
@@ -131,7 +131,7 @@ describe("Seq", () => {
         expect_seq_one_value(mapped, 4)
     })
 
-    it("flatMaps many elements to single element", () => {
+    it("flatMaps (all) many elements to single element", () => {
         const seq = seq_of_array([3, 4])
         const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
 
@@ -149,7 +149,7 @@ describe("Seq", () => {
         expect_seq_two_values(mapped, 4, 5)
     })
 
-    it("flatMaps many elements to many elements", () => {
+    it("flatMaps (all) many elements to many elements", () => {
         const seq = seq_of_array([1, 2])
         const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
@@ -158,7 +158,7 @@ describe("Seq", () => {
         expect_seq_four_values(mapped, 2, 3, 3, 4)
     })
 
-    it("flatMaps many elements to many elements with different mutations in supplier", () => {
+    it("flatMaps many elements to single and elements from supplier", () => {
         // redundant after supplier got fixed
         let i = 1
         const seq = seq_of_supplier(() =>
@@ -174,6 +174,20 @@ describe("Seq", () => {
         const mapped = seq_flat_map(seq, nextTwoNumbers)
 
         expect_seq_three_values(mapped, 1, 2, 2)
+    })
+
+    it("flatMaps many elements to empty and non empty (bug from PrimeFactors n=3)", () => {
+        const seq = seq_of_array([1, 2])
+        function first_empty(p:number) {
+            if (p == 2) {
+                return seq_of_singleton(2)
+            }
+            return seq_of_empty()
+        }
+
+        const mapped = seq_flat_map(seq, first_empty)
+
+        expect_seq_one_value(mapped, 2)
     })
 
     // TODO are tests for join missing

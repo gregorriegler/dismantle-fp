@@ -38,6 +38,19 @@ describe("PrimeFactors", () => {
         expect_seq_one_value(seq, 2)
     })
 
+    xit("debug of 3", () => {
+        const candidates = seq_of_supplier(range_supplier(2, 3))
+        expect_seq_two_values(candidates, 2, 3)
+
+        let divisors = divisors_of(3, 2)
+        expect_seq_empty(divisors)
+        divisors = divisors_of(3, 3)
+        expect_seq_one_value(divisors, 3)
+
+        const seq = prime_factors_generate(3)
+        expect_seq_one_value(seq, 3)
+    })
+
     xit("of 4", () => {
         const seq = prime_factors_generate(4)
         expect_seq_two_values(seq, 2, 2)
