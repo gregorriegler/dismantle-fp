@@ -40,32 +40,32 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     }
 }
 
-interface SuppliedSeq<R> extends PrivateSeq<R> {
-    supplied: Maybe<R> | undefined,
-    supplyOnce: () => Maybe<R>
+interface CachedValueSeq<V, R> extends PrivateSeq<R> {
+    value: V | undefined,
+    getValue: () => V
 }
 
 export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
     return {
-        supplied: undefined,
-        supplyOnce: function (): Maybe<R> {
-            if (this.supplied) {
-                return this.supplied
+        value: undefined,
+        getValue: function (): Maybe<R> {
+            if (this.value) {
+                return this.value
             }
-            this.supplied = supplier()
-            return this.supplied
+            this.value = supplier()
+            return this.value
         },
         head: function () {
-            return this.supplyOnce()
+            return this.getValue()
         },
         tail: function () {
-            const value: Maybe<R> = this.supplyOnce()
+            const value: Maybe<R> = this.getValue()
             if (maybe_is_none(value)) {
                 return EMPTY
             }
             return seq_of_supplier(supplier)
         }
-    } as SuppliedSeq<R>
+    } as CachedValueSeq<Maybe<R>, R>
 }
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
@@ -90,11 +90,8 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return seq_bind(f)(seq)
 }
 
-// TODO duplicate interface with seq_supplier
-interface BindSeq<T, R> extends PrivateSeq<R> {
-    currentSeq: Seq<T>,
-    cachedEvaluatedHead: Maybe<Seq<R>> | undefined,
-    evaluatedHead: () => Maybe<Seq<R>>
+interface BindSeq<T, R> extends CachedValueSeq<Maybe<Seq<R>>, R> {
+    currentSeq: Seq<T>
 }
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
@@ -102,31 +99,31 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
         // TODO gemeinsame Function rausziehen
         return {
             currentSeq: seq,
-            cachedEvaluatedHead: undefined,
-            evaluatedHead: function () {
-                if (this.cachedEvaluatedHead == undefined) {
+            value: undefined,
+            getValue: function () {
+                if (this.value == undefined) {
                     const head = seq_head(this.currentSeq)
                     if (maybe_is_none(head)) {
                         // finished
-                        this.cachedEvaluatedHead = maybe_none()
-                        return this.cachedEvaluatedHead
+                        this.value = maybe_none()
+                        return this.value
                     }
 
                     const evaluatedHead = maybe_lift(f)(head)
                     if (seq_is_empty(maybe_value(evaluatedHead, seq_of_empty))) {
                         this.currentSeq = seq_tail(this.currentSeq)
-                        return this.evaluatedHead()
+                        return this.getValue()
                     }
 
-                    this.cachedEvaluatedHead = evaluatedHead
+                    this.value = evaluatedHead
                 }
-                return this.cachedEvaluatedHead
+                return this.value
             },
             head: function (): Maybe<R> {
-                return maybe_bind(seq_head)(this.evaluatedHead())
+                return maybe_bind(seq_head)(this.getValue())
             },
             tail: function (): Seq<R> {
-                const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(this.evaluatedHead())
+                const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(this.getValue())
                 const tail_of_head_or_empty: Seq<R> = maybe_value(tail_of_head, seq_of_empty)
                 const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(this.currentSeq))
                 return seq_join(tail_of_head_or_empty, evaluated_tail)
