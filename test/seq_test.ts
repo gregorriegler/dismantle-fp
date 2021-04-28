@@ -223,9 +223,16 @@ describe("Seq", () => {
 
             expect_seq_one_value(joined, 2)
         })
-        // TODO are tests for join missing? More tests for join
-        // - empty in middle?
-        // - more elements?
+
+        it("joins two seq with values", () => {
+            const seq1 = seq_of_array([1, 2])
+            const seq2 = seq_of_array([3, 4])
+
+            const joined = seq_join(seq1, seq2)
+
+            expect_seq_four_values(joined, 1, 2, 3, 4)
+        })
     })
-    // TODO implement fold, reduce, forEach, length
+
+    // TODO 3. implement fold, reduce, forEach, length
 })
