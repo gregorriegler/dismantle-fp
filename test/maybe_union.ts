@@ -1,17 +1,21 @@
 import { compose1, F0, F1, identity1 } from "./func"
 
-const NONE: Maybe<never> = { hint: "None" }
+const NONE: None<never> = { hint: "None" }
 
-export type Maybe<T> = Value<T> | None<T>
-
-export interface Value<T> {
+interface Value<T> {
     readonly value: T
     readonly hint: "Value"
 }
 
-export interface None<T> {
+interface None<T> {
     readonly hint: "None"
 }
+
+/**
+ * Second version of Maybe.
+ * Using `lift` and `bind` for `map` and `flatMap`.
+ */
+export type Maybe<T> = Value<T> | None<T>
 
 export function maybe_none<T>(): Maybe<T> {
     return NONE

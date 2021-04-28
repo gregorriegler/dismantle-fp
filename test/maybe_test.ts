@@ -27,7 +27,7 @@ function expectValue<T>(maybe: Maybe<T>, expected: T) {
     })).to.equal(expected)
 }
 
-describe("Maybe (first version)", () => {
+describe("Maybe (first version using fold)", () => {
     describe("constructor", () => {
         it("of a value contains value", () => {
             const maybe = maybe_of(1)

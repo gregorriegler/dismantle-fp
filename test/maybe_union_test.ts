@@ -12,7 +12,7 @@ import {
     maybe_of
 } from "./maybe_union"
 
-describe("Maybe (second version)", () => {
+describe("Maybe (second version using lift+bind)", () => {
     describe("constructor", () => {
         it("is none", () => {
             const maybe = maybe_none()
