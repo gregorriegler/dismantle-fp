@@ -79,3 +79,7 @@ export function should_not_call0<R>(): R {
 export function should_not_call1<T, R>(_: T): R {
     throw new Error("should not be called")
 }
+
+export function inc(a: number): number {
+    return a + 1
+}

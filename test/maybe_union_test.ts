@@ -1,7 +1,6 @@
 import { expect } from "chai"
-import { should_not_call1 } from "./func"
+import { inc, should_not_call1 } from "./func"
 import { expectEmpty, expectValue } from "./maybe_expects"
-import { inc } from "./math"
 import {
     Maybe, maybe_bind,
     maybe_f,

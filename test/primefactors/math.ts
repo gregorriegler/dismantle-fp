@@ -1,9 +1,5 @@
-import { F0, F1 } from "./func"
-import { Maybe, maybe_none, maybe_of } from "./maybe_union"
-
-export function inc(a: number): number {
-    return a + 1
-}
+import { F0, F1 } from "../func"
+import { Maybe, maybe_none, maybe_of } from "../maybe_union"
 
 export function is_divided(n: number, divisor: number): boolean {
     return n % divisor == 0

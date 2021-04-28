@@ -1,6 +1,5 @@
 import { expect } from "chai"
-import { apply1, curry2, curry3, lazy } from "./func"
-import { inc } from "./math"
+import { apply1, curry2, curry3, inc, lazy } from "./func"
 
 describe("Func Tools", () => {
 

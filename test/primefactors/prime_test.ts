@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import { it } from "mocha"
 import { is_divided, range_supplier } from "./math"
-import { Seq, seq_flat_map, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "./seq"
-import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "./seq_expects"
+import { Seq, seq_flat_map, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "../seq"
+import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "../seq_expects"
 
 interface DividedByFactor {
     factors: Seq<number>,
