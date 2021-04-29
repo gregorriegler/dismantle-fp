@@ -234,5 +234,7 @@ describe("Seq", () => {
         })
     })
 
-    // TODO 3. implement fold, reduce, forEach, length
+    // TODO 3. test lazyness of all operations by creating a seq which throws an error on getValue
+    // TODO 4. implement fold, reduce, forEach
+    // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
 })
