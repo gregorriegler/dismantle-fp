@@ -1,5 +1,5 @@
 import { Maybe, maybe_bind, maybe_is_none, maybe_lift, maybe_none, maybe_of, maybe_value } from "./maybe_union"
-import { F0, F1 } from "./func"
+import { F0, F1, should_not_call0 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -170,12 +170,12 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-export function seq_fold(seq: Seq<number>, add: (a: number, b: number) => number, number: number): number {
-    if(seq_is_empty(seq)) return number;
-    const head = seq_head(seq);
-    const headValue = maybe_value(head, () => 0);
-    const tail = seq_tail(seq)
-
-    const added = add(headValue, number)
-    return seq_fold(tail, add, added)
+export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initialValue: R): R {
+    if(seq_is_empty(seq)) {
+        return initialValue
+    }
+    const head = seq_head(seq)
+    const headValue = maybe_value(head, should_not_call0) as T
+    const currentValue = combine(initialValue, headValue)
+    return seq_fold(seq_tail(seq), combine, currentValue)
 }
