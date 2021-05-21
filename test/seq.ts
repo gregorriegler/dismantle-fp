@@ -1,5 +1,14 @@
-import { Maybe, maybe_bind, maybe_is_none, maybe_lift, maybe_none, maybe_of, maybe_value } from "./maybe_union"
-import { F0, F1, should_not_call0 } from "./func"
+import {
+    Maybe,
+    maybe_bind,
+    maybe_fold,
+    maybe_is_none,
+    maybe_lift,
+    maybe_none,
+    maybe_of,
+    maybe_value
+} from "./maybe_union"
+import { F0, F1 } from "./func"
 
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
@@ -70,7 +79,7 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return { head: privateSeq.head(), tail: privateSeq.tail() }
+    return {head: privateSeq.head(), tail: privateSeq.tail()}
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
@@ -100,7 +109,7 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
             currentSeq: seq,
             value: undefined,
             getValue: function (): Maybe<Seq<R>> {
-                 return bind_seq_value(this, f)
+                return bind_seq_value(this, f)
             },
             head: function (): Maybe<R> {
                 return maybe_bind(seq_head)(this.getValue())
@@ -170,12 +179,18 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initialValue: R): R {
-    if(seq_is_empty(seq)) {
-        return initialValue
+export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
+    if (seq_is_empty(seq)) {
+        return none();
     }
-    const head = seq_head(seq)
-    const headValue = maybe_value(head, should_not_call0) as T
-    const currentValue = combine(initialValue, headValue)
-    return seq_fold(seq_tail(seq), combine, currentValue)
+    return maybe_fold(seq_first(seq).head, some, none)
+}
+
+export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
+    function combineRecursively(head: T) {
+        const current = combine(initial, head)
+        return seq_fold(seq_tail(seq), combine, current)
+    }
+
+    return seq_first_map(seq, combineRecursively, () => initial);
 }
