@@ -1,3 +1,4 @@
+import { expect } from "chai"
 import { compose1, F1, inc } from "./func"
 import { expectValue } from "./maybe_expects"
 import { maybe_none, maybe_of } from "./maybe_union"
@@ -20,6 +21,15 @@ import {
     expect_seq_three_values,
     expect_seq_two_values
 } from "./seq_expects"
+
+const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
+
+const BAD_SEQ_1 = {
+    head: () => { throw new Error("head was called") },
+    tail: () => { throw new Error("tail was called") }
+}
+
+const BAD_SEQ_2 = seq_join(seq_of_singleton(1), BAD_SEQ_1)
 
 describe("Seq", () => {
     describe("constructor", () => {
@@ -106,6 +116,27 @@ describe("Seq", () => {
             const mapped = lifted(seq)
             expect_seq_two_values(mapped, 2, 3)
         })
+
+        it("maps lazy, fail on first element", () => {
+            const seq = BAD_SEQ_1
+            const mapped = seq_map(seq, inc)
+
+            const act = () => seq_first(mapped)
+
+            expect(act).to.throw("head was called")
+        })
+
+        it("maps lazy, fail on second element", () => {
+            const seq = BAD_SEQ_2
+            const mapped = seq_map(seq, inc)
+            const first = seq_first(mapped)
+            expectValue(first.head, 2)
+            const second = first.tail
+
+            const act = () => seq_first(second)
+
+            expect(act).to.throw("head was called")
+        })
     })
 
     describe("bind and flatMap", () => {
@@ -147,7 +178,6 @@ describe("Seq", () => {
 
         it("flatMaps a single element to many elements", () => {
             const seq = seq_of_singleton(3)
-            const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
             const mapped = seq_flat_map(seq, nextTwoNumbers)
 
@@ -156,7 +186,6 @@ describe("Seq", () => {
 
         it("flatMaps (all) many elements to many elements", () => {
             const seq = seq_of_array([1, 2])
-            const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
             const mapped = seq_flat_map(seq, nextTwoNumbers)
 
@@ -171,12 +200,12 @@ describe("Seq", () => {
                     ? maybe_none()
                     : maybe_of(i++)
             )
-            const nextTwoNumbers: (n: number) => Seq<number> = (n) =>
+            const weirdNextTwoNumbers: (n: number) => Seq<number> = (n) =>
                 n == 1
                     ? seq_of_singleton(1)
                     : seq_of_array([n, n])
 
-            const mapped = seq_flat_map(seq, nextTwoNumbers)
+            const mapped = seq_flat_map(seq, weirdNextTwoNumbers)
 
             expect_seq_three_values(mapped, 1, 2, 2)
         })
@@ -193,6 +222,26 @@ describe("Seq", () => {
             const mapped = seq_flat_map(seq, first_empty)
 
             expect_seq_one_value(mapped, 2)
+        })
+
+        it("flatMaps lazy, fail on first element", () => {
+            const seq = BAD_SEQ_1
+            const mapped = seq_flat_map(seq, nextTwoNumbers)
+
+            const act = () => seq_first(mapped)
+
+            expect(act).to.throw("head was called")
+        })
+
+        it("flatMaps lazy, fail on second mapped = third element", () => {
+            const seq = BAD_SEQ_2
+            const mapped = seq_flat_map(seq, nextTwoNumbers)
+            const first = seq_first(mapped)
+            const second = seq_first(first.tail).tail
+
+            const act = () => seq_first(second)
+
+            expect(act).to.throw("head was called")
         })
     })
 
@@ -232,9 +281,18 @@ describe("Seq", () => {
 
             expect_seq_four_values(joined, 1, 2, 3, 4)
         })
+
+        it("joins lazy, fail on first element", () => {
+            const seq1 = BAD_SEQ_1
+            const seq2 = BAD_SEQ_1
+            const joined = seq_join(seq1, seq2)
+
+            const act = () => seq_first(joined)
+
+            expect(act).to.throw("head was called")
+        })
     })
 
-    // TODO 3. test lazyness of all operations by creating a seq which throws an error on getValue
     // TODO 4. implement fold, reduce, forEach
     // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
 })
