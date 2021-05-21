@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { it } from "mocha"
 import { is_divided, range_supplier } from "./math"
-import { Seq, seq_flat_map, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "../seq"
+import { Seq, seq_flat_map, seq_fold, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "../seq"
 import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "../seq_expects"
 
 interface DividedByFactor {
@@ -10,6 +10,7 @@ interface DividedByFactor {
 }
 
 function divisors_of(n: number, prime: number): DividedByFactor {
+    // TODO (maybe) the divisors_of is not lazy
     if (is_divided(n, prime)) {
         const remaining_factors = divisors_of(n / prime, prime)
         return {
@@ -31,7 +32,6 @@ function divisors_of(n: number, prime: number): DividedByFactor {
 function prime_factors_generate(n: number): Seq<number> {
     const candidates = seq_of_supplier(range_supplier(2, n))
 
-
     let remainder = n
     return seq_flat_map(candidates, p => {
         const divisors = divisors_of(remainder, p)
@@ -44,16 +44,19 @@ function prime_factors_generate(n: number): Seq<number> {
     remainder needs to be an input to the next iteration to avoid the mutation
     could solve via fold:
 
-    return seq_fold(candidates, foldingFunction, {remaining: n, factors: seq_of_empty()})
-
-    function foldingFunction(candidate: number, previous: DividedByFactor): DividedByFactor {
+    function foldingFunction(previous: DividedByFactor, candidate: number): DividedByFactor {
         const divisors = divisors_of(previous.remaining, candidate)
         return {
             remaining: divisors.remaining,
             factors: seq_join(previous.factors, divisors.factors)
         }
     }
-     */
+
+    const dividedByFactors = seq_fold(candidates, foldingFunction, { remaining: n, factors: seq_of_empty() } as DividedByFactor)
+    return dividedByFactors.factors
+
+    this code has a problem, stops running, why?
+    */
 }
 
 // -------- test ---------
