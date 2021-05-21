@@ -96,29 +96,12 @@ interface BindSeq<T, R> extends CachedValueSeq<Maybe<Seq<R>>, R> {
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
-        // TODO 1. gemeinsame Functionen rausziehen
         // TODO 2. umschreiben auf Functions only ("point free", nur compose)
         return {
             currentSeq: seq,
             value: undefined,
-            getValue: function () {
-                if (this.value == undefined) {
-                    const head = seq_head(this.currentSeq)
-                    if (maybe_is_none(head)) {
-                        // finished
-                        this.value = maybe_none()
-                        return this.value
-                    }
-
-                    const evaluatedHead = maybe_lift(f)(head)
-                    if (seq_is_empty(maybe_value(evaluatedHead, seq_of_empty))) {
-                        this.currentSeq = seq_tail(this.currentSeq)
-                        return this.getValue()
-                    }
-
-                    this.value = evaluatedHead
-                }
-                return this.value
+            getValue: function (): Maybe<Seq<R>> {
+                 return bind_seq_value(this, f)
             },
             head: function (): Maybe<R> {
                 return maybe_bind(seq_head)(this.getValue())
@@ -131,6 +114,30 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
             }
         } as BindSeq<T, R>
     }
+}
+
+function bind_seq_value<T, R>(bindSeq: BindSeq<T, R>, f: F1<T, Seq<R>>): Maybe<Seq<R>> {
+    if (bindSeq.value !== undefined) {
+        // value was cached
+        return bindSeq.value
+    }
+
+    const head = seq_head(bindSeq.currentSeq)
+    if (maybe_is_none(head)) {
+        // end of sequence - finished
+        bindSeq.value = maybe_none()
+        return bindSeq.value
+    }
+
+    const evaluatedHead = maybe_lift(f)(head)
+    if (seq_is_empty(maybe_value(evaluatedHead, seq_of_empty))) {
+        // evaluated head is none - try again
+        bindSeq.currentSeq = seq_tail(bindSeq.currentSeq)
+        return bind_seq_value(bindSeq, f);
+    }
+
+    bindSeq.value = evaluatedHead
+    return bindSeq.value
 }
 
 export function seq_is_empty<T>(seq: Seq<T>): boolean {
