@@ -310,6 +310,14 @@ describe("Seq", () => {
 
             expect(result).to.equal(3)
         })
+
+        it("folds a seq of two elements", () => {
+            const seq = seq_of_array([1, 2])
+
+            const result = seq_fold(seq, add, 3)
+
+            expect(result).to.equal(6)
+        })
     })
     // TODO 4. implement fold, reduce, forEach
     // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
