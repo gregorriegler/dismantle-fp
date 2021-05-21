@@ -30,14 +30,7 @@ function divisors_of(n: number, prime: number): DividedByFactor {
  */
 function prime_factors_generate(n: number): Seq<number> {
     const candidates = seq_of_supplier(range_supplier(2, n))
-    /*
-    TODO this has mutation, also the divisors_of is not lazy
-    remainder needs to be an input to the next iteration to avoid the mutation
-    could solve via fold:
 
-    const resultingRemainderAndFactors = seq_fold(candidates, remainderAndFactors, operationUsing_divisors_of)
-    return resultingRemainderAndFactors.factors
-     */
 
     let remainder = n
     return seq_flat_map(candidates, p => {
@@ -45,6 +38,22 @@ function prime_factors_generate(n: number): Seq<number> {
         remainder = divisors.remaining
         return divisors.factors
     })
+
+    /*
+    TODO this has mutation, also the divisors_of is not lazy
+    remainder needs to be an input to the next iteration to avoid the mutation
+    could solve via fold:
+
+    return seq_fold(candidates, foldingFunction, {remaining: n, factors: seq_of_empty()})
+
+    function foldingFunction(candidate: number, previous: DividedByFactor): DividedByFactor {
+        const divisors = divisors_of(previous.remaining, candidate)
+        return {
+            remaining: divisors.remaining,
+            factors: seq_join(previous.factors, divisors.factors)
+        }
+    }
+     */
 }
 
 // -------- test ---------

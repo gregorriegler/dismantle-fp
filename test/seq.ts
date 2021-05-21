@@ -163,3 +163,5 @@ function seq_head<T>(seq: Seq<T>): Maybe<T> {
 function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
+
+// TODO seq_fold
