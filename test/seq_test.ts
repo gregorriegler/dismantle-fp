@@ -294,7 +294,6 @@ describe("Seq", () => {
     })
 
     describe("fold", () => {
-
         it("folds an empty seq", () => {
             const seq = seq_of_empty()
 
@@ -319,6 +318,7 @@ describe("Seq", () => {
             expect(result).to.equal(6)
         })
     })
-    // TODO 4. implement fold, reduce, forEach
+
+    // TODO 4. implement reduce, forEach
     // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
 })
