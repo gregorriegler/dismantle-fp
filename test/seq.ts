@@ -170,4 +170,9 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-// TODO seq_fold
+export function seq_fold(seq: Seq<number>, add: (a: number, b: number) => number, number: number) {
+    if(seq_is_empty(seq)) return number;
+    const head = seq_head(seq);
+    const headValue = maybe_value(head, () => 0);
+    return add(headValue, number)
+}

@@ -83,3 +83,7 @@ export function should_not_call1<T, R>(_: T): R {
 export function inc(a: number): number {
     return a + 1
 }
+
+export function add(a: number, b: number): number {
+    return a + b
+}

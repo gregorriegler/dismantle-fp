@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { compose1, F1, inc } from "./func"
+import { add, compose1, F1, inc } from "./func"
 import { expectValue } from "./maybe_expects"
 import { maybe_none, maybe_of } from "./maybe_union"
 import {
@@ -12,7 +12,7 @@ import {
     seq_of_array,
     seq_of_empty,
     seq_of_singleton,
-    seq_of_supplier
+    seq_of_supplier, seq_fold
 } from "./seq"
 import {
     expect_seq_empty,
@@ -293,6 +293,24 @@ describe("Seq", () => {
         })
     })
 
+    describe("fold", () => {
+
+        it("folds an empty seq", () => {
+            const seq = seq_of_empty()
+
+            const result = seq_fold(seq, add, 0)
+
+            expect(result).to.equal(0)
+        })
+
+        it("folds a seq of one element", () => {
+            const seq = seq_of_singleton(1)
+
+            const result = seq_fold(seq, add, 2)
+
+            expect(result).to.equal(3)
+        })
+    })
     // TODO 4. implement fold, reduce, forEach
     // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
 })
