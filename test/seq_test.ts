@@ -346,7 +346,7 @@ describe("Seq", () => {
                     : maybe_of(i++)
             )
 
-            expect(seq.toString()).to.equal("1,2,_,[]")
+            expect(seq.toString()).to.equal("1,2,_")
         })
 
     })

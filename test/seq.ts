@@ -78,7 +78,8 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
             return seq_of_supplier(supplier)
         },
         toString: function () {
-            return this.head() + ',' + this.tail().toString()
+            const head = this.head()
+            return head + (!maybe_is_none(head) ? ',' + this.tail().toString() : '')
         }
     } as CachedValueSeq<Maybe<R>, R>
 }
