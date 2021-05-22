@@ -1,5 +1,4 @@
 import { expect } from "chai"
-import { it } from "mocha"
 import { is_divided, range_supplier, range_supplier_pure } from "./math"
 import { expectEmpty, expectValue } from "../maybe_expects"
 
