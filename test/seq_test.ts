@@ -12,7 +12,7 @@ import {
     seq_of_array,
     seq_of_empty,
     seq_of_singleton,
-    seq_of_supplier, seq_fold
+    seq_of_supplier, seq_fold, seq_to_string
 } from "./seq"
 import {
     expect_seq_empty,
@@ -319,6 +319,37 @@ describe("Seq", () => {
         })
     })
 
+    describe("toString", () => {
+        it("renders empty seq", () => {
+            const seq = seq_of_empty()
+
+            expect(seq.toString()).to.equal("[]")
+        })
+
+        it("renders singleton seq", () => {
+            const seq = seq_of_singleton(1)
+
+            expect(seq.toString()).to.equal("1")
+        })
+
+        it("renders seq of array", () => {
+            const seq = seq_of_array([1, 2, 3])
+
+            expect(seq.toString()).to.equal("1,2,3")
+        })
+
+        it("renders seq of supplier", () => {
+            let i = 1
+            const seq = seq_of_supplier(() =>
+                i >= 3
+                    ? maybe_none()
+                    : maybe_of(i++)
+            )
+
+            expect(seq.toString()).to.equal("1,2,_,[]")
+        })
+
+    })
     // TODO 4. implement reduce, forEach
     // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
 })

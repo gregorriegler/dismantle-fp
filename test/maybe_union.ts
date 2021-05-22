@@ -1,13 +1,16 @@
 import { compose1, F0, F1, identity1 } from "./func"
 
-const NONE: None<never> = { hint: "None" }
+const NONE: None<never> = {
+    hint: "None",
+    toString: () => "_"
+}
 
-interface Value<T> {
+interface Value<T> extends Object {
     readonly value: T
     readonly hint: "Value"
 }
 
-interface None<T> {
+interface None<T> extends Object {
     readonly hint: "None"
 }
 
@@ -26,7 +29,7 @@ export function maybe_is_none<T>(value: Maybe<T>): value is None<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return { value: value, hint: "Value" }
+    return {value: value, hint: "Value", toString: () => value + ''}
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {

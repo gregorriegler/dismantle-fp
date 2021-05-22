@@ -98,4 +98,18 @@ describe("Maybe (second version using lift+bind)", () => {
             expectValue(maybeTwo, 2)
         })
     })
+
+    describe("toString", () => {
+        it("renders none", () => {
+            const none = maybe_none()
+
+            expect(none.toString()).to.equal("_")
+        })
+
+        it("renders value", () => {
+            const none = maybe_of(1)
+
+            expect(none.toString()).to.equal("1")
+        })
+    })
 })

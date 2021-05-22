@@ -1,13 +1,13 @@
 import { compose1, F0, F1, identity1, partial2_1, partial2_2 } from "./func"
 
-const NONE: PrivateMaybe<any> = { value: undefined }
+const NONE: PrivateMaybe<any> = { value: undefined, toString: () => "_" }
 
 /**
  * First version of Maybe following outline of Tony.
  * Using `fold` for `map` and `flatMap`.
  * Not using `lift` or `bind`.
  */
-export interface Maybe<T> {
+export interface Maybe<T> extends Object {
 }
 
 interface PrivateMaybe<T> extends Maybe<T> {
@@ -19,7 +19,7 @@ export function maybe_none<T>(): Maybe<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return { value }
+    return { value, toString: () => value + '' } as PrivateMaybe<T>
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {

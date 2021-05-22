@@ -15,7 +15,7 @@ interface PrivateSeq<T> extends Seq<T> {
     tail: () => Seq<T>
 }
 
-export interface Seq<T> {
+export interface Seq<T> extends Object {
 }
 
 export interface SeqElement<T> {
@@ -25,7 +25,8 @@ export interface SeqElement<T> {
 
 const EMPTY: PrivateSeq<any> = {
     head: maybe_none,
-    tail: seq_of_empty
+    tail: seq_of_empty,
+    toString: () => '[]'
 }
 
 export function seq_of_empty<T>(): Seq<T> {
@@ -35,8 +36,9 @@ export function seq_of_empty<T>(): Seq<T> {
 export function seq_of_singleton<T>(value: T): Seq<T> {
     return {
         head: () => maybe_of(value),
-        tail: seq_of_empty
-    }
+        tail: seq_of_empty,
+        toString: () => value + ''
+    } as PrivateSeq<T>
 }
 
 export function seq_of_array<T>(elements: T[]): Seq<T> {
@@ -45,8 +47,9 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     }
     return {
         head: () => maybe_of(elements[0]),
-        tail: () => seq_of_array(elements.slice(1))
-    }
+        tail: () => seq_of_array(elements.slice(1)),
+        toString: () => elements.toString()
+    } as PrivateSeq<T>
 }
 
 interface CachedValueSeq<V, R> extends PrivateSeq<R> {
@@ -73,6 +76,9 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
                 return EMPTY
             }
             return seq_of_supplier(supplier)
+        },
+        toString: function () {
+            return this.head() + ',' + this.tail().toString()
         }
     } as CachedValueSeq<Maybe<R>, R>
 }
@@ -91,7 +97,7 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
         return {
             head: () => maybe_lift(f)(seq_head(seq)),
             tail: () => seq_lift(f)(seq_tail(seq))
-        }
+        } as PrivateSeq<T>
     }
 }
 
@@ -168,7 +174,7 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
                 return seq_tail(second)
             }
         }
-    }
+    } as PrivateSeq<T>
 }
 
 function seq_head<T>(seq: Seq<T>): Maybe<T> {
@@ -179,13 +185,6 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
-    if (seq_is_empty(seq)) {
-        return none();
-    }
-    return maybe_fold(seq_first(seq).head, some, none)
-}
-
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
     function combineRecursively(head: T) {
         const current = combine(initial, head)
@@ -193,4 +192,15 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
     }
 
     return seq_first_map(seq, combineRecursively, () => initial);
+}
+
+export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
+    if (seq_is_empty(seq)) {
+        return none();
+    }
+    return maybe_fold(seq_first(seq).head, some, none)
+}
+
+export function seq_to_string<T>(seq: Seq<T>) {
+    return //seq_first(seq).head.value
 }
