@@ -1,6 +1,13 @@
 import { expect } from "chai"
 import { is_divided, range_supplier } from "./math"
-import { Seq, seq_flat_map, seq_fold, seq_join, seq_of_empty, seq_of_singleton, seq_of_supplier } from "../seq"
+import {
+    Seq,
+    seq_fold,
+    seq_join,
+    seq_of_empty,
+    seq_of_singleton,
+    seq_of_supplier
+} from "../seq"
 import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "../seq_expects"
 
 interface DividedByFactor {
@@ -31,19 +38,13 @@ function divisors_of(n: number, prime: number): DividedByFactor {
 function prime_factors_generate(n: number): Seq<number> {
     const candidates = seq_of_supplier(range_supplier(2, n))
 
-    let remainder = n
-    return seq_flat_map(candidates, p => {
-        const divisors = divisors_of(remainder, p)
-        remainder = divisors.remaining
-        return divisors.factors
-    })
-
-    /*
-    TODO this has mutation, also the divisors_of is not lazy
-    remainder needs to be an input to the next iteration to avoid the mutation
-    could solve via fold:
-
     function foldingFunction(previous: DividedByFactor, candidate: number): DividedByFactor {
+        if(previous.remaining == 1) {
+            return {
+                remaining: 1,
+                factors: previous.factors
+            }
+        }
         const divisors = divisors_of(previous.remaining, candidate)
         return {
             remaining: divisors.remaining,
@@ -53,9 +54,6 @@ function prime_factors_generate(n: number): Seq<number> {
 
     const dividedByFactors = seq_fold(candidates, foldingFunction, { remaining: n, factors: seq_of_empty() } as DividedByFactor)
     return dividedByFactors.factors
-
-    this code has a problem, stops running, why?
-    */
 }
 
 // -------- test ---------
