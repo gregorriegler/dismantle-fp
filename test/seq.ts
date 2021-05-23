@@ -174,6 +174,10 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
             } else {
                 return seq_tail(second)
             }
+        },
+        toString: function () {
+            const head = this.head()
+            return head + (!maybe_is_none(head) ? ',' + this.tail().toString() : '')
         }
     } as PrivateSeq<T>
 }
@@ -200,8 +204,4 @@ export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R
         return none();
     }
     return maybe_fold(seq_first(seq).head, some, none)
-}
-
-export function seq_to_string<T>(seq: Seq<T>) {
-    return //seq_first(seq).head.value
 }

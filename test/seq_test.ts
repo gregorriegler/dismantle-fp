@@ -12,7 +12,8 @@ import {
     seq_of_array,
     seq_of_empty,
     seq_of_singleton,
-    seq_of_supplier, seq_fold, seq_to_string
+    seq_of_supplier,
+    seq_fold
 } from "./seq"
 import {
     expect_seq_empty,
@@ -347,6 +348,18 @@ describe("Seq", () => {
             )
 
             expect(seq.toString()).to.equal("1,2,_")
+        })
+
+        it("renders joined seq", () => {
+            let i = 1
+            const seq = seq_of_supplier(() =>
+                i >= 3
+                    ? maybe_none()
+                    : maybe_of(i++)
+            )
+            const joined = seq_join(seq, seq_of_singleton(3))
+
+            expect(joined.toString()).to.equal("1,2,3,[]")
         })
 
     })
