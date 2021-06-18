@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { readFileSync } from "fs"
-import { F0, F1, identity1 } from "../func"
+import { compose0, F0, F1, identity1 } from "../func"
 import { expectEmpty, expectValue } from "../maybe_expects"
 import { Maybe, maybe_none, maybe_of } from "../maybe_union"
 import { Seq, seq_of_empty, seq_of_supplier } from "../seq"
@@ -25,10 +25,7 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
 */
 
 function io_read_file(fileName: string): F0<string> {
-    return () => {
-        const text = readFileSync(fileName).toString();
-        return text
-    }
+    return () => readFileSync(fileName).toString()
 }
 
 const TestFile = "./test/datamunging/part1/testFile.dat"
@@ -46,26 +43,27 @@ describe("Weather Data", () => {
     describe("Reader", () => {
         it("executes io", () => {
             const reader = reader_of<string, string>(identity1)
-            const result = reader_execute(reader, io_read_file(TestFile))
-            expect(result).to.equal("a\nb\n")
+            const io_function = io_read_file(TestFile)
+
+            const result = reader_apply(reader, io_function)
+
+            expect(result()).to.equal("a\nb\n")
         })
     })
 })
 
-// Reader wird am Ende mit readFile aufgerufen
-
-interface Value<T, R> extends Object {
-    readonly operation: F1<T, R>
+interface Value<IO, R> extends Object {
+    readonly operation: F1<IO, R>
 }
 
-export type Reader<T, R> = Value<T, R>
+export type Reader<IO, R> = Value<IO, R>
 
-export function reader_of<T, R>(f: F1<T, R>): Reader<T, R> {
+export function reader_of<IO, R>(f: F1<IO, R>): Reader<IO, R> {
     return { operation: f }
 }
 
-function reader_execute<T, R>(reader: Reader<T, R>, io: F0<T>): R {
-    return reader.operation(io())
+function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
+    return compose0(io, reader.operation)
 }
 
 
