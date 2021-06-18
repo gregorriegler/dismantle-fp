@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { readFileSync } from "fs"
-import { compose0, F0, F1, identity1 } from "../func"
+import { compose0, compose1, F0, F1, identity1 } from "../func"
 
 function io_read_file(fileName: string): F0<string> {
     return () => readFileSync(fileName).toString()
@@ -37,7 +37,11 @@ interface Value<IO, R> extends Object {
 export type Reader<IO, R> = Value<IO, R>
 
 export function reader_of<IO, R>(f: F1<IO, R>): Reader<IO, R> {
-    return { operation: f }
+    return {operation: f}
+}
+
+export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
+    return reader_of(compose1(reader.operation, f));
 }
 
 function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
@@ -64,24 +68,20 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
 
 const Data1Line = "./test/datamunging/part1/weather1line.dat"
 
+function find_min_spread(text: string): number {
+    return 1
+}
 describe("Weather Data", () => {
 
-    xit("find_min_spread", () => {
+    it("find_min_spread", () => {
         // sketch
-        // const reader = reader_of(read_lines_from_file)
-        // const get_day = reader.map.map(parse).map(calc).reduce(find_minium).first().firstColumn()
-        // expect(get_day(read_file(filename))).to.equal(1)
-    })
 
-    xit("io_read_file", () => {
-        // const io = io_read_file(Data1Line)
+        const reader: Value<string, string> = reader_of(identity1)
 
-        // const lines = io()
+        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread);
 
-        // expect_seq_four_values(lines,
-        //     "  Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR MnR AvSLP",
-        //     "",
-        //     "   1  88    59    74          53.8       0.00 F       280  9.6 270  17  1.6  93 23 1004.5",
-        //     "  mo  82.9  60.5  71.7    16  58.8       0.00              6.9          5.3")
+        const io_function = io_read_file(TestFile)
+        const result = reader_apply(reader_mapped, io_function)
+        expect(result()).to.equal(1)
     })
 })
