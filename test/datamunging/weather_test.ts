@@ -120,4 +120,6 @@ describe("Weather Data", () => {
         const result = reader_apply(reader_mapped, io_function)
         expect(result()).to.equal(1)
     })
+
+    // TODO print final solution to console
 })
