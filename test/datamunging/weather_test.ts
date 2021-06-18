@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { readFileSync } from "fs"
-import { F0 } from "../func"
+import { F0, F1, identity1 } from "../func"
 import { expectEmpty, expectValue } from "../maybe_expects"
 import { Maybe, maybe_none, maybe_of } from "../maybe_union"
 import { Seq, seq_of_empty, seq_of_supplier } from "../seq"
@@ -24,21 +24,61 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
 * - outside in
 */
 
-function io_read_file(fileName: string): Maybe<string> {
-    const text = readFileSync(fileName).toString();
-    return maybe_of(text)
+function io_read_file(fileName: string): F0<string> {
+    return () => {
+        const text = readFileSync(fileName).toString();
+        return text
+    }
 }
 
-const Data1Line = "./test/datamunging/part1/weather1line.dat"
 const TestFile = "./test/datamunging/part1/testFile.dat"
 
 describe("Weather Data", () => {
 
-    it("io_read_file", () => {
-        const file = io_read_file(TestFile)
+    describe("IO", () => {
+        it("io_read_file", () => {
+            const file = io_read_file(TestFile)
 
-        expectValue(file, "a\nb\n")
+            expect(file()).to.equal("a\nb\n")
+        })
     })
+
+    describe("Reader", () => {
+        it("executes io", () => {
+            const reader = reader_of<string, string>(identity1)
+            const result = reader_execute(reader, io_read_file(TestFile))
+            expect(result).to.equal("a\nb\n")
+        })
+    })
+})
+
+// Reader wird am Ende mit readFile aufgerufen
+
+interface Value<T, R> extends Object {
+    readonly operation: F1<T, R>
+}
+
+export type Reader<T, R> = Value<T, R>
+
+export function reader_of<T, R>(f: F1<T, R>): Reader<T, R> {
+    return { operation: f }
+}
+
+function reader_execute<T, R>(reader: Reader<T, R>, io: F0<T>): R {
+    return reader.operation(io())
+}
+
+
+
+
+
+
+
+
+
+const Data1Line = "./test/datamunging/part1/weather1line.dat"
+
+describe("Weather Data", () => {
 
     xit("find_min_spread", () => {
         // sketch
@@ -63,4 +103,3 @@ describe("Weather Data", () => {
 // function io_read_file(filename: string): () => Seq<string> {
 //     return () => seq_of_supplier(read_file(filename))
 // }
-
