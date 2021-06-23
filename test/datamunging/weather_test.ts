@@ -7,7 +7,7 @@ function io_read_file(fileName: string): F0<string> {
     return () => readFileSync(fileName).toString()
 }
 
-const TestFile = "./test/datamunging/part1/testFile.dat"
+const TestFile = "./test/datamunging/testFile.dat"
 
 describe("Weather Data infrastructure", () => {
 
@@ -104,7 +104,7 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
 * - outside in
 */
 
-const Data1Line = "./test/datamunging/part1/weather1line.dat"
+const Data1Line = "./test/datamunging/weather1line.dat"
 
 function find_min_spread(text: string): number {
     // will be calculated using seq
