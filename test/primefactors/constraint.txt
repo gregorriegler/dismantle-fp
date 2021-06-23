@@ -1,0 +1,1 @@
+FP, immutable, lazy sequences/Monads
