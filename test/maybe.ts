@@ -63,10 +63,9 @@ export function maybe_flat_map_unary<T, R>(maybe: Maybe<T>): F1<F1<T, Maybe<R>>,
     return partial2_1(maybe_flat_map, maybe)
 }
 
-export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): F1<Maybe<T>, Maybe<R>> {
-    // TODO bind is missing
-    return null as any
-}
+// TODO bind is missing
+// export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): F1<Maybe<T>, Maybe<R>> {
+// }
 
 export function maybe_fold<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): R {
     return maybe_fold1<T, R>(maybe)(some, none)

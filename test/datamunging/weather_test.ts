@@ -30,6 +30,7 @@ describe("Weather Data infrastructure", () => {
         })
     })
 
+    // TODO 3. make this test work
     // describe("Writer", () => {
     //     it("writes to io", () => {
     //         let sink = "";
@@ -53,7 +54,7 @@ interface Input<IO, R> extends Object {
 
 export type Reader<IO, R> = Input<IO, R>
 
-// TODO remove R, use identity as starting point
+// TODO 1. remove R, use identity as starting point
 export function reader_of<IO, R>(read: F1<IO, R>): Reader<IO, R> {
     return {read: read}
 }
@@ -66,7 +67,7 @@ export function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
     return compose0(io, reader.read)
 }
 
-// TODO Output only has Type IO
+// TODO 2. Output only has Type IO
 interface Output<T, IO> extends Object {
     readonly write: F2<T, IO, never>
 }

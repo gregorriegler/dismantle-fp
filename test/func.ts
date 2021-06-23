@@ -64,8 +64,9 @@ export function apply1<T, R>(f: F1<T, R>, value: T): R {
     return f(value)
 }
 
-// TODO what is the name for this?
-// It is apply0 and compose at the same time. Or it is compose1 if we accept no arguments for T.
+// What is the name for this?
+// It is apply0 and compose at the same time.
+// Or it is compose1 if we accept no arguments for T.
 export function compose0<U, R>(a: F0<U>, b: F1<U, R>): F0<R> {
     return () => b(a())
 }
