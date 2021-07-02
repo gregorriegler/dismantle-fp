@@ -35,7 +35,7 @@ describe("Reader", () => {
         expect(result()).to.deep.equal(["a", "b", ""])
     })
 
-    it("flat maps io", () => {
+    it("binds io", () => {
 
         function countLines(s: string): Reader<string, number> {
             const reader = reader_of<string>()
@@ -59,35 +59,35 @@ describe("Reader", () => {
     // of, flatmap (bind)
 })
 
-    // TODO 3. make this test work
-    // describe("Writer", () => {
-    //     it("writes to io", () => {
-    //         let sink = ""
-    //         function io_print(message: string) {
-    //             sink += message + "\n"
-    //         }
+// TODO 3. make this test work
+// describe("Writer", () => {
+//     it("writes to io", () => {
+//         let sink = ""
+//         function io_print(message: string) {
+//             sink += message + "\n"
+//         }
 
-    //         const writer = writer_of<string, string>((a,b,c) => "Hello World")
+//         const writer = writer_of<string, string>((a,b,c) => "Hello World")
 
-    //         const io_function = io_read_file(TestFile)
-    //         const result = reader_apply(reader, io_print)
-    //         const val = result()
-    //         expect(sink).to.equal("foo")
-    //     })
-    // })
+//         const io_function = io_read_file(TestFile)
+//         const result = reader_apply(reader, io_print)
+//         const val = result()
+//         expect(sink).to.equal("foo")
+//     })
+// })
 
 interface Input<IO, R> extends Object {
-    readonly map: F1<IO, R>
+    readonly transform: F1<IO, R>
 }
 
 export type Reader<IO, R> = Input<IO, R>
 
 export function reader_of<IO>(): Reader<IO, IO> {
-    return {map: identity1}
+    return {transform: identity1}
 }
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
-    return {map: (compose1(reader.map, f))}
+    return {transform: (compose1(reader.transform, f))}
 }
 
 export function reader_lift<IO, T, R>(f: F1<T, R>): F1<Reader<IO, T>, Reader<IO, R>> {
@@ -98,19 +98,23 @@ export function reader_flatmap<IO, T, R>(reader: Reader<IO, T>, f: F1<T, Reader<
     return reader_bind(f)(reader)
 }
 
+function reader_apply_single<IO, R>(reader: Reader<IO, R>, input: IO): R {
+    return reader.transform(input);
+}
+
 export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): F1<Reader<IO, T>, Reader<IO, R>> {
     return (reader: Reader<IO, T>) => {
-        // TODO map is not point free, use compose instead
-        return {map: (input) => {
-                const currentInput: T = reader.map(input);
-                const result: F1<IO, R> = f(currentInput).map;
-                return result(input);
-            }} as Reader<IO, R>
+        function nestedTransform(input: IO) {
+            const transformedInput: T = reader_apply_single(reader, input);
+            return reader_apply_single(f(transformedInput), input);
+        }
+
+        return {transform: nestedTransform}
     }
 }
 
 export function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
-    return compose0(io, reader.map)
+    return () => reader_apply_single(reader, io())
 }
 
 // TODO 2. Output only has Type IO
@@ -157,6 +161,7 @@ function find_min_spread(text: string): number {
     // will be calculated using seq
     return 1
 }
+
 describe("Weather Data", () => {
 
     it("find_min_spread", () => {
