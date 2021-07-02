@@ -100,41 +100,40 @@ function reader_apply_single<IO, R>(reader: Reader<IO, R>, input: IO): R {
     return reader.transform(input)
 }
 
-// TODO 3. make this test work
-// describe("Writer", () => {
-//     it("writes to io", () => {
-//         let sink = ""
-//         function io_print(message: string) {
-//             sink += message + "\n"
-//         }
+describe("Writer", () => {
+    it("writes to io", () => {
+        let sink = ""
+        function io_print(message: string) {
+            sink += message + "\n"
+        }
 
-//         const writer = writer_of<string, string>((a,b,c) => "Hello World")
+        const writer = writer_of<string>()
+        writer_apply(writer, "Hello World", io_print)
 
-//         const io_function = io_read_file(TestFile)
-//         const result = reader_apply(reader, io_print)
-//         const val = result()
-//         expect(sink).to.equal("foo")
-//     })
-// })
+        expect(sink).to.equal("Hello World\n")
+    })
+})
 
-// TODO 2. Output only has Type IO
+interface Write<IO> {
+    (io: IO): void
+}
+
 interface Output<T, IO> extends Object {
-    readonly write: F2<T, IO, never>
+    readonly transform: F1<T, IO>
 }
 
 export type Writer<T, IO> = Output<T, IO>
 
-export function writer_of<T, IO>(write: F2<T, IO, never>): Writer<T, IO> {
-    return { write: write }
+export function writer_of<IO>(): Writer<IO, IO> {
+    return { transform: identity1 }
 }
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return writer_of((v: V, io: IO) => writer.write(f(v), io))
+    return { transform: (compose1(f, writer.transform)) }
 }
 
-export function writer_apply<T, IO>(writer: Writer<T, IO>, io: F0<IO>): F1<T, never> {
-    return (t: T) => writer.write(t, io())
-    // return compose0(writer.write, io)
+export function writer_apply<T, IO>(writer: Writer<T, IO>, t:T, ioWrite: Write<IO>): void {
+    ioWrite(writer.transform(t))
 }
 
 /*
