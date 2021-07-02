@@ -205,3 +205,7 @@ export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R
     }
     return maybe_fold(seq_first(seq).head, some, none)
 }
+
+export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
+    return seq // TODO implement filter
+}

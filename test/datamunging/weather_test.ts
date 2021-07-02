@@ -2,6 +2,7 @@ import { expect } from "chai"
 import { readFileSync } from "fs"
 import { EOL } from "os"
 import { compose1, F0, F1, F2, identity1 } from "../func"
+import { Seq, seq_filter, seq_map, seq_of_array } from "../seq"
 
 function io_read_file(fileName: string): Read<string> {
     return () => readFileSync(fileName).toString()
@@ -146,18 +147,49 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
 const Data1Line = "./test/datamunging/weather1line.dat"
 const FullFile = "./test/datamunging/weather.dat"
 
-function find_min_spread(text: string): number {
-    /*
-    * Algorithm (solution)
-    * - read lines
-    * - calc spread
-    * - find min
-    * - report day
-    *
-    * Design (units)
-    * - outside in
-    */
+/*
+* Algorithm (solution)
+* - read lines
+* - calc spread
+* - find min
+* - report day
+*
+* Design (units)
+* - outside in
+*/
 
+// 1st idea: List of functions to map onto the Reader.
+
+function splitIntoLines(fileText: string): Seq<string> {
+    return seq_of_array(fileText.split(EOL))
+}
+
+function trimLines(lines: Seq<string>): Seq<string> {
+    function trim(line: string): string {
+        return line.trim()
+    }
+    return seq_map(lines, trim)
+}
+
+function filterNonEmptyLines(lines: Seq<string>): Seq<string> {
+    function isNonEmptyLine(line: string): boolean {
+        return line.trim().length > 0
+    }
+    return seq_filter(lines, isNonEmptyLine)
+}
+
+function filterDataLines(lines: Seq<string>): Seq<string> {
+    function isDataLine(nonEmptyLine: string): boolean {
+        const firstCharacter = nonEmptyLine.trim().charAt(0)
+        return ! isNaN(+firstCharacter)
+    }
+    return seq_filter(lines, isDataLine)
+}
+
+// 2nd idea: Go into find_min_spread and map there only once.
+// No fine grained methods on reader_map.
+
+function find_min_spread(fileText: string): number {
     // will be calculated using seq
     return 1
 }
