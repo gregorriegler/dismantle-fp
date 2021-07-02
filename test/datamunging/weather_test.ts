@@ -34,6 +34,29 @@ describe("Reader", () => {
 
         expect(result()).to.deep.equal(["a", "b", ""])
     })
+
+    it("flat maps io", () => {
+
+        function countLines(s: string): Reader<string, number> {
+            const reader = reader_of<string>()
+            const mapped_reader = reader_map(reader, (s) => s.split(EOL))
+            const count_reader = reader_map(mapped_reader, (array) => array.length)
+            return count_reader
+        }
+
+        const io_function = io_read_file(TestFile)
+        const reader = reader_of<string>()
+        const mapped_reader = reader_bind(countLines)(reader)
+
+        const result = reader_apply(mapped_reader, io_function)
+
+        expect(result()).to.equal(3)
+    })
+
+    // functor needs 2 operations
+    // of, lift (map)
+    // monad needs 2 operations
+    // of, flatmap (bind)
 })
 
     // TODO 3. make this test work
@@ -65,6 +88,21 @@ export function reader_of<IO>(): Reader<IO, IO> {
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
     return {map: (compose1(reader.map, f))}
+}
+
+export function reader_lift<IO, T, R>(f: F1<T, R>): F1<Reader<IO, T>, Reader<IO, R>> {
+    return (reader) => reader_map(reader, f)
+}
+
+export function reader_flatmap<IO, T, R>(reader: Reader<IO, T>, f: F1<T, Reader<IO, R>>): Reader<IO, R> {
+    return reader_bind(f)(reader)
+}
+
+export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): F1<Reader<IO, T>, Reader<IO, R>> {
+    return (reader: Reader<IO, T>) => {
+
+
+    }
 }
 
 export function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
