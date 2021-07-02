@@ -9,26 +9,22 @@ function io_read_file(fileName: string): F0<string> {
 
 const TestFile = "./test/datamunging/testFile.dat"
 
-describe("Weather Data infrastructure", () => {
+describe("Reader", () => {
+    it("io_read_file", () => {
+        const file = io_read_file(TestFile)
 
-    describe("IO", () => {
-        it("io_read_file", () => {
-            const file = io_read_file(TestFile)
-
-            expect(file()).to.equal("a" + EOL + "b" + EOL)
-        })
+        expect(file()).to.equal("a" + EOL + "b" + EOL)
     })
 
-    describe("Reader", () => {
-        it("executes io", () => {
-            const reader = reader_of<string, string>(identity1)
-            const io_function = io_read_file(TestFile)
+    it("executes io", () => {
+        const reader = reader_of<string, string>(identity1)
+        const io_function = io_read_file(TestFile)
 
-            const result = reader_apply(reader, io_function)
+        const result = reader_apply(reader, io_function)
 
-            expect(result()).to.equal("a" + EOL + "b" + EOL)
-        })
+        expect(result()).to.equal("a" + EOL + "b" + EOL)
     })
+})
 
     // TODO 3. make this test work
     // describe("Writer", () => {
@@ -46,25 +42,23 @@ describe("Weather Data infrastructure", () => {
     //         expect(sink).to.equal("foo")
     //     })
     // })
-})
 
 interface Input<IO, R> extends Object {
-    readonly read: F1<IO, R>
+    readonly map: F1<IO, R>
 }
 
 export type Reader<IO, R> = Input<IO, R>
 
-// TODO 1. remove R, use identity as starting point
-export function reader_of<IO, R>(read: F1<IO, R>): Reader<IO, R> {
-    return {read: read}
+export function reader_of<IO, R>(initialMap: F1<IO, R>): Reader<IO, R> {
+    return {map: initialMap}
 }
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
-    return reader_of(compose1(reader.read, f));
+    return reader_of(compose1(reader.map, f));
 }
 
 export function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
-    return compose0(io, reader.read)
+    return compose0(io, reader.map)
 }
 
 // TODO 2. Output only has Type IO
