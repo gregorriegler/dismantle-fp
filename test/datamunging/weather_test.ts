@@ -100,8 +100,12 @@ export function reader_flatmap<IO, T, R>(reader: Reader<IO, T>, f: F1<T, Reader<
 
 export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): F1<Reader<IO, T>, Reader<IO, R>> {
     return (reader: Reader<IO, T>) => {
-
-
+        // TODO map is not point free, use compose instead
+        return {map: (input) => {
+                const currentInput: T = reader.map(input);
+                const result: F1<IO, R> = f(currentInput).map;
+                return result(input);
+            }} as Reader<IO, R>
     }
 }
 
