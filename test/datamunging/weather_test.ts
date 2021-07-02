@@ -132,7 +132,7 @@ export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer
     return { transform: (compose1(f, writer.transform)) }
 }
 
-export function writer_apply<T, IO>(writer: Writer<T, IO>, t:T, ioWrite: Write<IO>): void {
+export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, ioWrite: Write<IO>): void {
     ioWrite(writer.transform(t))
 }
 
@@ -143,35 +143,42 @@ Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR Mn
    2  79    63    71          46.5       0.00         330  8.7 340  23  3.3  70 28 1004.5
 */
 
-/*
-* Algorithm (solution)
-* - read lines
-* - calc spread
-* - find min
-* - report day
-*
-* Design (units)
-* - outside in
-*/
-
 const Data1Line = "./test/datamunging/weather1line.dat"
+const FullFile = "./test/datamunging/weather.dat"
 
 function find_min_spread(text: string): number {
+    /*
+    * Algorithm (solution)
+    * - read lines
+    * - calc spread
+    * - find min
+    * - report day
+    *
+    * Design (units)
+    * - outside in
+    */
+
     // will be calculated using seq
     return 1
 }
 
+function console_print(message: string) {
+    console.log(message + "\n")
+}
+
 describe("Weather Data", () => {
 
-    it("find_min_spread", () => {
-        const reader: Input<string, string> = reader_of()
+    it("run application", () => {
+        const reader: Reader<string, string> = reader_of()
 
         const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread)
 
-        const io_function = io_read_file(TestFile)
+        const io_function = io_read_file(Data1Line)
         const result = reader_apply(reader_mapped, io_function)
         expect(result).to.equal(1)
-    })
 
-    // TODO print final solution to console
+        const writer: Writer<string, string> = writer_of()
+        const writer_mapped: Writer<number, string> = writer_map(writer, (n) => "" + n)
+        writer_apply(writer_mapped, result, console_print)
+    })
 })
