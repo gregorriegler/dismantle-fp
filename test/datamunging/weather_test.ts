@@ -17,19 +17,29 @@ describe("Reader", () => {
     })
 
     it("executes io", () => {
-        const reader = reader_of<string, string>(identity1)
         const io_function = io_read_file(TestFile)
+        const reader = reader_of<string>()
 
         const result = reader_apply(reader, io_function)
 
         expect(result()).to.equal("a" + EOL + "b" + EOL)
+    })
+
+    it("maps io", () => {
+        const io_function = io_read_file(TestFile)
+        const reader = reader_of<string>()
+        const mapped_reader = reader_map(reader, (s) => s.split(EOL))
+
+        const result = reader_apply(mapped_reader, io_function)
+
+        expect(result()).to.deep.equal(["a", "b", ""])
     })
 })
 
     // TODO 3. make this test work
     // describe("Writer", () => {
     //     it("writes to io", () => {
-    //         let sink = "";
+    //         let sink = ""
     //         function io_print(message: string) {
     //             sink += message + "\n"
     //         }
@@ -38,7 +48,7 @@ describe("Reader", () => {
 
     //         const io_function = io_read_file(TestFile)
     //         const result = reader_apply(reader, io_print)
-    //         const val = result();
+    //         const val = result()
     //         expect(sink).to.equal("foo")
     //     })
     // })
@@ -49,12 +59,12 @@ interface Input<IO, R> extends Object {
 
 export type Reader<IO, R> = Input<IO, R>
 
-export function reader_of<IO, R>(initialMap: F1<IO, R>): Reader<IO, R> {
-    return {map: initialMap}
+export function reader_of<IO>(): Reader<IO, IO> {
+    return {map: identity1}
 }
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
-    return reader_of(compose1(reader.map, f));
+    return {map: (compose1(reader.map, f))}
 }
 
 export function reader_apply<IO, R>(reader: Reader<IO, R>, io: F0<IO>): F0<R> {
@@ -108,7 +118,7 @@ function find_min_spread(text: string): number {
 describe("Weather Data", () => {
 
     it("find_min_spread", () => {
-        const reader: Input<string, string> = reader_of(identity1)
+        const reader: Input<string, string> = reader_of()
 
         const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread);
 
