@@ -19,7 +19,7 @@ export function maybe_none<T>(): Maybe<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return { value, toString: () => value + '' } as PrivateMaybe<T>
+    return { value, toString: () => value + "" } as PrivateMaybe<T>
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
@@ -63,7 +63,7 @@ export function maybe_flat_map_unary<T, R>(maybe: Maybe<T>): F1<F1<T, Maybe<R>>,
     return partial2_1(maybe_flat_map, maybe)
 }
 
-// TODO bind is missing
+// TODO Maybe bind is missing
 // export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): F1<Maybe<T>, Maybe<R>> {
 // }
 

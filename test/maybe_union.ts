@@ -29,7 +29,7 @@ export function maybe_is_none<T>(value: Maybe<T>): value is None<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return {value: value, hint: "Value", toString: () => value + ''}
+    return {value: value, hint: "Value", toString: () => value + ""}
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {

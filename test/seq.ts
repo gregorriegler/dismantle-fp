@@ -26,7 +26,7 @@ export interface SeqElement<T> {
 const EMPTY: PrivateSeq<any> = {
     head: maybe_none,
     tail: seq_of_empty,
-    toString: () => '[]'
+    toString: () => "[]"
 }
 
 export function seq_of_empty<T>(): Seq<T> {
@@ -37,7 +37,7 @@ export function seq_of_singleton<T>(value: T): Seq<T> {
     return {
         head: () => maybe_of(value),
         tail: seq_of_empty,
-        toString: () => value + ''
+        toString: () => value + ""
     } as PrivateSeq<T>
 }
 
@@ -79,7 +79,7 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
         },
         toString: function () {
             const head = this.head()
-            return head + (!maybe_is_none(head) ? ',' + this.tail().toString() : '')
+            return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
         }
     } as CachedValueSeq<Maybe<R>, R>
 }
@@ -148,7 +148,7 @@ function bind_seq_value<T, R>(bindSeq: BindSeq<T, R>, f: F1<T, Seq<R>>): Maybe<S
     if (seq_is_empty(maybe_value(evaluatedHead, seq_of_empty))) {
         // evaluated head is none - try again
         bindSeq.currentSeq = seq_tail(bindSeq.currentSeq)
-        return bind_seq_value(bindSeq, f);
+        return bind_seq_value(bindSeq, f)
     }
 
     bindSeq.value = evaluatedHead
@@ -177,7 +177,7 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
         },
         toString: function () {
             const head = this.head()
-            return head + (!maybe_is_none(head) ? ',' + this.tail().toString() : '')
+            return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
         }
     } as PrivateSeq<T>
 }
@@ -196,16 +196,16 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
         return seq_fold(seq_tail(seq), combine, current)
     }
 
-    return seq_first_map(seq, combineRecursively, () => initial);
+    return seq_first_map(seq, combineRecursively, () => initial)
 }
 
 export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
     if (seq_is_empty(seq)) {
-        return none();
+        return none()
     }
     return maybe_fold(seq_first(seq).head, some, none)
 }
 
 export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
-    return seq // TODO implement filter
+    return seq // TODO Seq implement filter
 }
