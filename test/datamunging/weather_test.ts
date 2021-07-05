@@ -116,7 +116,7 @@ describe("Weather Data (application of Reader)", () => {
 
     })
 
-    xit("find_min_spread filters", () => {
+    it("find_min_spread filters", () => {
         const reader: Reader<string, string> = reader_of()
 
         const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread)
@@ -126,14 +126,14 @@ describe("Weather Data (application of Reader)", () => {
         expect(result).to.equal(1)
     })
 
-    xit("run application", () => {
+    it("run application", () => {
         const reader: Reader<string, string> = reader_of()
 
         const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread)
 
         const io_function = io_read_file(FullFile)
         const result = reader_apply(reader_mapped, io_function)
-        expect(result).to.equal(1)
+        expect(result).to.equal(14)
 
         const writer: Writer<string, string> = writer_of()
         const writer_mapped: Writer<number, string> = writer_map(writer, (n) => "" + n)
