@@ -112,7 +112,7 @@ describe("Weather Data (application of Reader)", () => {
         })
 
         it("parseData", () => {
-            const a = parseData("1  88    59    74     ")
+            const a = parseData("1  88    59*    74     ")
             expect(a.Dy).to.equal(1)
             expect(a.MxT).to.equal(88)
             expect(a.MnT).to.equal(59)
