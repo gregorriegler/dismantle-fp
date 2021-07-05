@@ -32,7 +32,7 @@ const BAD_SEQ_1 = {
 
 const BAD_SEQ_2 = seq_join(seq_of_singleton(1), BAD_SEQ_1)
 
-describe("Seq", () => {
+describe("Seq (Monad)", () => {
     describe("constructor", () => {
         it("is empty", () => {
             const seq = seq_of_empty()
@@ -363,7 +363,8 @@ describe("Seq", () => {
         })
 
     })
-    // TODO 4. implement reduce, forEach
-    // TODO 5. implement length - two cases: finite length, infinite length (Math.infinity)
-    // TODO 6. toString max elements in case of infinite seq
+
+    // TODO Seq implement reduce, forEach
+    // TODO Seq implement length - two cases: finite length, infinite length (Math.infinity)
+    // TODO Seq toString max elements in case of infinite seq
 })

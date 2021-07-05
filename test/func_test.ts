@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { apply1, curry2, curry3, inc, lazy } from "./func"
 
-describe("Func Tools", () => {
+describe("Func Tools (functions)", () => {
 
     describe("curry", () => {
         it("curry binary", () => {

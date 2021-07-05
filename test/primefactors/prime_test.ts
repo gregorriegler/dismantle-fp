@@ -16,7 +16,7 @@ interface DividedByFactor {
 }
 
 function divisors_of(n: number, prime: number): DividedByFactor {
-    // TODO (maybe) the divisors_of is not lazy
+    // TODO PrimeFactors (maybe) the divisors_of is not lazy
     if (is_divided(n, prime)) {
         const remaining_factors = divisors_of(n / prime, prime)
         return {
@@ -58,7 +58,7 @@ function prime_factors_generate(n: number): Seq<number> {
 
 // -------- test ---------
 
-describe("PrimeFactors", () => {
+describe("PrimeFactors (application of Seq)", () => {
     describe("divisors_of", () => {
         it("divisors of 4", () => {
             const divisors = divisors_of(4 * 3, 2)

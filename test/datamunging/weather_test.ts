@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { readFileSync } from "fs"
 import { EOL } from "os"
-import { compose1, F0, F1, F2, identity1 } from "../func"
+import { compose1, F0, F1, identity1 } from "../func"
 import { Seq, seq_filter, seq_map, seq_of_array } from "../seq"
 
 function io_read_file(fileName: string): Read<string> {
@@ -10,7 +10,7 @@ function io_read_file(fileName: string): Read<string> {
 
 const TestFile = "./test/datamunging/testFile.dat"
 
-describe("Reader", () => {
+describe("Reader (Monad)", () => {
     it("io_read_file", () => {
         const file = io_read_file(TestFile)
 
@@ -101,7 +101,7 @@ function reader_apply_single<IO, R>(reader: Reader<IO, R>, input: IO): R {
     return reader.transform(input)
 }
 
-describe("Writer", () => {
+describe("Writer (Monad)", () => {
     it("writes to io", () => {
         let sink = ""
         function io_print(message: string) {
@@ -198,7 +198,7 @@ function console_print(message: string) {
     console.log(message + "\n")
 }
 
-describe("Weather Data", () => {
+describe("Weather Data (application of Reader)", () => {
 
     it("run application", () => {
         const reader: Reader<string, string> = reader_of()

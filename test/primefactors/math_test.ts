@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { is_divided, range_supplier, range_supplier_pure } from "./math"
 import { expectEmpty, expectValue } from "../maybe_expects"
 
-describe("Math", () => {
+describe("Math (functions)", () => {
     it("isDivided", () => {
         expect(is_divided(4, 2)).to.equal(true)
         expect(is_divided(2, 4)).to.equal(false)
