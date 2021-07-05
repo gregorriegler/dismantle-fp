@@ -52,7 +52,7 @@ interface DataEntry {
 }
 
 function parseData(dataLine: string): DataEntry {
-    const entries = dataLine.split(" ").slice(0, 3).map(parseInt)
+    const entries = dataLine.split(/\s+/).slice(0, 3).map(s => parseInt(s, 10))
     return {
         Dy: entries[0],
         MxT: entries[1],
@@ -89,6 +89,36 @@ function console_print(message: string) {
 }
 
 describe("Weather Data (application of Reader)", () => {
+
+    describe("used functions", () => {
+        // splitIntoLines(fileText: string): Seq<string> {
+        it("", () => {
+        })
+        // trim(line: string): string {
+        it("", () => {
+        })
+        // isNonEmptyLine(line: string): boolean {
+        it("", () => {
+        })
+        // isDataLine(nonEmptyLine: string): boolean {
+        it("", () => {
+        })
+        // parseData(dataLine: string): DataEntry {
+        it("parseData", () => {
+            const a = parseData("1  88    59    74     ")
+            expect(a.Dy).to.equal(1)
+            expect(a.MxT).to.equal(88)
+            expect(a.MnT).to.equal(59)
+            expect(a.spread()).to.equal(88 - 59)
+        })
+
+        it("minEntry", () => {
+            const a = parseData("1 10 5 13")
+            const b = parseData("2 12 5 15")
+            expect(minEntry(a, b)).to.deep.equal(a)
+        })
+
+    })
 
     it("find_min_spread filters", () => {
         const reader: Reader<string, string> = reader_of()
