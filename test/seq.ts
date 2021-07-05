@@ -4,6 +4,7 @@ import {
     maybe_fold,
     maybe_is_none,
     maybe_lift,
+    maybe_map,
     maybe_none,
     maybe_of,
     maybe_value
@@ -206,6 +207,40 @@ export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R
     return maybe_fold(seq_first(seq).head, some, none)
 }
 
+interface FilterSeq<T> extends CachedValueSeq<Maybe<T>, T> {
+    currentSeq: Seq<T>
+}
+
 export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
-    return seq // TODO Seq implement filter
+    return {
+        currentSeq: seq,
+        value: undefined,
+        getValue: function (): Maybe<T> {
+            if (this.value) {
+                return this.value
+            }
+            while (true) {
+                if (seq_is_empty(this.currentSeq)) {
+                    return maybe_none()
+                }
+
+                // advance
+                this.value = seq_head(this.currentSeq)
+                this.currentSeq = seq_tail(this.currentSeq)
+
+                const filter = maybe_map(this.value, predicate)
+                const acceptedOrEmpty = maybe_value(filter, () => true)
+                if (acceptedOrEmpty) {
+                    return this.value
+                }
+            }
+        },
+        head: function () {
+            return this.getValue()
+        },
+        tail: function () {
+            this.getValue() // advance
+            return seq_filter(this.currentSeq, predicate)
+        }
+    } as FilterSeq<T>
 }

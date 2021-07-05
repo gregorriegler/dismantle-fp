@@ -13,7 +13,8 @@ import {
     seq_of_empty,
     seq_of_singleton,
     seq_of_supplier,
-    seq_fold
+    seq_fold,
+    seq_filter
 } from "./seq"
 import {
     expect_seq_empty,
@@ -360,6 +361,25 @@ describe("Seq (Monad)", () => {
             const joined = seq_join(seq, seq_of_singleton(3))
 
             expect(joined.toString()).to.equal("1,2,3,[]")
+        })
+
+    })
+
+    describe("filter", () => {
+        it("filter an empty seq", () => {
+            const seq = seq_of_empty()
+
+            const result = seq_filter(seq, (_) => false)
+
+            expect_seq_empty(result)
+        })
+
+        it("filter drops all", () => {
+            const seq = seq_of_array([1,2])
+
+            const result = seq_filter(seq, (_) => false)
+
+            expect_seq_empty(result)
         })
 
     })
