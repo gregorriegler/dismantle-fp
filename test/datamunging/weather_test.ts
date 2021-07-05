@@ -91,19 +91,26 @@ function console_print(message: string) {
 describe("Weather Data (application of Reader)", () => {
 
     describe("used functions", () => {
-        // splitIntoLines(fileText: string): Seq<string> {
-        it("", () => {
+
+        it("splitIntoLines", () => {
+            // tested in "Reader maps io"
         })
-        // trim(line: string): string {
-        it("", () => {
+
+        it("trim", () => {
+            expect(trim("  ")).to.equal("")
+            expect(trim(" a ")).to.equal("a")
         })
-        // isNonEmptyLine(line: string): boolean {
-        it("", () => {
+
+        it("isNonEmptyLine", () => {
+            expect(isNonEmptyLine("")).to.be.false
+            expect(isNonEmptyLine("11  88    59    74")).to.be.true
         })
-        // isDataLine(nonEmptyLine: string): boolean {
-        it("", () => {
+
+        it("isDataLine", () => {
+            expect(isDataLine("Dy MxT   MnT   AvT   ")).to.be.false
+            expect(isDataLine("11  88    59    74")).to.be.true
         })
-        // parseData(dataLine: string): DataEntry {
+
         it("parseData", () => {
             const a = parseData("1  88    59    74     ")
             expect(a.Dy).to.equal(1)
@@ -137,7 +144,7 @@ describe("Weather Data (application of Reader)", () => {
 
         const io_function = io_read_file(FullFile)
         const result = reader_apply(reader_mapped, io_function)
-        // expect(result).to.equal(1)
+        expect(result).to.equal(1)
 
         const writer: Writer<string, string> = writer_of()
         const writer_mapped: Writer<number, string> = writer_map(writer, (n) => "" + n)
