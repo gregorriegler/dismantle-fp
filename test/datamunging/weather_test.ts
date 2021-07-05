@@ -1,44 +1,8 @@
 import { expect } from "chai"
 import { EOL } from "os"
-import { compose1, F1, identity1 } from "../func"
 import { Seq, seq_filter, seq_map, seq_of_array } from "../seq"
 import { io_read_file, Reader, reader_apply, reader_map, reader_of } from "./reader"
-
-describe("Writer (Monad)", () => {
-    it("writes to io", () => {
-        let sink = ""
-        function io_print(message: string) {
-            sink += message + "\n"
-        }
-
-        const writer = writer_of<string>()
-        writer_apply(writer, "Hello World", io_print)
-
-        expect(sink).to.equal("Hello World\n")
-    })
-})
-
-interface Write<IO> {
-    (io: IO): void
-}
-
-interface Output<T, IO> extends Object {
-    readonly transform: F1<T, IO>
-}
-
-export type Writer<T, IO> = Output<T, IO>
-
-export function writer_of<IO>(): Writer<IO, IO> {
-    return { transform: identity1 }
-}
-
-export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return { transform: (compose1(f, writer.transform)) }
-}
-
-export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, ioWrite: Write<IO>): void {
-    ioWrite(writer.transform(t))
-}
+import { Writer, writer_apply, writer_map, writer_of } from "./writer"
 
 /*
 Dy MxT   MnT   AvT   HDDay  AvDP 1HrP TPcpn WxType PDir AvSp Dir MxS SkyC MxR MnR AvSLP
@@ -84,7 +48,7 @@ function filterNonEmptyLines(lines: Seq<string>): Seq<string> {
 function filterDataLines(lines: Seq<string>): Seq<string> {
     function isDataLine(nonEmptyLine: string): boolean {
         const firstCharacter = nonEmptyLine.trim().charAt(0)
-        return ! isNaN(+firstCharacter)
+        return !isNaN(+firstCharacter)
     }
     return seq_filter(lines, isDataLine)
 }
