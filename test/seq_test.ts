@@ -362,26 +362,40 @@ describe("Seq (Monad)", () => {
 
             expect(joined.toString()).to.equal("1,2,3,[]")
         })
-
     })
 
     describe("filter", () => {
         it("filter an empty seq", () => {
             const seq = seq_of_empty()
 
-            const result = seq_filter(seq, (_) => false)
+            const filtered = seq_filter(seq, (_) => false)
 
-            expect_seq_empty(result)
+            expect_seq_empty(filtered)
         })
 
         it("filter drops all", () => {
-            const seq = seq_of_array([1,2])
+            const seq = seq_of_array([1, 2])
 
-            const result = seq_filter(seq, (_) => false)
+            const filtered = seq_filter(seq, (_) => false)
 
-            expect_seq_empty(result)
+            expect_seq_empty(filtered)
         })
 
+        it("filter drops none", () => {
+            const seq = seq_of_array([1, 2])
+
+            const filtered = seq_filter(seq, (_) => true)
+
+            expect_seq_two_values(filtered, 1, 2)
+        })
+
+        it("filter drops some", () => {
+            const seq = seq_of_array([1, 2, 3, 4])
+
+            const filtered = seq_filter(seq, (i) => i % 2 == 1)
+
+            expect_seq_two_values(filtered, 1, 3)
+        })
     })
 
     // TODO Seq implement reduce, forEach
