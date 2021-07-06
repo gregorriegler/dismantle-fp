@@ -18,19 +18,19 @@ function isNonEmptyLine(line: string): boolean {
     return line.length > 0
 }
 
-function isDataLine(nonEmptyLine: string): boolean {
+function startsWithDigit(nonEmptyLine: string): boolean {
     const firstCharacter = nonEmptyLine.charAt(0)
     return !isNaN(+firstCharacter)
 }
 
-interface DataEntry {
+interface WeatherEntry {
     Dy: number
     MxT: number
     MnT: number
     spread(): number;
 }
 
-function parseData(dataLine: string): DataEntry {
+function parseWeatherData(dataLine: string): WeatherEntry {
     const entries = dataLine.split(/\s+/).slice(0, 3).map(s => parseInt(s, 10))
     return {
         Dy: entries[0],
@@ -42,7 +42,7 @@ function parseData(dataLine: string): DataEntry {
     }
 }
 
-function minEntry(a: DataEntry, b: DataEntry): DataEntry {
+function minEntry<T extends { spread(): number }>(a: T, b: T): T {
     if (a.spread() < b.spread()) {
         return a
     }
@@ -52,18 +52,18 @@ function minEntry(a: DataEntry, b: DataEntry): DataEntry {
 // 2nd idea: Go into find_min_spread and map there only once.
 // No fine grained methods on reader_map.
 
-function find_min_spread(fileText: string): number {
+function find_min_temp_spread(fileText: string): number {
     // Algorithm (solution) will be calculated using seq
 
     // read lines
     const lines = splitIntoLines(fileText)
     const trimmedLines = seq_map(lines, trim)
     const nonEmptyLines = seq_filter(trimmedLines, isNonEmptyLine)
-    const dataLines = seq_filter(nonEmptyLines, isDataLine)
+    const dataLines = seq_filter(nonEmptyLines, startsWithDigit)
     // calc spread
-    const dataEntries = seq_map(dataLines, parseData)
+    const dataEntries = seq_map(dataLines, parseWeatherData)
     // find min
-    const min = seq_fold(dataEntries, minEntry, parseData("0 999 0"))
+    const min = seq_fold(dataEntries, minEntry, parseWeatherData("0 999 0"))
     // report day
     return min.Dy
 }
@@ -74,8 +74,8 @@ function console_print(message: string) {
 
 // -------- test ---------
 
-const Data1Line = "./test/datamunging/weather1line.dat"
-const FullFile = "./test/datamunging/weather.dat"
+const WeatherData1Line = "./test/datamunging/weather1line.dat"
+const WeatherDataFile = "./test/datamunging/weather.dat"
 
 describe("Weather Data (application of Reader)", () => {
 
@@ -95,13 +95,13 @@ describe("Weather Data (application of Reader)", () => {
             expect(isNonEmptyLine("11  88    59    74")).to.be.true
         })
 
-        it("isDataLine", () => {
-            expect(isDataLine("Dy MxT   MnT   AvT   ")).to.be.false
-            expect(isDataLine("11  88    59    74")).to.be.true
+        it("startsWithDigit", () => {
+            expect(startsWithDigit("Dy MxT   MnT   AvT   ")).to.be.false
+            expect(startsWithDigit("11  88    59    74")).to.be.true
         })
 
-        it("parseData", () => {
-            const a = parseData("1  88    59*    74     ")
+        it("parseWeatherData", () => {
+            const a = parseWeatherData("1  88    59*    74     ")
             expect(a.Dy).to.equal(1)
             expect(a.MxT).to.equal(88)
             expect(a.MnT).to.equal(59)
@@ -109,19 +109,19 @@ describe("Weather Data (application of Reader)", () => {
         })
 
         it("minEntry", () => {
-            const a = parseData("1 10 5 13")
-            const b = parseData("2 12 5 15")
+            const a = parseWeatherData("1 10 5 13")
+            const b = parseWeatherData("2 12 5 15")
             expect(minEntry(a, b)).to.deep.equal(a)
         })
 
     })
 
-    it("find_min_spread filters", () => {
+    it("find_min_temp_spread filters", () => {
         const reader: Reader<string, string> = reader_of()
 
-        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread)
+        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_temp_spread)
 
-        const io_function = io_read_file(Data1Line)
+        const io_function = io_read_file(WeatherData1Line)
         const result = reader_apply(reader_mapped, io_function)
         expect(result).to.equal(1)
     })
@@ -129,14 +129,57 @@ describe("Weather Data (application of Reader)", () => {
     it("run application", () => {
         const reader: Reader<string, string> = reader_of()
 
-        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_spread)
+        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_temp_spread)
 
-        const io_function = io_read_file(FullFile)
+        const io_function = io_read_file(WeatherDataFile)
         const result = reader_apply(reader_mapped, io_function)
         expect(result).to.equal(14)
 
         const writer: Writer<string, string> = writer_of()
         const writer_mapped: Writer<number, string> = writer_map(writer, (n) => "" + n)
         writer_apply(writer_mapped, result, console_print)
+    })
+})
+
+interface FootballEntry {
+    Team: string
+    F: number
+    A: number
+    spread(): number;
+}
+
+function parseFootballData(dataLine: string): FootballEntry {
+    const entries = dataLine.split(/\s+/).slice(0, 9)
+    return {
+        Team: entries[1],
+        F: parseInt(entries[6], 10),
+        A: parseInt(entries[8], 10),
+        spread() {
+            return Math.abs(this.F - this.A)
+        }
+    }
+}
+
+function find_min_goal_spread(fileText: string): string {
+    const lines = splitIntoLines(fileText)
+    const trimmedLines = seq_map(lines, trim)
+    const nonEmptyLines = seq_filter(trimmedLines, isNonEmptyLine)
+    const dataLines = seq_filter(nonEmptyLines, startsWithDigit)
+    const dataEntries = seq_map(dataLines, parseFootballData)
+    const min = seq_fold(dataEntries, minEntry, { Team: "none", F: 999, A: 0, spread() { return 999 } } as FootballEntry)
+    return min.Team
+}
+
+const FootballDataFile = "./test/datamunging/football.dat"
+
+describe("Football Data (reuse Weather Data)", () => {
+    it("run application", () => {
+        const reader: Reader<string, string> = reader_of()
+
+        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_goal_spread)
+
+        const io_function = io_read_file(FootballDataFile)
+        const result = reader_apply(reader_mapped, io_function)
+        expect(result).to.equal("Aston_Villa")
     })
 })
