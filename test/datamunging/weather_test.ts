@@ -6,6 +6,8 @@ import { Writer, writer_apply, writer_map, writer_of } from "./writer"
 
 // 1st idea: List of functions to map onto the Reader.
 
+// -------- requirement 1 ---------
+
 function splitIntoLines(fileText: string): Seq<string> {
     return seq_of_array(fileText.split(EOL))
 }
@@ -24,18 +26,18 @@ function startsWithDigit(nonEmptyLine: string): boolean {
 }
 
 interface WeatherEntry {
-    Dy: number
+    Dy: string
     MxT: number
     MnT: number
     spread(): number;
 }
 
 function parseWeatherData(dataLine: string): WeatherEntry {
-    const entries = dataLine.split(/\s+/).slice(0, 3).map(s => parseInt(s, 10))
+    const entries = dataLine.split(/\s+/)
     return {
         Dy: entries[0],
-        MxT: entries[1],
-        MnT: entries[2],
+        MxT: parseInt(entries[1], 10),
+        MnT: parseInt(entries[2], 10),
         spread() {
             return this.MxT - this.MnT
         }
@@ -52,7 +54,7 @@ function minEntry<T extends { spread(): number }>(a: T, b: T): T {
 // 2nd idea: Go into find_min_spread and map there only once.
 // No fine grained methods on reader_map.
 
-function find_min_temp_spread(fileText: string): number {
+function find_min_temp_spread(fileText: string): string {
     // Algorithm (solution) will be calculated using seq
 
     // read lines
@@ -63,7 +65,7 @@ function find_min_temp_spread(fileText: string): number {
     // calc spread
     const dataEntries = seq_map(dataLines, parseWeatherData)
     // find min
-    const min = seq_fold(dataEntries, minEntry, parseWeatherData("0 999 0"))
+    const min = seq_fold(dataEntries, minEntry, { Dy: "", MxT: 0, MnT: 0, spread() { return 999 } } as WeatherEntry)
     // report day
     return min.Dy
 }
@@ -102,7 +104,7 @@ describe("Weather Data (application of Reader)", () => {
 
         it("parseWeatherData", () => {
             const a = parseWeatherData("1  88    59*    74     ")
-            expect(a.Dy).to.equal(1)
+            expect(a.Dy).to.equal("1")
             expect(a.MxT).to.equal(88)
             expect(a.MnT).to.equal(59)
             expect(a.spread()).to.equal(88 - 59)
@@ -119,27 +121,28 @@ describe("Weather Data (application of Reader)", () => {
     it("find_min_temp_spread filters", () => {
         const reader: Reader<string, string> = reader_of()
 
-        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_temp_spread)
+        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_temp_spread)
 
         const io_function = io_read_file(WeatherData1Line)
         const result = reader_apply(reader_mapped, io_function)
-        expect(result).to.equal(1)
+        expect(result).to.equal("1")
     })
 
     it("run application", () => {
         const reader: Reader<string, string> = reader_of()
 
-        const reader_mapped: Reader<string, number> = reader_map(reader, find_min_temp_spread)
+        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_temp_spread)
 
         const io_function = io_read_file(WeatherDataFile)
         const result = reader_apply(reader_mapped, io_function)
-        expect(result).to.equal(14)
+        expect(result).to.equal("14")
 
         const writer: Writer<string, string> = writer_of()
-        const writer_mapped: Writer<number, string> = writer_map(writer, (n) => "" + n)
-        writer_apply(writer_mapped, result, console_print)
+        writer_apply(writer, result, console_print)
     })
 })
+
+// -------- requirement 2 ---------
 
 interface FootballEntry {
     Team: string
@@ -149,7 +152,7 @@ interface FootballEntry {
 }
 
 function parseFootballData(dataLine: string): FootballEntry {
-    const entries = dataLine.split(/\s+/).slice(0, 9)
+    const entries = dataLine.split(/\s+/)
     return {
         Team: entries[1],
         F: parseInt(entries[6], 10),
@@ -166,7 +169,7 @@ function find_min_goal_spread(fileText: string): string {
     const nonEmptyLines = seq_filter(trimmedLines, isNonEmptyLine)
     const dataLines = seq_filter(nonEmptyLines, startsWithDigit)
     const dataEntries = seq_map(dataLines, parseFootballData)
-    const min = seq_fold(dataEntries, minEntry, { Team: "none", F: 999, A: 0, spread() { return 999 } } as FootballEntry)
+    const min = seq_fold(dataEntries, minEntry, { Team: "", F: 0, A: 0, spread() { return 999 } } as FootballEntry)
     return min.Team
 }
 
@@ -183,3 +186,5 @@ describe("Football Data (reuse Weather Data)", () => {
         expect(result).to.equal("Aston_Villa")
     })
 })
+
+// -------- requirement 3 ---------
