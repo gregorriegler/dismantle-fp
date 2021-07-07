@@ -106,7 +106,7 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
             toString() {
                 return seq_to_string(this)
             }
-            } as PrivateSeq<T>
+        } as PrivateSeq<T>
     }
 }
 
@@ -221,19 +221,19 @@ export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
                 return this.value
             }
 
-            if (seq_is_empty(this.currentSeq)) {
-                return maybe_none()
-            }
-
-            // advance
             const first = seq_first(this.currentSeq)
-            const potentialValue = first.head
+            const head = first.head
             this.currentSeq = first.tail
 
-            const filter = maybe_map(potentialValue, predicate)
+            if (maybe_is_none(head)) {
+                this.value = head
+                return this.value
+            }
+
+            const filter = maybe_map(head, predicate)
             const acceptedOrEmpty = maybe_value(filter, () => true)
             if (acceptedOrEmpty) {
-                this.value = potentialValue
+                this.value = head
                 return this.value
             }
 
