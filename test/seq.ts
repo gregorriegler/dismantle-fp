@@ -79,10 +79,14 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
             return seq_of_supplier(supplier)
         },
         toString() {
-            const head = this.head()
-            return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
+            return seq_to_string(this)
         }
     } as CachedValueSeq<Maybe<R>, R>
+}
+
+function seq_to_string<T>(seq: PrivateSeq<T>): string {
+    const head = seq.head()
+    return head + (!maybe_is_none(head) ? "," + seq.tail().toString() : "")
 }
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
@@ -98,8 +102,11 @@ export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
         return {
             head: () => maybe_lift(f)(seq_head(seq)),
-            tail: () => seq_lift(f)(seq_tail(seq))
-        } as PrivateSeq<T>
+            tail: () => seq_lift(f)(seq_tail(seq)),
+            toString() {
+                return seq_to_string(this)
+            }
+            } as PrivateSeq<T>
     }
 }
 
@@ -129,6 +136,9 @@ export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
                 const tail_of_head_or_empty: Seq<R> = maybe_value(tail_of_head, seq_of_empty)
                 const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(this.currentSeq))
                 return seq_join(tail_of_head_or_empty, evaluated_tail)
+            },
+            toString() {
+                return seq_to_string(this)
             }
         } as BoundSeq<T, R>
     }
@@ -179,8 +189,7 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
             }
         },
         toString() {
-            const head = this.head()
-            return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
+            return seq_to_string(this)
         }
     } as PrivateSeq<T>
 }
@@ -237,6 +246,9 @@ export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
         tail() {
             this.getValue() // advance
             return seq_filter(this.currentSeq, predicate)
+        },
+        toString() {
+            return seq_to_string(this)
         }
     } as FilteredSeq<T>
 }
