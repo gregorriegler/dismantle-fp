@@ -11,12 +11,12 @@ import {
 } from "./maybe_union"
 import { F0, F1 } from "./func"
 
+export interface Seq<T> extends Object {
+}
+
 interface PrivateSeq<T> extends Seq<T> {
     head: () => Maybe<T>
     tail: () => Seq<T>
-}
-
-export interface Seq<T> extends Object {
 }
 
 export interface SeqElement<T> {
@@ -53,7 +53,7 @@ export function seq_of_array<T>(elements: T[]): Seq<T> {
     } as PrivateSeq<T>
 }
 
-interface CachedValueSeq<V, R> extends PrivateSeq<R> {
+interface CachedValueSeq<V, T> extends PrivateSeq<T> {
     value: V | undefined,
     getValue: () => V
 }
@@ -61,24 +61,24 @@ interface CachedValueSeq<V, R> extends PrivateSeq<R> {
 export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
     return {
         value: undefined,
-        getValue: function (): Maybe<R> {
+        getValue(): Maybe<R> {
             if (this.value) {
                 return this.value
             }
             this.value = supplier()
             return this.value
         },
-        head: function () {
+        head() {
             return this.getValue()
         },
-        tail: function () {
+        tail() {
             const value: Maybe<R> = this.getValue()
             if (maybe_is_none(value)) {
                 return EMPTY
             }
             return seq_of_supplier(supplier)
         },
-        toString: function () {
+        toString() {
             const head = this.head()
             return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
         }
@@ -87,7 +87,7 @@ export function seq_of_supplier<R>(supplier: F0<Maybe<R>>): Seq<R> {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return {head: privateSeq.head(), tail: privateSeq.tail()}
+    return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
@@ -107,32 +107,34 @@ export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return seq_bind(f)(seq)
 }
 
-interface BindSeq<T, R> extends CachedValueSeq<Maybe<Seq<R>>, R> {
-    currentSeq: Seq<T>
+interface CachedCurrentSeqValueSeq<V, S, T> extends CachedValueSeq<V, T> {
+    currentSeq: Seq<S>
 }
+
+interface BoundSeq<T, R> extends CachedCurrentSeqValueSeq<Maybe<Seq<R>>, T, R> { }
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
         return {
-            currentSeq: seq,
             value: undefined,
-            getValue: function (): Maybe<Seq<R>> {
+            currentSeq: seq,
+            getValue(): Maybe<Seq<R>> {
                 return bind_seq_value(this, f)
             },
-            head: function (): Maybe<R> {
+            head(): Maybe<R> {
                 return maybe_bind(seq_head)(this.getValue())
             },
-            tail: function (): Seq<R> {
+            tail(): Seq<R> {
                 const tail_of_head: Maybe<Seq<R>> = maybe_lift(seq_tail)(this.getValue())
                 const tail_of_head_or_empty: Seq<R> = maybe_value(tail_of_head, seq_of_empty)
                 const evaluated_tail: Seq<R> = seq_bind(f)(seq_tail(this.currentSeq))
                 return seq_join(tail_of_head_or_empty, evaluated_tail)
             }
-        } as BindSeq<T, R>
+        } as BoundSeq<T, R>
     }
 }
 
-function bind_seq_value<T, R>(bindSeq: BindSeq<T, R>, f: F1<T, Seq<R>>): Maybe<Seq<R>> {
+function bind_seq_value<T, R>(bindSeq: BoundSeq<T, R>, f: F1<T, Seq<R>>): Maybe<Seq<R>> {
     if (bindSeq.value !== undefined) {
         // value was cached
         return bindSeq.value
@@ -176,19 +178,11 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
                 return seq_tail(second)
             }
         },
-        toString: function () {
+        toString() {
             const head = this.head()
             return head + (!maybe_is_none(head) ? "," + this.tail().toString() : "")
         }
     } as PrivateSeq<T>
-}
-
-function seq_head<T>(seq: Seq<T>): Maybe<T> {
-    return seq_first(seq).head
-}
-
-function seq_tail<T>(seq: Seq<T>): Seq<T> {
-    return seq_first(seq).tail
 }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
@@ -207,40 +201,50 @@ export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R
     return maybe_fold(seq_first(seq).head, some, none)
 }
 
-interface FilterSeq<T> extends CachedValueSeq<Maybe<T>, T> {
-    currentSeq: Seq<T>
-}
+interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> { }
 
 export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
     return {
-        currentSeq: seq,
         value: undefined,
-        getValue: function (): Maybe<T> {
+        currentSeq: seq,
+        getValue(): Maybe<T> {
             if (this.value) {
                 return this.value
             }
-            while (true) {
-                if (seq_is_empty(this.currentSeq)) {
-                    return maybe_none()
-                }
 
-                // advance
-                this.value = seq_head(this.currentSeq)
-                this.currentSeq = seq_tail(this.currentSeq)
-
-                const filter = maybe_map(this.value, predicate)
-                const acceptedOrEmpty = maybe_value(filter, () => true)
-                if (acceptedOrEmpty) {
-                    return this.value
-                }
+            if (seq_is_empty(this.currentSeq)) {
+                return maybe_none()
             }
-        },
-        head: function () {
+
+            // advance
+            const first = seq_first(this.currentSeq)
+            const potentialValue = first.head
+            this.currentSeq = first.tail
+
+            const filter = maybe_map(potentialValue, predicate)
+            const acceptedOrEmpty = maybe_value(filter, () => true)
+            if (acceptedOrEmpty) {
+                this.value = potentialValue
+                return this.value
+            }
+
+            // retry
             return this.getValue()
         },
-        tail: function () {
+        head() {
+            return this.getValue()
+        },
+        tail() {
             this.getValue() // advance
             return seq_filter(this.currentSeq, predicate)
         }
-    } as FilterSeq<T>
+    } as FilteredSeq<T>
+}
+
+function seq_head<T>(seq: Seq<T>): Maybe<T> {
+    return seq_first(seq).head
+}
+
+function seq_tail<T>(seq: Seq<T>): Seq<T> {
+    return seq_first(seq).tail
 }
