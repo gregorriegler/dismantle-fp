@@ -188,3 +188,5 @@ describe("Football Data (reuse Weather Data)", () => {
 })
 
 // -------- requirement 3 ---------
+
+// TODO data entries and parse data are different. Should we do sth about it?
