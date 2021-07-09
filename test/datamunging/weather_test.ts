@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { EOL } from "os"
 import { Seq, seq_filter, seq_fold, seq_map, seq_of_array } from "../seq"
 import { io_read_file, Reader, reader_apply, reader_map, reader_of } from "./reader"
-import { Writer, writer_apply, writer_map, writer_of } from "./writer"
+import { Writer, writer_apply, writer_of } from "./writer"
 
 // 1st idea: List of functions to map onto the Reader.
 
@@ -44,13 +44,6 @@ function parseWeatherData(dataLine: string): WeatherEntry {
     }
 }
 
-function minEntry<T extends { spread(): number }>(a: T, b: T): T {
-    if (a.spread() < b.spread()) {
-        return a
-    }
-    return b
-}
-
 // 2nd idea: Go into find_min_spread and map there only once.
 // No fine grained methods on reader_map.
 
@@ -59,15 +52,46 @@ function find_min_temp_spread(fileText: string): string {
 
     // read lines
     const lines = splitIntoLines(fileText)
-    const trimmedLines = seq_map(lines, trim)
-    const nonEmptyLines = seq_filter(trimmedLines, isNonEmptyLine)
-    const dataLines = seq_filter(nonEmptyLines, startsWithDigit)
+    const trimmedLines = trimLines(lines)
+    const nonEmptyLines = filterNonEmptyLines(trimmedLines)
+    const dataLines = filterDataLines(nonEmptyLines)
     // calc spread
-    const dataEntries = seq_map(dataLines, parseWeatherData)
+    const dataEntries = parseDataEntries(dataLines)
     // find min
-    const min = seq_fold(dataEntries, minEntry, { Dy: "", MxT: 0, MnT: 0, spread() { return 999 } } as WeatherEntry)
+    const min = getMinEntry(dataEntries)
     // report day
     return min.Dy
+}
+
+function trimLines(lines: Seq<string>) {
+    return seq_map(lines, trim);
+}
+
+function filterNonEmptyLines(trimmedLines: Seq<string>) {
+    return seq_filter(trimmedLines, isNonEmptyLine);
+}
+
+function filterDataLines(nonEmptyLines: Seq<string>) {
+    return seq_filter(nonEmptyLines, startsWithDigit);
+}
+
+function parseDataEntries(dataLines: Seq<string>) {
+    return seq_map(dataLines, parseWeatherData);
+}
+
+function getMinEntry(dataEntries: Seq<WeatherEntry>) {
+    return seq_fold(dataEntries, minEntry, {
+        Dy: "", MxT: 0, MnT: 0, spread() {
+            return 999
+        }
+    } as WeatherEntry);
+}
+
+function minEntry<T extends { spread(): number }>(a: T, b: T): T {
+    if (a.spread() < b.spread()) {
+        return a
+    }
+    return b
 }
 
 function console_print(message: string) {
