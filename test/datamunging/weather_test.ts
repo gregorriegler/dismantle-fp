@@ -8,23 +8,6 @@ import { Writer, writer_apply, writer_of } from "./writer"
 
 // -------- requirement 1 ---------
 
-function splitIntoLines(fileText: string): Seq<string> {
-    return seq_of_array(fileText.split(EOL))
-}
-
-function trim(line: string): string {
-    return line.trim()
-}
-
-function isNonEmptyLine(line: string): boolean {
-    return line.length > 0
-}
-
-function startsWithDigit(nonEmptyLine: string): boolean {
-    const firstCharacter = nonEmptyLine.charAt(0)
-    return !isNaN(+firstCharacter)
-}
-
 interface WeatherEntry {
     Dy: string
     MxT: number
@@ -32,17 +15,6 @@ interface WeatherEntry {
     spread(): number;
 }
 
-function parseWeatherData(dataLine: string): WeatherEntry {
-    const entries = dataLine.split(/\s+/)
-    return {
-        Dy: entries[0],
-        MxT: parseInt(entries[1], 10),
-        MnT: parseInt(entries[2], 10),
-        spread() {
-            return this.MxT - this.MnT
-        }
-    }
-}
 
 // 2nd idea: Go into find_min_spread and map there only once.
 // No fine grained methods on reader_map.
@@ -61,22 +33,66 @@ function find_min_temp_spread(fileText: string): string {
     const min = getMinEntry(dataEntries)
     // report day
     return min.Dy
+
+    /**
+     * could be
+     *
+     * pipe(
+     *   splitIntoLines,
+     *   trimLines,
+     *   filterNonEmptyLines,
+     *   filterDataLines,
+     *   parseDataEntries,
+     *   getMinEntry
+     * )(fileText).Dy
+     *
+     * but programming a pipe in typescript is boring
+     */
+}
+
+function splitIntoLines(fileText: string): Seq<string> {
+    return seq_of_array(fileText.split(EOL))
 }
 
 function trimLines(lines: Seq<string>) {
     return seq_map(lines, trim);
 }
 
+function trim(line: string): string {
+    return line.trim()
+}
+
 function filterNonEmptyLines(trimmedLines: Seq<string>) {
     return seq_filter(trimmedLines, isNonEmptyLine);
+}
+
+function isNonEmptyLine(line: string): boolean {
+    return line.length > 0
 }
 
 function filterDataLines(nonEmptyLines: Seq<string>) {
     return seq_filter(nonEmptyLines, startsWithDigit);
 }
 
+function startsWithDigit(nonEmptyLine: string): boolean {
+    const firstCharacter = nonEmptyLine.charAt(0)
+    return !isNaN(+firstCharacter)
+}
+
 function parseDataEntries(dataLines: Seq<string>) {
     return seq_map(dataLines, parseWeatherData);
+}
+
+function parseWeatherData(dataLine: string): WeatherEntry {
+    const entries = dataLine.split(/\s+/)
+    return {
+        Dy: entries[0],
+        MxT: parseInt(entries[1], 10),
+        MnT: parseInt(entries[2], 10),
+        spread() {
+            return this.MxT - this.MnT
+        }
+    }
 }
 
 function getMinEntry(dataEntries: Seq<WeatherEntry>) {
