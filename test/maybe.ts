@@ -1,4 +1,4 @@
-import { compose1, F0, F1, identity1, partial2_1, partial2_2 } from "./func"
+import { compose2, F0, F1, identity1, partial2_1, partial2_2 } from "./func"
 
 const NONE: PrivateMaybe<any> = { value: undefined, toString: () => "_" }
 
@@ -23,7 +23,7 @@ export function maybe_of<T>(value: T): Maybe<T> {
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
-    return compose1(f, maybe_of)
+    return compose2(f, maybe_of)
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, defaultValue: F0<T>): T {

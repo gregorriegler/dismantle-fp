@@ -1,5 +1,5 @@
 import { readFileSync } from "fs"
-import { compose1, F0, F1, identity1 } from "../func"
+import { compose2, F0, F1, identity1 } from "../func"
 
 export function io_read_file(fileName: string): Read<string> {
     return () => readFileSync(fileName).toString()
@@ -18,7 +18,7 @@ export function reader_of<IO>(): Reader<IO, IO> {
 }
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
-    return { transform: (compose1(reader.transform, f)) }
+    return { transform: (compose2(reader.transform, f)) }
 }
 
 export function reader_lift<IO, T, R>(f: F1<T, R>): F1<Reader<IO, T>, Reader<IO, R>> {

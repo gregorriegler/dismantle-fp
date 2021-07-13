@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { add, compose1, F1, inc } from "./func"
+import { add, compose2, F1, inc } from "./func"
 import { expectValue } from "./maybe_expects"
 import { maybe_none, maybe_of } from "./maybe_union"
 import {
@@ -139,7 +139,7 @@ describe("Seq (Monad)", () => {
         it("flatMaps an empty seq", () => {
             const emptySeq = seq_of_empty()
 
-            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
+            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose2(inc, seq_of_singleton)
             const mapped: Seq<number> = seq_flat_map(emptySeq, increaseToSequenceOfNumbers)
 
             expect_seq_n_values(mapped)
@@ -156,7 +156,7 @@ describe("Seq (Monad)", () => {
 
         it("flatMaps single element to single element", () => {
             const seq = seq_of_singleton(3)
-            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
+            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose2(inc, seq_of_singleton)
 
             const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 
@@ -165,7 +165,7 @@ describe("Seq (Monad)", () => {
 
         it("flatMaps (all) many elements to single element", () => {
             const seq = seq_of_array([3, 4])
-            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
+            const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose2(inc, seq_of_singleton)
 
             const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 

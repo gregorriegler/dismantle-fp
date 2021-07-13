@@ -1,4 +1,4 @@
-import { compose1, F1, identity1 } from "../func"
+import { compose2, F1, identity1 } from "../func"
 
 interface Write<IO> {
     (io: IO): void
@@ -15,7 +15,7 @@ export function writer_of<IO>(): Writer<IO, IO> {
 }
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return { transform: (compose1(f, writer.transform)) }
+    return { transform: (compose2(f, writer.transform)) }
 }
 
 export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, ioWrite: Write<IO>): void {

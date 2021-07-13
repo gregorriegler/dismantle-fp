@@ -71,8 +71,24 @@ export function compose0<U, R>(a: F0<U>, b: F1<U, R>): F0<R> {
     return () => b(a())
 }
 
-export function compose1<T, U, R>(a: F1<T, U>, b: F1<U, R>): F1<T, R> {
+export function compose2<T, U, R>(a: F1<T, U>, b: F1<U, R>): F1<T, R> {
     return (t: T) => b(a(t))
+}
+
+export function compose3<T, U, V, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, R>): F1<T, R> {
+    return compose2(compose2(a, b), c)
+}
+
+export function compose4<T, U, V, W, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, W>, d: F1<W, R>): F1<T, R> {
+    return compose2(compose3(a, b, c), d)
+}
+
+export function compose5<T, U, V, W, X, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, W>, d: F1<W, X>, e: F1<X, R>): F1<T, R> {
+    return compose2(compose4(a, b, c, d), e)
+}
+
+export function compose6<T, U, V, W, X, Y, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, W>, d: F1<W, X>, e: F1<X, Y>, f: F1<Y, R>): F1<T, R> {
+    return compose2(compose5(a, b, c, d, e), f)
 }
 
 export function lazy<R>(value: R): F0<R> {
