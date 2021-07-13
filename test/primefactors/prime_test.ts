@@ -8,7 +8,7 @@ import {
     seq_of_singleton,
     seq_of_supplier
 } from "../seq"
-import { expect_seq_empty, expect_seq_one_value, expect_seq_three_values, expect_seq_two_values } from "../seq_expects"
+import { expect_seq_n_values } from "../seq_expects"
 
 interface DividedByFactor {
     factors: Seq<number>,
@@ -64,53 +64,53 @@ describe("PrimeFactors (application of Seq)", () => {
             const divisors = divisors_of(4 * 3, 2)
             expect(divisors.remaining).to.equals(3)
             const seq: Seq<number> = divisors.factors
-            expect_seq_two_values(seq, 2, 2)
+            expect_seq_n_values(seq, 2, 2)
         })
     })
 
     describe("factors of", () => {
         it("of 1", () => {
             const seq = prime_factors_generate(1)
-            expect_seq_empty(seq)
+            expect_seq_n_values(seq)
         })
 
         it("of 2", () => {
             const seq = prime_factors_generate(2)
-            expect_seq_one_value(seq, 2)
+            expect_seq_n_values(seq, 2)
         })
 
         it("debug of 3", () => {
             const n = 3
             const candidates = seq_of_supplier(range_supplier(2, n))
-            expect_seq_two_values(candidates, 2, n)
+            expect_seq_n_values(candidates, 2, n)
 
             let divisors = divisors_of(n, 2).factors
-            expect_seq_empty(divisors)
+            expect_seq_n_values(divisors)
             divisors = divisors_of(n, n).factors
-            expect_seq_one_value(divisors, n)
+            expect_seq_n_values(divisors, n)
 
             const seq = prime_factors_generate(n)
-            expect_seq_one_value(seq, n)
+            expect_seq_n_values(seq, n)
         })
 
         it("of 4", () => {
             const seq = prime_factors_generate(4)
-            expect_seq_two_values(seq, 2, 2)
+            expect_seq_n_values(seq, 2, 2)
         })
 
         it("of 8", () => {
             const seq = prime_factors_generate(8)
-            expect_seq_three_values(seq, 2, 2, 2)
+            expect_seq_n_values(seq, 2, 2, 2)
         })
 
         it("of 9", () => {
             const seq = prime_factors_generate(9)
-            expect_seq_two_values(seq, 3, 3)
+            expect_seq_n_values(seq, 3, 3)
         })
 
         it("of multiple", () => {
             const seq = prime_factors_generate(2 * 2 * 11)
-            expect_seq_three_values(seq, 2, 2, 11)
+            expect_seq_n_values(seq, 2, 2, 11)
         })
     })
 })

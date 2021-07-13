@@ -16,13 +16,7 @@ import {
     seq_fold,
     seq_filter
 } from "./seq"
-import {
-    expect_seq_empty,
-    expect_seq_four_values,
-    expect_seq_one_value,
-    expect_seq_three_values,
-    expect_seq_two_values
-} from "./seq_expects"
+import { expect_seq_n_values } from "./seq_expects"
 
 const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
@@ -38,19 +32,19 @@ describe("Seq (Monad)", () => {
         it("is empty", () => {
             const seq = seq_of_empty()
 
-            expect_seq_empty(seq)
+            expect_seq_n_values(seq)
         })
 
         it("with singleton element", () => {
             const seq = seq_of_singleton(1)
 
-            expect_seq_one_value(seq, 1)
+            expect_seq_n_values(seq, 1)
         })
 
         it("with 2 elements", () => {
             const seq = seq_of_array([1, 2])
 
-            expect_seq_two_values(seq, 1, 2)
+            expect_seq_n_values(seq, 1, 2)
         })
 
         it("with supplier function", () => {
@@ -71,7 +65,7 @@ describe("Seq (Monad)", () => {
                     ? maybe_none()
                     : maybe_of(++i))
 
-            expect_seq_one_value(seq, 11)
+            expect_seq_n_values(seq, 11)
         })
 
         it("with limited supplier function (added but was already there)", () => {
@@ -82,13 +76,13 @@ describe("Seq (Monad)", () => {
                     : maybe_of(i++)
             )
 
-            expect_seq_two_values(seq, 1, 2)
+            expect_seq_n_values(seq, 1, 2)
         })
 
         it("with empty supplier function", () => {
             const seq = seq_of_supplier(() => maybe_none())
 
-            expect_seq_empty(seq)
+            expect_seq_n_values(seq)
         })
     })
 
@@ -98,7 +92,7 @@ describe("Seq (Monad)", () => {
 
             const mapped = seq_map(seq, inc)
 
-            expect_seq_one_value(mapped, 2)
+            expect_seq_n_values(mapped, 2)
         })
 
         it("lifts functions", () => {
@@ -107,7 +101,7 @@ describe("Seq (Monad)", () => {
             const lifted = seq_lift(inc)
 
             const mapped = lifted(seq)
-            expect_seq_one_value(mapped, 2)
+            expect_seq_n_values(mapped, 2)
         })
 
         it("lifted functions apply to seq with many elements", () => {
@@ -116,7 +110,7 @@ describe("Seq (Monad)", () => {
             const lifted = seq_lift((a: number) => (a + 1))
 
             const mapped = lifted(seq)
-            expect_seq_two_values(mapped, 2, 3)
+            expect_seq_n_values(mapped, 2, 3)
         })
 
         it("maps lazy, fail on first element", () => {
@@ -148,7 +142,7 @@ describe("Seq (Monad)", () => {
             const increaseToSequenceOfNumbers: F1<number, Seq<number>> = compose1(inc, seq_of_singleton)
             const mapped: Seq<number> = seq_flat_map(emptySeq, increaseToSequenceOfNumbers)
 
-            expect_seq_empty(mapped)
+            expect_seq_n_values(mapped)
         })
 
         it("flatMaps (all) many elements to empty", () => {
@@ -157,7 +151,7 @@ describe("Seq (Monad)", () => {
 
             const mapped: Seq<number> = seq_flat_map(seq, makeEmptyList)
 
-            expect_seq_empty(mapped)
+            expect_seq_n_values(mapped)
         })
 
         it("flatMaps single element to single element", () => {
@@ -166,7 +160,7 @@ describe("Seq (Monad)", () => {
 
             const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 
-            expect_seq_one_value(mapped, 4)
+            expect_seq_n_values(mapped, 4)
         })
 
         it("flatMaps (all) many elements to single element", () => {
@@ -175,7 +169,7 @@ describe("Seq (Monad)", () => {
 
             const mapped: Seq<number> = seq_flat_map(seq, increaseToSequenceOfNumbers)
 
-            expect_seq_two_values(mapped, 4, 5)
+            expect_seq_n_values(mapped, 4, 5)
         })
 
         it("flatMaps a single element to many elements", () => {
@@ -183,7 +177,7 @@ describe("Seq (Monad)", () => {
 
             const mapped = seq_flat_map(seq, nextTwoNumbers)
 
-            expect_seq_two_values(mapped, 4, 5)
+            expect_seq_n_values(mapped, 4, 5)
         })
 
         it("flatMaps (all) many elements to many elements", () => {
@@ -191,7 +185,7 @@ describe("Seq (Monad)", () => {
 
             const mapped = seq_flat_map(seq, nextTwoNumbers)
 
-            expect_seq_four_values(mapped, 2, 3, 3, 4)
+            expect_seq_n_values(mapped, 2, 3, 3, 4)
         })
 
         it("flatMaps many elements to single and elements from supplier", () => {
@@ -209,7 +203,7 @@ describe("Seq (Monad)", () => {
 
             const mapped = seq_flat_map(seq, weirdNextTwoNumbers)
 
-            expect_seq_three_values(mapped, 1, 2, 2)
+            expect_seq_n_values(mapped, 1, 2, 2)
         })
 
         it("flatMaps many elements to empty and non empty (bug from PrimeFactors n=3)", () => {
@@ -223,7 +217,7 @@ describe("Seq (Monad)", () => {
 
             const mapped = seq_flat_map(seq, first_empty)
 
-            expect_seq_one_value(mapped, 2)
+            expect_seq_n_values(mapped, 2)
         })
 
         it("flatMaps lazy, fail on first element", () => {
@@ -254,7 +248,7 @@ describe("Seq (Monad)", () => {
 
             const joined = seq_join(seq1, seq2)
 
-            expect_seq_empty(joined)
+            expect_seq_n_values(joined)
         })
 
         it("joins seq with an empty seq", () => {
@@ -263,7 +257,7 @@ describe("Seq (Monad)", () => {
 
             const joined = seq_join(seq1, seq2)
 
-            expect_seq_one_value(joined, 3)
+            expect_seq_n_values(joined, 3)
         })
 
         it("joins empty seq with a value", () => {
@@ -272,7 +266,7 @@ describe("Seq (Monad)", () => {
 
             const joined = seq_join(seq1, seq2)
 
-            expect_seq_one_value(joined, 2)
+            expect_seq_n_values(joined, 2)
         })
 
         it("joins two seq with values", () => {
@@ -281,7 +275,7 @@ describe("Seq (Monad)", () => {
 
             const joined = seq_join(seq1, seq2)
 
-            expect_seq_four_values(joined, 1, 2, 3, 4)
+            expect_seq_n_values(joined, 1, 2, 3, 4)
         })
 
         it("joins lazy, fail on first element", () => {
@@ -370,7 +364,7 @@ describe("Seq (Monad)", () => {
 
             const filtered = seq_filter(seq, (_) => false)
 
-            expect_seq_empty(filtered)
+            expect_seq_n_values(filtered)
         })
 
         it("filter drops all", () => {
@@ -378,7 +372,7 @@ describe("Seq (Monad)", () => {
 
             const filtered = seq_filter(seq, (_) => false)
 
-            expect_seq_empty(filtered)
+            expect_seq_n_values(filtered)
         })
 
         it("filter drops none", () => {
@@ -386,7 +380,7 @@ describe("Seq (Monad)", () => {
 
             const filtered = seq_filter(seq, (_) => true)
 
-            expect_seq_two_values(filtered, 1, 2)
+            expect_seq_n_values(filtered, 1, 2)
         })
 
         it("filter drops some", () => {
@@ -394,7 +388,7 @@ describe("Seq (Monad)", () => {
 
             const filtered = seq_filter(seq, (i) => i % 2 == 1)
 
-            expect_seq_two_values(filtered, 1, 3)
+            expect_seq_n_values(filtered, 1, 3)
         })
     })
 

@@ -9,27 +9,12 @@ export function expect_seq_empty(seq: Seq<any>) {
     expectEmpty(second)
 }
 
-export function expect_seq_one_value<T>(seq: Seq<T>, a: T) {
-    const { head: first, tail: tail } = seq_first(seq)
-    expectValue(first, a)
-    expect_seq_empty(tail)
-}
-
-export function expect_seq_two_values<T>(seq: Seq<T>, a: T, b: T) {
+export function expect_seq_n_values<T>(seq: Seq<T>, ...values: T[]) {
     const { head: first, tail } = seq_first(seq)
-    expectValue(first, a)
-    expect_seq_one_value(tail, b)
-}
-
-export function expect_seq_three_values<T>(seq: Seq<T>, a: T, b: T, c: T) {
-    const { head: first, tail } = seq_first(seq)
-    expectValue(first, a)
-    expect_seq_two_values(tail, b, c)
-}
-
-// TODO can we write expects_seq_* with less duplication?
-export function expect_seq_four_values<T>(seq: Seq<T>, a: T, b: T, c: T, d: T) {
-    const { head: first, tail } = seq_first(seq)
-    expectValue(first, a)
-    expect_seq_three_values(tail, b, c, d)
+    if (values.length == 0) {
+        expect_seq_empty(seq)
+    } else {
+        expectValue(first, values[0])
+        expect_seq_n_values(tail, ...values.slice(1))
+    }
 }
