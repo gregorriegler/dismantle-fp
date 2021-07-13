@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import { EOL } from "os"
+import { compose6 } from "../func"
 import { Seq, seq_filter, seq_fold, seq_map, seq_of_array } from "../seq"
 import { io_read_file, Reader, reader_apply, reader_map, reader_of } from "./reader"
 import { Writer, writer_apply, writer_of } from "./writer"
@@ -8,7 +9,7 @@ import { Writer, writer_apply, writer_of } from "./writer"
 
 // -------- requirement 1 ---------
 
-interface WeatherEntry {
+export interface WeatherEntry {
     Dy: string
     MxT: number
     MnT: number
@@ -19,35 +20,29 @@ interface WeatherEntry {
 // 2nd idea: Go into find_min_spread and map there only once.
 // No fine grained methods on reader_map.
 
-function find_min_temp_spread(fileText: string): string {
+export function find_min_temp_spread(fileText: string): string {
     // Algorithm (solution) will be calculated using seq
 
-    // read lines
-    const lines = splitIntoLines(fileText)
-    const trimmedLines = trimLines(lines)
-    const nonEmptyLines = filterNonEmptyLines(trimmedLines)
-    const dataLines = filterDataLines(nonEmptyLines)
-    // calc spread
-    const dataEntries = parseDataEntries(dataLines)
-    // find min
-    const min = getMinEntry(dataEntries)
-    // report day
-    return min.Dy
+    // // read lines
+    // const lines = splitIntoLines(fileText)
+    // const trimmedLines = trimLines(lines)
+    // const nonEmptyLines = filterNonEmptyLines(trimmedLines)
+    // const dataLines = filterDataLines(nonEmptyLines)
+    // // calc spread
+    // const dataEntries = parseDataEntries(dataLines)
+    // // find min
+    // const min = getMinEntry(dataEntries)
+    // // report day
+    // return min.Dy
 
-    /**
-     * could be
-     *
-     * pipe(
-     *   splitIntoLines,
-     *   trimLines,
-     *   filterNonEmptyLines,
-     *   filterDataLines,
-     *   parseDataEntries,
-     *   getMinEntry
-     * )(fileText).Dy
-     *
-     * but programming a pipe in typescript is boring
-     */
+    return compose6(
+        splitIntoLines,
+        trimLines,
+        filterNonEmptyLines,
+        filterDataLines,
+        parseWeatherDataEntries,
+        getMinWeatherEntry
+    )(fileText).Dy
 }
 
 function splitIntoLines(fileText: string): Seq<string> {
@@ -79,7 +74,7 @@ function startsWithDigit(nonEmptyLine: string): boolean {
     return !isNaN(+firstCharacter)
 }
 
-function parseDataEntries(dataLines: Seq<string>) {
+function parseWeatherDataEntries(dataLines: Seq<string>) {
     return seq_map(dataLines, parseWeatherData);
 }
 
@@ -95,12 +90,8 @@ function parseWeatherData(dataLine: string): WeatherEntry {
     }
 }
 
-function getMinEntry(dataEntries: Seq<WeatherEntry>) {
-    return seq_fold(dataEntries, minEntry, {
-        Dy: "", MxT: 0, MnT: 0, spread() {
-            return 999
-        }
-    } as WeatherEntry);
+function getMinWeatherEntry(dataEntries: Seq<WeatherEntry>) {
+    return seq_fold(dataEntries, minEntry, { Dy: "", MxT: 0, MnT: 0, spread() { return 999 } } as WeatherEntry);
 }
 
 function minEntry<T extends { spread(): number }>(a: T, b: T): T {
@@ -184,11 +175,26 @@ describe("Weather Data (application of Reader)", () => {
 
 // -------- requirement 2 ---------
 
-interface FootballEntry {
+export interface FootballEntry {
     Team: string
     F: number
     A: number
     spread(): number;
+}
+
+export function find_min_goal_spread(fileText: string): string {
+    return compose6(
+        splitIntoLines,
+        trimLines,
+        filterNonEmptyLines,
+        filterDataLines,
+        parseFootballDataEntries,
+        getMinFootballEntry
+    )(fileText).Team
+}
+
+function parseFootballDataEntries(dataLines: Seq<string>) {
+    return seq_map(dataLines, parseFootballData)
 }
 
 function parseFootballData(dataLine: string): FootballEntry {
@@ -203,14 +209,8 @@ function parseFootballData(dataLine: string): FootballEntry {
     }
 }
 
-function find_min_goal_spread(fileText: string): string {
-    const lines = splitIntoLines(fileText)
-    const trimmedLines = seq_map(lines, trim)
-    const nonEmptyLines = seq_filter(trimmedLines, isNonEmptyLine)
-    const dataLines = seq_filter(nonEmptyLines, startsWithDigit)
-    const dataEntries = seq_map(dataLines, parseFootballData)
-    const min = seq_fold(dataEntries, minEntry, { Team: "", F: 0, A: 0, spread() { return 999 } } as FootballEntry)
-    return min.Team
+function getMinFootballEntry(dataEntries: Seq<FootballEntry>) {
+    return seq_fold(dataEntries, minEntry, { Team: "", F: 0, A: 0, spread() { return 999 } } as FootballEntry)
 }
 
 const FootballDataFile = "./test/datamunging/football.dat"
@@ -226,6 +226,7 @@ describe("Football Data (reuse Weather Data)", () => {
         expect(result).to.equal("Aston_Villa")
     })
 })
+
 
 // -------- requirement 3 ---------
 
