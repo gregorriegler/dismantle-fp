@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Write, Writer, writer_apply, writer_of } from "../datamunging/writer";
-import { curry3 } from "../func";
+import { Writer, writer_apply, writer_of, writer_map } from "../datamunging/writer";
+import { curry2, curry3, F1 } from "../func";
 
 /**
  * # Phase 1
@@ -21,12 +21,12 @@ describe("TaskList App", () => {
 
     describe("TaskList Top Level", () => {
         let originalConsole = console.log
-        let output:String
+        let output: String
 
         beforeEach(() => {
             originalConsole = console.log
             output = ""
-            console.log = function(message?) {
+            console.log = function (message?) {
                 output += message
             }
         })
@@ -55,20 +55,35 @@ describe("TaskList App", () => {
  * Pure (Domain)
  */
 
-function format_tasks() {
+interface FormattedTasks {
+    value: string;
+}
+
+function format_tasks(): FormattedTasks {
     const header = "Current Tasks:\n"
     const current_tasks = ""
     const formatted_task_list = header + current_tasks
-    return formatted_task_list
+    return { value: formatted_task_list }
+}
+
+function formatted_tasks_to_string(fts: FormattedTasks) {
+    return fts.value
 }
 
 function formatted_tasks_writer() {
     const formatted_task_list = format_tasks()
+
     const string_writer: Writer<string, string> = writer_of()
+
+    const make_writer_map = curry2(writer_map) as (t: Writer<string, string>) => F1<F1<FormattedTasks, string>, Writer<FormattedTasks, string>>
+    const map_string_writer = make_writer_map(string_writer)
+    const formatted_tasks_writer = map_string_writer(formatted_tasks_to_string)
+
     const apply_writer = curry3(writer_apply)
-    const write = apply_writer(string_writer)
-    const write_formatted_task = write(formatted_task_list)
-    return write_formatted_task
+    const write = apply_writer(formatted_tasks_writer)
+    const write_formatted_tasks = write(formatted_task_list)
+
+    return write_formatted_tasks
 }
 
 /*
