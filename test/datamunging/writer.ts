@@ -1,6 +1,6 @@
 import { compose2, F1, identity1 } from "../func"
 
-interface Write<IO> {
+export interface Write<IO> {
     (io: IO): void
 }
 

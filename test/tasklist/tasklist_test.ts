@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Writer, writer_apply, writer_of } from "../datamunging/writer";
+import { Write, Writer, writer_apply, writer_of } from "../datamunging/writer";
 
 /**
  * # Phase 1
@@ -54,11 +54,21 @@ function console_print(message: string) {
     console.log(message)
 }
 
-function task_list(strings: string[]) {
-    let header = "Current Tasks:\n";
-    let current_tasks = "";
-    let formatted_task_list = header + current_tasks;
+function format_tasks() {
+    const header = "Current Tasks:\n";
+    const current_tasks = "";
+    const formatted_task_list = header + current_tasks;
+    return formatted_task_list;
+}
+
+function formatted_tasks_writer() {
+    const formatted_task_list = format_tasks();
 
     const writer: Writer<string, string> = writer_of()
-    writer_apply(writer, formatted_task_list, console_print)
+    return (io_write:Write<string>) => { writer_apply(writer, formatted_task_list, io_write) }
+}
+
+function task_list(strings: string[]) {
+    const writer = formatted_tasks_writer()
+    writer(console_print)
 }
