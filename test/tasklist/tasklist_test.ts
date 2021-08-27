@@ -2,6 +2,7 @@ import { expect } from "chai"
 import { describe } from "mocha";
 import { Writer, writer_apply, writer_of, writer_map } from "../datamunging/writer";
 import { curry2, curry3, F1 } from "../func";
+import { Seq, seq_of_array } from "../seq";
 
 /**
  * # Phase 1
@@ -44,6 +45,12 @@ describe("TaskList App", () => {
             task_list(["list"])
             expect(output).to.eq("Current Tasks:\n")
         })
+
+        xit("creates task", () => {
+            task_list(["create foo", "list"])
+            expect(output).to.eq("Current Tasks:\n( ) foo\n")
+            // TODO continue or find better test with smaller increment
+        })
     })
 
     describe("TaskList Domain", () => {
@@ -70,7 +77,7 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
 }
 
-function formatted_tasks_writer() {
+function formatted_tasks_writer(args: Seq<string>) {
     const formatted_task_list = format_tasks()
 
     const string_writer: Writer<string, string> = writer_of()
@@ -90,11 +97,21 @@ function formatted_tasks_writer() {
  * Top Level
  */
 
-function task_list(strings: string[]): void {
-    const writer = formatted_tasks_writer()
+function task_list(args: string[]): void {
+    const commands = seq_of_array(args);
+    const writer = formatted_tasks_writer(commands)
     writer(console_print)
 }
 
 function console_print(message: string): void {
     console.log(message)
 }
+
+/*
+ * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
+ * String ist nicht in domain aber das Mapping kann pure gemacht werden.
+ * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
+ *
+ * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
+ * Dann folden wir den State über die Commands. Am Ende wandert der State in einen Writer zum Save.
+ */
