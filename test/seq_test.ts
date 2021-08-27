@@ -367,14 +367,6 @@ describe("Seq (Monad)", () => {
             expect_seq_n_values(filtered)
         })
 
-        it("filter drops all", () => {
-            const seq = seq_of_array([1, 2])
-
-            const filtered = seq_filter(seq, (_) => false)
-
-            expect_seq_n_values(filtered)
-        })
-
         it("filter drops none", () => {
             const seq = seq_of_array([1, 2])
 
@@ -389,6 +381,14 @@ describe("Seq (Monad)", () => {
             const filtered = seq_filter(seq, (i) => i % 2 == 1)
 
             expect_seq_n_values(filtered, 1, 3)
+        })
+
+        it("filter drops all", () => {
+            const seq = seq_of_array([1, 2])
+
+            const filtered = seq_filter(seq, (_) => false)
+
+            expect_seq_n_values(filtered)
         })
     })
 

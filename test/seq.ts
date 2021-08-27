@@ -9,7 +9,7 @@ import {
     maybe_of,
     maybe_value
 } from "./maybe_union"
-import { F0, F1 } from "./func"
+import {F0, F1} from "./func"
 
 export interface Seq<T> extends Object {
 }
@@ -91,7 +91,7 @@ function seq_to_string<T>(seq: PrivateSeq<T>): string {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return { head: privateSeq.head(), tail: privateSeq.tail() }
+    return {head: privateSeq.head(), tail: privateSeq.tail()}
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
@@ -118,7 +118,8 @@ interface CachedCurrentSeqValueSeq<V, S, T> extends CachedValueSeq<V, T> {
     currentSeq: Seq<S>
 }
 
-interface BoundSeq<T, R> extends CachedCurrentSeqValueSeq<Maybe<Seq<R>>, T, R> { }
+interface BoundSeq<T, R> extends CachedCurrentSeqValueSeq<Maybe<Seq<R>>, T, R> {
+}
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
     return (seq): Seq<R> => {
@@ -210,41 +211,40 @@ export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R
     return maybe_fold(seq_first(seq).head, some, none)
 }
 
-interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> { }
+interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> {
+    advanceToFirst(): void
+}
 
 export function seq_filter<T>(seq: Seq<T>, predicate: F1<T, boolean>): Seq<T> {
     return {
         value: undefined,
         currentSeq: seq,
-        getValue(): Maybe<T> {
+        advanceToFirst(): void {
             if (this.value) {
-                return this.value
+                return
             }
 
             const first = seq_first(this.currentSeq)
             const head = first.head
             this.currentSeq = first.tail
 
-            if (maybe_is_none(head)) {
-                this.value = head
-                return this.value
-            }
-
             const filter = maybe_map(head, predicate)
             const acceptedOrEmpty = maybe_value(filter, () => true)
             if (acceptedOrEmpty) {
                 this.value = head
-                return this.value
+            } else {
+                this.advanceToFirst()
             }
-
-            // retry
-            return this.getValue()
+        },
+        getValue(): Maybe<T> {
+            return this.value as Maybe<T>
         },
         head() {
+            this.advanceToFirst()
             return this.getValue()
         },
         tail() {
-            this.getValue() // advance
+            this.advanceToFirst()
             return seq_filter(this.currentSeq, predicate)
         },
         toString() {
