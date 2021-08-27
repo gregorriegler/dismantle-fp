@@ -18,8 +18,24 @@ import { describe } from "mocha";
 describe("TaskList App", () => {
 
     describe("TaskList Top Level", () => {
-        it("foo", () => {
-            expect(1).to.equal(1)
+        let originalConsole = console.log
+        let output:String
+
+        beforeEach(() => {
+            originalConsole = console.log
+            output = ""
+            console.log = function(message?) {
+                output += message
+            }
+        })
+
+        afterEach(() => {
+            console.log = originalConsole
+        })
+
+        it("captures console", () => {
+            console.log("Hello")
+            expect(output).to.eq("Hello")
         })
     })
 
