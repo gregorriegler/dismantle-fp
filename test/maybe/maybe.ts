@@ -1,4 +1,4 @@
-import { compose2, F0, F1, identity1, partial2_1, partial2_2 } from "./func"
+import { compose2, F0, F1, identity1, partial2_1, partial2_2 } from "../func"
 
 const NONE: PrivateMaybe<any> = { value: undefined, toString: () => "_" }
 
