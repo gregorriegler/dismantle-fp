@@ -21,7 +21,9 @@ export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader
     return { transform: (compose2(reader.transform, f)) }
 }
 
-export function reader_lift<IO, T, R>(f: F1<T, R>): F1<Reader<IO, T>, Reader<IO, R>> {
+export type ReaderF1<IO, T, R> = F1<Reader<IO, T>, Reader<IO, R>>
+
+export function reader_lift<IO, T, R>(f: F1<T, R>): ReaderF1<IO, T, R> {
     return (reader) => reader_map(reader, f)
 }
 
@@ -29,7 +31,7 @@ export function reader_flatmap<IO, T, R>(reader: Reader<IO, T>, f: F1<T, Reader<
     return reader_bind(f)(reader)
 }
 
-export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): F1<Reader<IO, T>, Reader<IO, R>> {
+export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): ReaderF1<IO, T, R> {
     return (reader: Reader<IO, T>) => {
         function nestedTransform(input: IO) {
             const transformedInput = reader_apply_single(reader, input)
@@ -40,8 +42,8 @@ export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): F1<Reader<IO, T>
     }
 }
 
-export function reader_apply<IO, R>(reader: Reader<IO, R>, ioRead: Read<IO>): R {
-    return reader_apply_single(reader, ioRead())
+export function reader_apply<IO, R>(reader: Reader<IO, R>, io_read: Read<IO>): R {
+    return reader_apply_single(reader, io_read())
 }
 
 function reader_apply_single<IO, R>(reader: Reader<IO, R>, input: IO): R {
