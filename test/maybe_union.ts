@@ -44,7 +44,9 @@ export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
     return maybe_lift(f)(maybe)
 }
 
-export function maybe_lift<T, R>(f: F1<T, R>): F1<Maybe<T>, Maybe<R>> {
+export type MaybeF1<T, R> = F1<Maybe<T>, Maybe<R>>
+
+export function maybe_lift<T, R>(f: F1<T, R>): MaybeF1<T, R> {
     return maybe => maybe_is_none(maybe) ? NONE : maybe_of(f(maybe.value))
 }
 
@@ -52,7 +54,7 @@ export function maybe_flat_map<T, R>(maybe: Maybe<T>, f: F1<T, Maybe<R>>): Maybe
     return maybe_bind(f)(maybe)
 }
 
-export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): F1<Maybe<T>, Maybe<R>> {
+export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): MaybeF1<T, R> {
     return maybe => maybe_is_none(maybe) ? NONE : f(maybe.value)
 }
 

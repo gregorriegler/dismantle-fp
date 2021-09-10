@@ -98,7 +98,9 @@ export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
     return seq_lift(f)(seq)
 }
 
-export function seq_lift<T, R>(f: F1<T, R>): F1<Seq<T>, Seq<R>> {
+export type SeqF1<T, R> = F1<Seq<T>, Seq<R>>
+
+export function seq_lift<T, R>(f: F1<T, R>): SeqF1<T, R> {
     return (seq): Seq<R> => {
         return {
             head: () => maybe_lift(f)(seq_head(seq)),
@@ -121,7 +123,7 @@ interface CachedCurrentSeqValueSeq<V, S, T> extends CachedValueSeq<V, T> {
 interface BoundSeq<T, R> extends CachedCurrentSeqValueSeq<Maybe<Seq<R>>, T, R> {
 }
 
-export function seq_bind<T, R>(f: F1<T, Seq<R>>): F1<Seq<T>, Seq<R>> {
+export function seq_bind<T, R>(f: F1<T, Seq<R>>): SeqF1<T, R> {
     return (seq): Seq<R> => {
         return {
             value: undefined,
