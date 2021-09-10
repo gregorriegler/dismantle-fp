@@ -21,14 +21,15 @@ export interface Writer<T, IO> extends Object {
 }
 
 export function new_writer<IO>(): Writer<IO, IO> {
-    return {transform: identity1}
+    return { transform: identity1 }
 }
 
 // TODO could create writer_of that combines new_writer with writer_map
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return {transform: (compose2(f, writer.transform))}
+    return { transform: (compose2(f, writer.transform)) }
 }
+// TODO add lift and map uses list -> WriterF1 for lifted F1s, only list and invoke separately
 
 export type MapForWriter<V, T, IO> = F1<F1<V, T>, Writer<V, IO>>
 
@@ -46,14 +47,20 @@ export function create_map_for_writer<V, T, IO>(writer: Writer<T, IO>): MapForWr
  * @type IO The type that is going to be written (after transformation)
  * @param writer
  * @param t the value going to be written
- * @param ioWrite the function that takes the value and writes it
+ * @param io_write the function that takes the value and writes it
  */
-export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, ioWrite: Write<IO>): void {
-    writer_ap(writer, ioWrite)(t)
+export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, io_write: Write<IO>): void {
+    writer_ap1(writer, io_write)(t)
 }
 
-export function writer_ap<T, IO>(writer: Writer<T, IO>, ioWrite: Write<IO>): Write<T> {
-    return (t: T) => ioWrite(writer.transform(t))
+function writer_ap1<T, IO>(writer: Writer<T, IO>, io_write: Write<IO>): Write<T> {
+    // is this useful? We return a Write
+    return (t: T) => io_write(writer.transform(t))
+}
+
+function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): F1<Write<IO>, void> {
+    // is this useful? We evaluate
+    return (io_write: Write<IO>) => io_write(writer.transform(t))
 }
 
 export type ApplyForWriter<T, IO> = F1<T, F1<Write<IO>, void>>
