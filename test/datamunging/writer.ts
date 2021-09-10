@@ -1,4 +1,4 @@
-import { compose2, curry3, F1, identity1 } from "../func"
+import { compose2, curry2, curry3, F1, identity1 } from "../func"
 
 
 /**
@@ -30,6 +30,13 @@ export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer
     return {transform: (compose2(f, writer.transform))}
 }
 
+export type MapForWriter<V, T, IO> = F1<F1<V, T>, Writer<V, IO>>
+
+export function create_map_for_writer<V, T, IO>(writer: Writer<T, IO>): MapForWriter<V, T, IO> {
+    const writer_map_curried = curry2(writer_map)
+    return writer_map_curried(writer)
+}
+
 // TODO do we need flatMap? Not a monad without flatMap.
 
 /**
@@ -49,7 +56,9 @@ export function writer_ap<T, IO>(writer: Writer<T, IO>, ioWrite: Write<IO>): Wri
     return (t: T) => ioWrite(writer.transform(t))
 }
 
-export function use_writer<T, IO>(writer: Writer<T, IO>): F1<T, F1<Write<IO>, void>> {
-    const apply_writer = curry3(writer_apply)
-    return apply_writer(writer)
+export type ApplyForWriter<T, IO> = F1<T, F1<Write<IO>, void>>
+
+export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForWriter<T, IO> {
+    const writer_apply_curried = curry3(writer_apply)
+    return writer_apply_curried(writer)
 }
