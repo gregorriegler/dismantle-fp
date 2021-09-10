@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Writer, writer_apply, new_writer, writer_map, use_writer } from "../datamunging/writer";
-import { curry2, curry3, F1 } from "../func";
+import { Writer, new_writer, writer_map, use_writer as create_apply_for_writer } from "../datamunging/writer";
+import { curry2, F1 } from "../func";
 import { Seq, seq_of_array } from "../seq";
 
 /**
@@ -86,8 +86,8 @@ function formatted_tasks_writer(args: Seq<string>) {
     const map_string_writer = make_writer_map(string_writer)
     const formatted_tasks_writer = map_string_writer(formatted_tasks_to_string)
 
-    const write = use_writer(formatted_tasks_writer)
-    const write_formatted_tasks = write(formatted_task_list)
+    const apply_tasks_writer = create_apply_for_writer(formatted_tasks_writer)
+    const write_formatted_tasks = apply_tasks_writer(formatted_task_list)
 
     return write_formatted_tasks
 }
