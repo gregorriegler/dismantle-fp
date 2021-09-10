@@ -21,18 +21,26 @@ export interface Writer<T, IO> extends Object {
 }
 
 export function new_writer<IO>(): Writer<IO, IO> {
-    return { transform: identity1 }
+    return {transform: identity1}
 }
 
-// TODO could create writer_of that combines new_writer with writer_map
+export function writer_of<T, IO>(f: F1<T, IO>): Writer<T, IO> {
+    const writer: Writer<IO, IO> = new_writer();
+    return writer_map(writer, f)
+}
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return { transform: (compose2(f, writer.transform)) }
+    return {transform: (compose2(f, writer.transform))}
 }
+
 // TODO add lift and map uses list -> WriterF1 for lifted F1s, only list and invoke separately
 
 export type MapForWriter<V, T, IO> = F1<F1<V, T>, Writer<V, IO>>
 
+/**
+ * shortcut for curried map of a Writer
+ * @param writer
+ */
 export function create_map_for_writer<V, T, IO>(writer: Writer<T, IO>): MapForWriter<V, T, IO> {
     const writer_map_curried = curry2(writer_map)
     return writer_map_curried(writer)

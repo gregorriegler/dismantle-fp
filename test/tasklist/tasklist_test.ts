@@ -1,7 +1,11 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Writer, new_writer, create_apply_for_writer, create_map_for_writer, MapForWriter } from "../datamunging/writer";
+import {
+    create_apply_for_writer,
+    writer_of, Write
+} from "../datamunging/writer";
 import { Seq, seq_of_array } from "../seq";
+import { F1 } from "../func";
 
 /**
  * # Phase 1
@@ -76,15 +80,11 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
 }
 
-function formatted_tasks_writer(args: Seq<string>) {
-    const formatted_task_list = format_tasks()
-
-    const string_writer: Writer<string, string> = new_writer()
-
-    const map_string_writer: MapForWriter<FormattedTasks, string, string> = create_map_for_writer(string_writer)
-    const formatted_tasks_writer = map_string_writer(formatted_tasks_to_string)
-
+function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
+    const formatted_tasks_writer = writer_of(formatted_tasks_to_string);
     const apply_formatted_tasks_writer = create_apply_for_writer(formatted_tasks_writer)
+
+    const formatted_task_list = format_tasks()
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
     return write_formatted_tasks
