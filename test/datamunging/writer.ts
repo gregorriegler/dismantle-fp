@@ -5,7 +5,7 @@ import { compose2, curry2, curry3, F1, identity1 } from "../func"
  * A Function that writes our Value (IO) to some output
  * This is the part with side-effects (non-pure, void)
  *
- * @type IO The type of the value that is going to be written
+ * @param IO The type of the value that is going to be written
  * @param io The value that is going to be written
  */
 export type Write<IO> = (io: IO) => void
@@ -13,8 +13,8 @@ export type Write<IO> = (io: IO) => void
 /**
  * Writer monad which is a container (so it is an object)
  *
- * @type T Any kind of type we'd like to write
- * @type IO The type that is going to be written to the sink
+ * @param T Any kind of type we'd like to write
+ * @param IO The type that is going to be written to the sink
  */
 export interface Writer<T, IO> extends Object {
     readonly transform: F1<T, IO>

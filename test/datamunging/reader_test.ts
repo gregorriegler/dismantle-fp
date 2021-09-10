@@ -32,12 +32,12 @@ describe("Reader (Monad)", () => {
 
     it("binds io", () => {
         const reader = new_reader<string>()
-        function countLines(s: string): Reader<string, number> {
+        function count_lines(_: string): Reader<string, number> {
             const mapped_reader = reader_of((s: string) => s.split(EOL))
             const count_reader = reader_map(mapped_reader, (array) => array.length)
             return count_reader
         }
-        const mapped_reader = reader_bind(countLines)(reader)
+        const mapped_reader = reader_bind(count_lines)(reader)
 
         const io_function = io_read_file(TestFile)
         const result = reader_apply(mapped_reader, io_function)

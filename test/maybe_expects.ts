@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { Maybe, maybe_is_none, maybe_map, maybe_value } from "./maybe_union"
+import { Maybe, maybe_map, maybe_value } from "./maybe_union"
 
 export function expectEmpty(maybe: Maybe<any>) {
     maybe_map(maybe, (value) => {
