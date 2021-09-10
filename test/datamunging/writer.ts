@@ -3,6 +3,7 @@ import { compose2, curry3, F1, identity1 } from "../func"
 
 /**
  * A Function that writes our Value (IO) to some output
+ * This is the part with side-effects (non-pure, void)
  *
  * @type IO The type of the value that is going to be written
  * @param io The value that is going to be written
@@ -20,27 +21,35 @@ export interface Writer<T, IO> extends Object {
 }
 
 export function new_writer<IO>(): Writer<IO, IO> {
-    return { transform: identity1 }
+    return {transform: identity1}
 }
 
 // TODO could create writer_of that combines new_writer with writer_map
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return { transform: (compose2(f, writer.transform)) }
+    return {transform: (compose2(f, writer.transform))}
 }
 
 // TODO do we need flatMap? Not a monad without flatMap.
 
 /**
+ * executes the actual writing (non-pure, returns void)
  *
+ * @type T The type we want to write
+ * @type IO The type that is going to be written (after transformation)
  * @param writer
- * @param t
- * @param ioWrite the function that takes the Value and outputs it
+ * @param t the value going to be written
+ * @param ioWrite the function that takes the value and writes it
  */
 export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, ioWrite: Write<IO>): void {
-    ioWrite(writer.transform(t))
+    writer_ap(writer, ioWrite)(t)
 }
 
-// export function
-// const apply_writer = curry3(writer_apply) // this should be part of the writer lib
-// const write = apply_writer(string_writer) // or even this
+export function writer_ap<T, IO>(writer: Writer<T, IO>, ioWrite: Write<IO>): Write<T> {
+    return (t: T) => ioWrite(writer.transform(t))
+}
+
+export function use_writer<T, IO>(writer: Writer<T, IO>): F1<T, F1<Write<IO>, void>> {
+    const apply_writer = curry3(writer_apply)
+    return apply_writer(writer)
+}
