@@ -9,19 +9,27 @@ import { compose2, curry3, F1, identity1 } from "../func"
  */
 export type Write<IO> = (io: IO) => void
 
-interface Output<T, IO> extends Object {
+/**
+ * Writer monad which is a container (so it is an object)
+ *
+ * @type T Any kind of type we'd like to write
+ * @type IO The type that is going to be written to the sink
+ */
+export interface Writer<T, IO> extends Object {
     readonly transform: F1<T, IO>
 }
 
-export type Writer<T, IO> = Output<T, IO>
-
-export function writer_of<IO>(): Writer<IO, IO> {
+export function new_writer<IO>(): Writer<IO, IO> {
     return { transform: identity1 }
 }
+
+// TODO could create writer_of that combines new_writer with writer_map
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
     return { transform: (compose2(f, writer.transform)) }
 }
+
+// TODO do we need flatMap? Not a monad without flatMap.
 
 /**
  *

@@ -3,7 +3,7 @@ import { EOL } from "os"
 import { compose6 } from "../func"
 import { Seq, seq_filter, seq_fold, seq_map, seq_of_array } from "../seq"
 import { io_read_file, Reader, reader_apply, reader_map, reader_of } from "./reader"
-import { Writer, writer_apply, writer_of } from "./writer"
+import { Writer, writer_apply, new_writer } from "./writer"
 
 // 1st idea: List of functions to map onto the Reader.
 
@@ -168,7 +168,7 @@ describe("Weather Data (application of Reader)", () => {
         const result = reader_apply(reader_mapped, io_function)
         expect(result).to.equal("14")
 
-        const writer: Writer<string, string> = writer_of()
+        const writer: Writer<string, string> = new_writer()
         writer_apply(writer, result, console_print)
     })
 })

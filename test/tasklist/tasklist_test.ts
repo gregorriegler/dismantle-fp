@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Writer, writer_apply, writer_of, writer_map } from "../datamunging/writer";
+import { Writer, writer_apply, new_writer, writer_map } from "../datamunging/writer";
 import { curry2, curry3, F1 } from "../func";
 import { Seq, seq_of_array } from "../seq";
 
@@ -80,7 +80,7 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
 function formatted_tasks_writer(args: Seq<string>) {
     const formatted_task_list = format_tasks()
 
-    const string_writer: Writer<string, string> = writer_of()
+    const string_writer: Writer<string, string> = new_writer()
 
     const make_writer_map = curry2(writer_map) as (t: Writer<string, string>) => F1<F1<FormattedTasks, string>, Writer<FormattedTasks, string>>
     const map_string_writer = make_writer_map(string_writer)
@@ -113,5 +113,5 @@ function console_print(message: string): void {
  * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
  *
  * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
- * Dann folden wir den State über die Commands. Am Ende wandert der State in einen Writer zum Save.
+ * Dann folden wir den State ï¿½ber die Commands. Am Ende wandert der State in einen Writer zum Save.
  */

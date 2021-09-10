@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { writer_apply, writer_of } from "./writer"
+import { writer_apply, new_writer } from "./writer"
 
 describe("Writer (Monad)", () => {
     it("writes to io", () => {
@@ -8,7 +8,7 @@ describe("Writer (Monad)", () => {
             sink += message + "\n"
         }
 
-        const writer = writer_of<string>()
+        const writer = new_writer<string>()
         writer_apply(writer, "Hello World", io_print)
 
         expect(sink).to.equal("Hello World\n")
