@@ -1,7 +1,6 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { Writer, new_writer, writer_map, create_apply_for_writer, create_map_for_writer, MapForWriter } from "../datamunging/writer";
-import { curry2, F1 } from "../func";
+import { Writer, new_writer, create_apply_for_writer, create_map_for_writer, MapForWriter } from "../datamunging/writer";
 import { Seq, seq_of_array } from "../seq";
 
 /**

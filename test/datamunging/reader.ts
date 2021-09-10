@@ -14,14 +14,17 @@ interface Input<IO, R> extends Object {
 export type Reader<IO, R> = Input<IO, R>
 
 export function new_reader<IO>(): Reader<IO, IO> {
-    return { transform: identity1 }
+    return {transform: identity1}
 }
 
-// export type ReaderConstructor<IO, T, R> = F1<F1<T, R>, Reader<IO, T>>
-// TODO could create reader_of that combines new_reader with reader_map = constructor
+// export type ReaderConstructor<IO, R> = F1<F1<IO, R>, Reader<IO, R>>
+export function reader_of<IO, R>(f: F1<IO, R>): Reader<IO, R> {
+    const reader: Reader<IO, IO> = new_reader();
+    return reader_map(reader, f)
+}
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
-    return { transform: (compose2(reader.transform, f)) }
+    return {transform: (compose2(reader.transform, f))}
 }
 
 export type ReaderF1<IO, T, R> = F1<Reader<IO, T>, Reader<IO, R>>
@@ -41,7 +44,8 @@ export function reader_bind<IO, T, R>(f: F1<T, Reader<IO, R>>): ReaderF1<IO, T, 
             return reader_apply_single(f(transformedInput), input)
             // see https://gist.github.com/teazaid/c8e200ad07156de22da94c01ffc81014#file-userrepositorywrappermonad-scala
         }
-        return { transform: nestedTransform }
+
+        return {transform: nestedTransform}
     }
 }
 

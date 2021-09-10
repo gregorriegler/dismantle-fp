@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { EOL } from "os"
 import { compose6 } from "../func"
 import { Seq, seq_filter, seq_fold, seq_map, seq_of_array } from "../seq"
-import { io_read_file, Reader, reader_apply, reader_map, new_reader } from "./reader"
+import { io_read_file, reader_apply, reader_of } from "./reader"
 import { Writer, writer_apply, new_writer } from "./writer"
 
 // 1st idea: List of functions to map onto the Reader.
@@ -150,9 +150,7 @@ describe("Weather Data (application of Reader)", () => {
     })
 
     it("find_min_temp_spread filters", () => {
-        const reader: Reader<string, string> = new_reader()
-
-        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_temp_spread)
+        const reader_mapped = reader_of(find_min_temp_spread)
 
         const io_function = io_read_file(WeatherData1Line)
         const result = reader_apply(reader_mapped, io_function)
@@ -160,9 +158,7 @@ describe("Weather Data (application of Reader)", () => {
     })
 
     it("run application", () => {
-        const reader: Reader<string, string> = new_reader()
-
-        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_temp_spread)
+        const reader_mapped = reader_of(find_min_temp_spread)
 
         const io_function = io_read_file(WeatherDataFile)
         const result = reader_apply(reader_mapped, io_function)
@@ -217,9 +213,7 @@ const FootballDataFile = "./test/datamunging/football.dat"
 
 describe("Football Data (reuse Weather Data)", () => {
     it("run application", () => {
-        const reader: Reader<string, string> = new_reader()
-
-        const reader_mapped: Reader<string, string> = reader_map(reader, find_min_goal_spread)
+        const reader_mapped = reader_of(find_min_goal_spread)
 
         const io_function = io_read_file(FootballDataFile)
         const result = reader_apply(reader_mapped, io_function)

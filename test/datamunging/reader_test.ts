@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { EOL } from "os"
-import { io_read_file, Reader, reader_apply, reader_bind, reader_map, new_reader } from "./reader"
+import { io_read_file, Reader, reader_apply, reader_bind, reader_map, new_reader, reader_of } from "./reader"
 
 const TestFile = "./test/datamunging/testFile.dat"
 
@@ -33,8 +33,7 @@ describe("Reader (Monad)", () => {
     it("binds io", () => {
         const reader = new_reader<string>()
         function countLines(s: string): Reader<string, number> {
-            const reader = new_reader<string>()
-            const mapped_reader = reader_map(reader, (s) => s.split(EOL))
+            const mapped_reader = reader_of((s: string) => s.split(EOL))
             const count_reader = reader_map(mapped_reader, (array) => array.length)
             return count_reader
         }
