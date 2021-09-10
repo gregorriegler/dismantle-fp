@@ -13,9 +13,12 @@ interface Input<IO, R> extends Object {
 
 export type Reader<IO, R> = Input<IO, R>
 
-export function reader_of<IO>(): Reader<IO, IO> {
+export function new_reader<IO>(): Reader<IO, IO> {
     return { transform: identity1 }
 }
+
+// export type ReaderConstructor<IO, T, R> = F1<F1<T, R>, Reader<IO, T>>
+// TODO could create reader_of that combines new_reader with reader_map = constructor
 
 export function reader_map<IO, T, R>(reader: Reader<IO, T>, f: F1<T, R>): Reader<IO, R> {
     return { transform: (compose2(reader.transform, f)) }
