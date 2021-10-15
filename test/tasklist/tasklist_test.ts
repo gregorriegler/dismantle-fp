@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { create_apply_for_writer, new_writer, Write, Writer, writer_of } from "../datamunging/writer";
+import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
 import { Seq, seq_first, seq_maybe_first_value, seq_of_array } from "../seq";
-import { F1 } from "../func";
+import { F1, identity1 } from "../func";
 import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_1 } from "./map";
 
@@ -95,8 +95,7 @@ function command_by_name(name: string): Maybe<Command> {
 }
 
 function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
-    const formatted_tasks_writer = writer_of(formatted_tasks_to_string);
-    const apply_formatted_tasks_writer = create_apply_for_writer(formatted_tasks_writer)
+    const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string);
 
     const formatted_task_list = format_tasks()
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
@@ -105,8 +104,8 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
 }
 
 function invalid_command_writer(args: Seq<string>): F1<Write<string>, void> {
-    const invalid_command_writer = new_writer() as Writer<string, string>
-    const apply_invalid_command_writer = create_apply_for_writer(invalid_command_writer)
+    const identity = identity1 as F1<string, string>;
+    const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
     const formatted_invalid_command = "Invalid Command: \"" + seq_maybe_first_value(args, () => "no command given") + "\"\n"
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)

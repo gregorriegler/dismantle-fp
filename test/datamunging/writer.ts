@@ -77,3 +77,8 @@ export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForW
     const writer_apply_curried = curry3(writer_apply)
     return writer_apply_curried(writer)
 }
+
+export function create_apply_writer_for_transformation<T, IO>(transformation: F1<T, IO>) : ApplyForWriter<T, IO> {
+    const writer = writer_of(transformation)
+    return create_apply_for_writer(writer);
+}
