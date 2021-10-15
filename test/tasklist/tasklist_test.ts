@@ -76,22 +76,24 @@ describe("TaskList App", () => {
  * Pure (Domain)
  */
 
+type Command = (args: Seq<string>) => F1<Write<string>, void>
+
 interface FormattedTasks {
     value: string;
 }
 
-function format_tasks(): FormattedTasks {
-    const header = "Current Tasks:\n"
-    const current_tasks = ""
-    const formatted_task_list = header + current_tasks
-    return { value: formatted_task_list }
+function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
+    const first_command_name = seq_first(command_names).head
+    const command = maybe_flat_map(first_command_name, command_by_name)
+    const executed_command = maybe_map(command, f => f(command_names))
+
+    return maybe_value(executed_command, () => fail("should not be called"))
 }
 
-function formatted_tasks_to_string(fts: FormattedTasks) {
-    return fts.value
+function command_by_name(name: string): Maybe<Command> {
+    const lookup: Map<Command> = map_of_1("list", formatted_tasks_writer)
+    return map_get(lookup, name)
 }
-
-type Command = (args: Seq<string>) => F1<Write<string>, void>
 
 function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     const formatted_tasks_writer = writer_of(formatted_tasks_to_string);
@@ -103,18 +105,15 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     return write_formatted_tasks
 }
 
-function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-
-    const first_command_name = seq_first(command_names).head
-    const command = maybe_flat_map(first_command_name, command_by_name)
-    const executed_command = maybe_map(command, f => f(command_names))
-
-    return maybe_value(executed_command, () => fail("should not be called"))
+function formatted_tasks_to_string(fts: FormattedTasks) {
+    return fts.value
 }
 
-function command_by_name(name: string): Maybe<Command> {
-    const lookup: Map<Command> = map_of_1("list", formatted_tasks_writer)
-    return map_get(lookup, name)
+function format_tasks(): FormattedTasks {
+    const header = "Current Tasks:\n"
+    const current_tasks = ""
+    const formatted_task_list = header + current_tasks
+    return { value: formatted_task_list }
 }
 
 /*
