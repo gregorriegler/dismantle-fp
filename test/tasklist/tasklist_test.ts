@@ -1,13 +1,11 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import {
-    create_apply_for_writer,
-    writer_of, Write
-} from "../datamunging/writer";
+import { create_apply_for_writer, Write, writer_of } from "../datamunging/writer";
 import { Seq, seq_first, seq_of_array } from "../seq";
-import { F1, lazy } from "../func";
-import { Maybe, maybe_flat_map, maybe_map, maybe_none, maybe_of, maybe_value } from "../maybe_union";
+import { F1 } from "../func";
+import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
 import { fail } from "assert";
+import { Map, map_get, map_of_1 } from "./map";
 
 /**
  * # Phase 1
@@ -105,17 +103,6 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     return write_formatted_tasks
 }
 
-type Map<T> = { [name: string]: T }
-
-function map_get<T>(map: Map<T>, name: string): Maybe<T> {
-    const x = map[name];
-    if (x) {
-        return maybe_of(x)
-    }
-    else return maybe_none()
-}
-// TODO map_create und map_put
-
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
 
     const first_command_name = seq_first(command_names).head
@@ -126,7 +113,7 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
 }
 
 function command_by_name(name: string): Maybe<Command> {
-    const lookup: Map<Command> = { "list": formatted_tasks_writer }
+    const lookup: Map<Command> = map_of_1("list", formatted_tasks_writer)
     return map_get(lookup, name)
 }
 
