@@ -1,10 +1,11 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import { Seq, seq_first, seq_maybe_first_value, seq_of_array } from "../seq";
+import { Seq, seq_first, seq_map, seq_maybe_first_value, seq_of_array } from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_1 } from "./map";
+import { fail } from "assert";
 
 /**
  * # Phase 1
@@ -82,11 +83,14 @@ interface FormattedTasks {
 }
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-    const first_command_name = seq_first(command_names).head
-    const command = maybe_flat_map(first_command_name, command_by_name)
-    const executed_command = maybe_map(command, f => f(command_names))
+    const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
+        const command = command_by_name(command_name)
+        const executed_command = maybe_map(command, f => f(command_names))
 
-    return maybe_value(executed_command, lazy(invalid_command_writer(command_names)))
+        return maybe_value(executed_command, lazy(invalid_command_writer(command_names)))
+    });
+
+    return seq_maybe_first_value(seq, fail)
 }
 
 function command_by_name(name: string): Maybe<Command> {
