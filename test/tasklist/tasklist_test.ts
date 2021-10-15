@@ -116,12 +116,18 @@ function map_get<T>(map: Map<T>, name: string): Maybe<T> {
 }
 // TODO map_create und map_put
 
-function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
+function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
+
+    const first_command_name = seq_first(command_names).head
+    const command = maybe_flat_map(first_command_name, command_by_name)
+    const executed_command = maybe_map(command, f => f(command_names))
+
+    return maybe_value(executed_command, () => fail("should not be called"))
+}
+
+function command_by_name(name: string): Maybe<Command> {
     const lookup: Map<Command> = { "list": formatted_tasks_writer }
-    const command = seq_first(commands).head
-    const mapped_commands: Maybe<F1<Write<string>, void>> =
-        maybe_flat_map(command, c => maybe_map(map_get(lookup, c), f => f(commands)))
-    return maybe_value(mapped_commands, () => fail("should not be called"))
+    return map_get(lookup, name)
 }
 
 /*
@@ -130,7 +136,7 @@ function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
 
 function task_list(args: string[]): void {
     const commands = seq_of_array(args);
-    const writer = execute_commands(commands)
+    const writer = execute_commands_by_name(commands)
     writer(console_print)
 }
 
