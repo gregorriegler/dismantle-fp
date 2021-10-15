@@ -28,6 +28,11 @@ export function maybe_is_none<T>(value: Maybe<T>): value is None<T> {
     return value.hint === "None"
 }
 
+// TODO Test
+export function maybe_of_nullable<T>(value: T | undefined | null): Maybe<T> {
+    return value ? maybe_of(value) : maybe_none();
+}
+
 export function maybe_of<T>(value: T): Maybe<T> {
     return {value: value, hint: "Value", toString: () => value + ""}
 }
