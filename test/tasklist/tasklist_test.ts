@@ -1,10 +1,9 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_for_writer, new_writer, Write, Writer, writer_of } from "../datamunging/writer";
-import { Seq, seq_first, seq_of_array } from "../seq";
+import { Seq, seq_first, seq_maybe_first_value, seq_of_array } from "../seq";
 import { F1 } from "../func";
 import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
-import { fail } from "assert";
 import { Map, map_get, map_of_1 } from "./map";
 
 /**
@@ -109,7 +108,7 @@ function invalid_command_writer(args: Seq<string>): F1<Write<string>, void> {
     const invalid_command_writer = new_writer() as Writer<string, string>
     const apply_invalid_command_writer = create_apply_for_writer(invalid_command_writer)
 
-    const formatted_invalid_command = "Invalid Command: \"" + "invalid-command" + "\"\n"
+    const formatted_invalid_command = "Invalid Command: \"" + seq_maybe_first_value(args, () => "no command given") + "\"\n"
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
 
     return write_invalid_command
@@ -123,7 +122,7 @@ function format_tasks(): FormattedTasks {
     const header = "Current Tasks:\n"
     const current_tasks = ""
     const formatted_task_list = header + current_tasks
-    return { value: formatted_task_list }
+    return {value: formatted_task_list}
 }
 
 /*

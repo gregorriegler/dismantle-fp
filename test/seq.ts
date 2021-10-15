@@ -9,7 +9,7 @@ import {
     maybe_of,
     maybe_value
 } from "./maybe_union"
-import {F0, F1} from "./func"
+import { F0, F1 } from "./func"
 
 export interface Seq<T> extends Object {
 }
@@ -261,4 +261,9 @@ function seq_head<T>(seq: Seq<T>): Maybe<T> {
 
 function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
+}
+
+// TODO Test
+export function seq_maybe_first_value<T>(seq: Seq<T>, default_value: () => T) {
+    return maybe_value(seq_head(seq), default_value);
 }

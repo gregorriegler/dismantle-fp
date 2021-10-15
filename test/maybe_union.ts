@@ -36,8 +36,8 @@ export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
     return compose2(f, maybe_of)
 }
 
-export function maybe_value<T>(maybe: Maybe<T>, defaultValue: F0<T>): T {
-    return maybe_fold(maybe, identity1, defaultValue)
+export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
+    return maybe_fold(maybe, identity1, default_value)
 }
 
 export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
