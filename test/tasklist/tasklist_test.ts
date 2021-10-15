@@ -105,16 +105,22 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     return write_formatted_tasks
 }
 
+type Map<T> = { [name: string]: T }
+
+function map_get<T>(map: Map<T>, name: string): Maybe<T> {
+    const x = map[name];
+    if (x) {
+        return maybe_of(x)
+    }
+    else return maybe_none()
+}
+// TODO map_create und map_put
+
 function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
-    const lookup: { [name: string]: Command } = { "list": formatted_tasks_writer }
+    const lookup: Map<Command> = { "list": formatted_tasks_writer }
     const command = seq_first(commands).head
-    const mapped_commands: Maybe<F1<Write<string>, void>> = maybe_flat_map(command, c => {
-        const x = lookup[c];
-        if (x) {
-            return maybe_of(x(commands))
-        }
-        else return maybe_none()
-    })
+    const mapped_commands: Maybe<F1<Write<string>, void>> =
+        maybe_flat_map(command, c => maybe_map(map_get(lookup, c), f => f(commands)))
     return maybe_value(mapped_commands, () => fail("should not be called"))
 }
 
