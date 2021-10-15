@@ -1,7 +1,5 @@
 import { Maybe, maybe_of_nullable } from "../maybe_union";
 
-// TODO map_create und map_put
-
 export interface Map<T> extends Object {
 }
 
@@ -12,6 +10,8 @@ export function map_of_1<T>(key: string, value: T): Map<T> {
         [key]: value
     }
 }
+
+// TODO  map_put
 
 export function map_get<T>(map: Map<T>, key: string): Maybe<T> {
     const value = (map as PrivateMap<T>)[key];

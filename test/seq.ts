@@ -91,7 +91,7 @@ function seq_to_string<T>(seq: PrivateSeq<T>): string {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return {head: privateSeq.head(), tail: privateSeq.tail()}
+    return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {

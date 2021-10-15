@@ -21,7 +21,7 @@ export interface Writer<T, IO> extends Object {
 }
 
 export function new_writer<IO>(): Writer<IO, IO> {
-    return {transform: identity1}
+    return { transform: identity1 }
 }
 
 export function writer_of<T, IO>(f: F1<T, IO>): Writer<T, IO> {
@@ -30,7 +30,7 @@ export function writer_of<T, IO>(f: F1<T, IO>): Writer<T, IO> {
 }
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return {transform: (compose2(f, writer.transform))}
+    return { transform: (compose2(f, writer.transform)) }
 }
 
 // TODO add lift and map uses list -> WriterF1 for lifted F1s, only list and invoke separately
@@ -78,7 +78,7 @@ export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForW
     return writer_apply_curried(writer)
 }
 
-export function create_apply_writer_for_transformation<T, IO>(transformation: F1<T, IO>) : ApplyForWriter<T, IO> {
+export function create_apply_writer_for_transformation<T, IO>(transformation: F1<T, IO>): ApplyForWriter<T, IO> {
     const writer = writer_of(transformation)
     return create_apply_for_writer(writer);
 }

@@ -143,7 +143,7 @@ function format_tasks(): FormattedTasks {
     const header = "Current Tasks:\n"
     const current_tasks = ""
     const formatted_task_list = header + current_tasks
-    return {value: formatted_task_list}
+    return { value: formatted_task_list }
 }
 
 /*
@@ -160,12 +160,11 @@ function console_print(message: string): void {
     console.log(message)
 }
 
-
 /*
  * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
  * String ist nicht in domain aber das Mapping kann pure gemacht werden.
  * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
  *
  * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
- * Dann folden wir den State ï¿½ber die Commands. Am Ende wandert der State in einen Writer zum Save.
+ * Dann folden wir den State über die Commands. Am Ende wandert der State in einen Writer zum Save.
  */
