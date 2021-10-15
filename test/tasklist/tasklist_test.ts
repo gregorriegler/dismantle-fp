@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { create_apply_for_writer, Write, writer_of } from "../datamunging/writer";
+import { create_apply_for_writer, new_writer, Write, Writer, writer_of } from "../datamunging/writer";
 import { Seq, seq_first, seq_of_array } from "../seq";
 import { F1 } from "../func";
 import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
@@ -51,7 +51,7 @@ describe("TaskList App", () => {
 
         // create task was too big step -> go back
 
-        xit("rejects (single) invalid command", () => {
+        it("rejects (single) invalid command", () => {
             task_list(["invalid-command"])
             expect(output).to.eq("Invalid Command: \"invalid-command\"\n")
         })
@@ -87,7 +87,7 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
     const command = maybe_flat_map(first_command_name, command_by_name)
     const executed_command = maybe_map(command, f => f(command_names))
 
-    return maybe_value(executed_command, () => fail("should not be called"))
+    return maybe_value(executed_command, () => invalid_command_writer(command_names))
 }
 
 function command_by_name(name: string): Maybe<Command> {
@@ -103,6 +103,16 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
     return write_formatted_tasks
+}
+
+function invalid_command_writer(args: Seq<string>): F1<Write<string>, void> {
+    const invalid_command_writer = new_writer() as Writer<string, string>
+    const apply_invalid_command_writer = create_apply_for_writer(invalid_command_writer)
+
+    const formatted_invalid_command = "Invalid Command: \"" + "invalid-command" + "\"\n"
+    const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
+
+    return write_invalid_command
 }
 
 function formatted_tasks_to_string(fts: FormattedTasks) {
