@@ -93,6 +93,8 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
 }
 
+type Command = (args: Seq<string>) => F1<Write<string>, void>
+
 function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     const formatted_tasks_writer = writer_of(formatted_tasks_to_string);
     const apply_formatted_tasks_writer = create_apply_for_writer(formatted_tasks_writer)
@@ -104,10 +106,12 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
 }
 
 function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
+    const lookup: { [name: string]: Command } = { "list": formatted_tasks_writer }
     const command = seq_first(commands).head
     const mapped_commands: Maybe<F1<Write<string>, void>> = maybe_flat_map(command, c => {
-        if (c === 'list') {
-            return maybe_of(formatted_tasks_writer(commands))
+        const x = lookup[c];
+        if (x) {
+            return maybe_of(x(commands))
         }
         else return maybe_none()
     })
