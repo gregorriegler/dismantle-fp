@@ -62,14 +62,14 @@ describe("TaskList App", () => {
                 "Invalid Command: \"invalid-2\"\n"
             )
         })
+
         // Test list
-        // * multiple commands ["invalid-command", "list"]
         // * kein command
 
+        // TODO NEXT
         xit("creates task", () => {
             task_list(["create foo", "list"])
             expect(output).to.eq("Current Tasks:\n( ) foo\n")
-            // TODO continue or find better test with smaller increment
         })
     })
 
