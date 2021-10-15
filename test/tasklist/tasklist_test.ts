@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
 import { Seq, seq_first, seq_maybe_first_value, seq_of_array } from "../seq";
-import { F1, identity1 } from "../func";
+import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_1 } from "./map";
 
@@ -86,7 +86,7 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
     const command = maybe_flat_map(first_command_name, command_by_name)
     const executed_command = maybe_map(command, f => f(command_names))
 
-    return maybe_value(executed_command, () => invalid_command_writer(command_names))
+    return maybe_value(executed_command, lazy(invalid_command_writer(command_names)))
 }
 
 function command_by_name(name: string): Maybe<Command> {
@@ -107,7 +107,8 @@ function invalid_command_writer(args: Seq<string>): F1<Write<string>, void> {
     const identity = identity1 as F1<string, string>;
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
-    const formatted_invalid_command = "Invalid Command: \"" + seq_maybe_first_value(args, () => "no command given") + "\"\n"
+    const command_name = seq_maybe_first_value(args, lazy("no command given"));
+    const formatted_invalid_command = "Invalid Command: \"" + command_name + "\"\n"
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
 
     return write_invalid_command
