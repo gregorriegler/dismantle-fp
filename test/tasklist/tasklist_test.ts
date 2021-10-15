@@ -6,7 +6,7 @@ import {
 } from "../datamunging/writer";
 import { Seq, seq_first, seq_of_array } from "../seq";
 import { F1, lazy } from "../func";
-import { maybe_map, maybe_value } from "../maybe_union";
+import { Maybe, maybe_flat_map, maybe_map, maybe_none, maybe_of, maybe_value } from "../maybe_union";
 import { fail } from "assert";
 
 /**
@@ -105,10 +105,13 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
 
 function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
     const command = seq_first(commands).head
-    if (maybe_value(maybe_map(command, c => c === 'list'), lazy(false))) {
-        return formatted_tasks_writer(commands)
-    }
-    return fail("should not be called");
+    const mapped_commands: Maybe<F1<Write<string>, void>> = maybe_flat_map(command, c => {
+        if (c === 'list') {
+            return maybe_of(formatted_tasks_writer(commands))
+        }
+        else return maybe_none()
+    })
+    return maybe_value(mapped_commands, () => fail("should not be called"))
 }
 
 /*
