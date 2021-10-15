@@ -1,11 +1,10 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import { Seq, seq_first, seq_fold, seq_map, seq_maybe_first_value, seq_of_array } from "../seq";
+import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_singleton } from "../seq";
 import { F1, identity1, lazy } from "../func";
-import { Maybe, maybe_flat_map, maybe_map, maybe_value } from "../maybe_union";
+import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_1 } from "./map";
-import { fail } from "assert";
 
 /**
  * # Phase 1
@@ -56,6 +55,13 @@ describe("TaskList App", () => {
             expect(output).to.eq("Invalid Command: \"invalid-command\"\n")
         })
 
+        it("rejects invalid commands", () => {
+            task_list(["invalid-1", "invalid-2"])
+            expect(output).to.eq(
+                "Invalid Command: \"invalid-1\"\n" +
+                "Invalid Command: \"invalid-2\"\n"
+            )
+        })
         // Test list
         // * multiple commands ["invalid-command", "list"]
         // * kein command
@@ -94,12 +100,14 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
     const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
         const command = command_by_name(command_name)
-        const executed_command = maybe_map(command, f => f(command_names))
+        const current_command = seq_of_singleton(command_name);
+        const executed_command = maybe_map(command, f => f(current_command))
 
-        return maybe_value(executed_command, lazy(invalid_command_writer(command_names)))
+        return maybe_value(executed_command, lazy(invalid_command_writer(current_command)))
     })
 
-    return seq_fold(seq, combiner, _ => {})
+    return seq_fold(seq, combiner, _ => {
+    })
 }
 
 function command_by_name(name: string): Maybe<Command> {
