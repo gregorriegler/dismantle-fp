@@ -4,8 +4,10 @@ import {
     create_apply_for_writer,
     writer_of, Write
 } from "../datamunging/writer";
-import { Seq, seq_of_array } from "../seq";
-import { F1 } from "../func";
+import { Seq, seq_first, seq_of_array } from "../seq";
+import { F1, lazy } from "../func";
+import { maybe_map, maybe_value } from "../maybe_union";
+import { fail } from "assert";
 
 /**
  * # Phase 1
@@ -23,7 +25,7 @@ import { F1 } from "../func";
  */
 describe("TaskList App", () => {
 
-    describe("TaskList Top Level", () => {
+    describe("TaskList Top Level (outside-in)", () => {
         let originalConsole = console.log
         let output: String
 
@@ -48,6 +50,17 @@ describe("TaskList App", () => {
             task_list(["list"])
             expect(output).to.eq("Current Tasks:\n")
         })
+
+        // create task was too big step -> go back
+
+        xit("rejects (single) invalid command", () => {
+            task_list(["invalid-command"])
+            expect(output).to.eq("Invalid Command: \"invalid-command\"\n")
+        })
+
+        // Test list
+        // * multiple commands ["invalid-command", "list"]
+        // * kein command
 
         xit("creates task", () => {
             task_list(["create foo", "list"])
@@ -90,19 +103,28 @@ function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
     return write_formatted_tasks
 }
 
+function execute_commands(commands: Seq<string>): F1<Write<string>, void> {
+    const command = seq_first(commands).head
+    if (maybe_value(maybe_map(command, c => c === 'list'), lazy(false))) {
+        return formatted_tasks_writer(commands)
+    }
+    return fail("should not be called");
+}
+
 /*
  * Top Level
  */
 
 function task_list(args: string[]): void {
     const commands = seq_of_array(args);
-    const writer = formatted_tasks_writer(commands)
+    const writer = execute_commands(commands)
     writer(console_print)
 }
 
 function console_print(message: string): void {
     console.log(message)
 }
+
 
 /*
  * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
