@@ -179,20 +179,39 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 }
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-    let tasks = tasks_create() // maybe create as first command
-    // TODO let is mutation
-    const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
-        // TODO constraints, no anonymous function
-        const command = command_by_name(command_name)
-        const current_command = seq_of_singleton(command_name);
-        const executed_command = maybe_map(command, f => f(current_command, tasks))
-        const foo = maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
-        tasks = foo.new_tasks
-        return foo.output
-    })
-
-    return seq_fold(seq, combiner, _ => {
-    })
+    const final: CommandResult = seq_fold(
+        command_names,
+        (current: CommandResult, command_name: string): CommandResult  => {
+            const command = command_by_name(command_name)
+            const current_command = seq_of_singleton(command_name);
+            const executed_command = maybe_map(command, f => f(current_command, current.new_tasks))
+            const result: CommandResult = maybe_value(executed_command, lazy(invalid_command_writer(current_command, current.new_tasks)))
+            return {
+                new_tasks: result.new_tasks,
+                output: combiner(current.output, result.output)
+            }
+        },
+        {
+            new_tasks: tasks_create(),
+            output: () => {}
+        }
+    );
+    return final.output
+    // let tasks = tasks_create() // maybe create as first command
+    //
+    // // TODO let is mutation
+    // const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
+    //     // TODO constraints, no anonymous function
+    //     const command = command_by_name(command_name)
+    //     const current_command = seq_of_singleton(command_name);
+    //     const executed_command = maybe_map(command, f => f(current_command, tasks))
+    //     const foo = maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
+    //     tasks = foo.new_tasks
+    //     return foo.output
+    // })
+    //
+    // return seq_fold(seq, combiner, _ => {
+    // })
 }
 
 function command_by_name(name: string): Maybe<Command> {
