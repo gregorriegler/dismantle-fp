@@ -81,8 +81,16 @@ describe("TaskList App", () => {
         // TODO testcase: create foo, list (only foo), create bar, list (both)
     })
 
+    // tasks create
+    // tasks add
+    // tasks format
     describe("TaskList Domain", () => {
+        it("formats empty Tasks", () => {
+            const tasks = tasks_create()
+            const formatted_tasks = tasks_format(tasks);
 
+            expect(formatted_tasks.value).to.eq("Current Tasks:\n")
+        })
     })
 })
 
@@ -92,6 +100,10 @@ describe("TaskList App", () => {
 
 type Tasks = {
     elements: Seq<string>
+}
+
+function tasks_create(): Tasks {
+    return { elements: seq_of_empty() }
 }
 
 // named pair of Tasks and lazy Write
@@ -213,5 +225,5 @@ function console_print(message: string): void {
  * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
  *
  * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
- * Dann folden wir den State über die Commands. Am Ende wandert der State in einen Writer zum Save.
+ * Dann folden wir den State Ã¼ber die Commands. Am Ende wandert der State in einen Writer zum Save.
  */
