@@ -4,7 +4,8 @@ import { create_apply_writer_for_transformation, Write } from "../datamunging/wr
 import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_singleton } from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
-import { Map, map_get, map_of_1 } from "./map";
+import { Map, map_get, map_of_1, map_of_2 } from "./map";
+import { SSL_OP_MSIE_SSLV2_RSA_PADDING } from "constants";
 
 /**
  * # Phase 1
@@ -66,6 +67,10 @@ describe("TaskList App", () => {
         // Test list
         // * kein command
 
+        it("creates task command exists", () => {
+            task_list(["create foo"])
+            expect(output).to.eq("")
+        })
         // TODO NEXT
         xit("creates task", () => {
             task_list(["create foo", "list"])
@@ -99,6 +104,7 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
     const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
+        // TODO constraints, no anonymous function
         const command = command_by_name(command_name)
         const current_command = seq_of_singleton(command_name);
         const executed_command = maybe_map(command, f => f(current_command))
@@ -111,8 +117,13 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
 }
 
 function command_by_name(name: string): Maybe<Command> {
-    const lookup: Map<Command> = map_of_1("list", formatted_tasks_writer)
+    const lookup: Map<Command> = map_of_2("list", formatted_tasks_writer,
+                                        "create foo", add_task)
     return map_get(lookup, name)
+}
+
+function add_task(args: Seq<string>): F1<Write<string>, void> {
+    return (w) => {}
 }
 
 function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
