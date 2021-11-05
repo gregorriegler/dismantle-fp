@@ -4,8 +4,7 @@ import { create_apply_writer_for_transformation, Write } from "../datamunging/wr
 import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_singleton } from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
-import { Map, map_get, map_of_1, map_of_2 } from "./map";
-import { SSL_OP_MSIE_SSLV2_RSA_PADDING } from "constants";
+import { Map, map_get, map_of_2 } from "./map";
 
 /**
  * # Phase 1
@@ -90,7 +89,7 @@ describe("TaskList App", () => {
  * Pure (Domain)
  */
 
-type Command = (args: Seq<string>) => F1<Write<string>, void>
+type Command = (args: Seq<string>, tasks: Tasks) => F1<Write<string>, void>
 
 interface FormattedTasks {
     value: string;
@@ -106,13 +105,14 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 }
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
+    const tasks = {} // maybe create as first command
     const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
         // TODO constraints, no anonymous function
         const command = command_by_name(command_name)
         const current_command = seq_of_singleton(command_name);
-        const executed_command = maybe_map(command, f => f(current_command))
+        const executed_command = maybe_map(command, f => f(current_command, tasks))
 
-        return maybe_value(executed_command, lazy(invalid_command_writer(current_command)))
+        return maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
     })
 
     return seq_fold(seq, combiner, _ => {
@@ -125,20 +125,21 @@ function command_by_name(name: string): Maybe<Command> {
     return map_get(lookup, name)
 }
 
-function add_task(args: Seq<string>): F1<Write<string>, void> {
+function add_task(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
     return (w) => {}
 }
 
-function formatted_tasks_writer(args: Seq<string>): F1<Write<string>, void> {
+// list command
+function formatted_tasks_writer(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string);
 
-    const formatted_task_list = format_tasks()
+    const formatted_task_list = format_tasks(tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
     return write_formatted_tasks
 }
 
-function invalid_command_writer(args: Seq<string>): F1<Write<string>, void> {
+function invalid_command_writer(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
     const identity = identity1 as F1<string, string>;
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
@@ -153,9 +154,11 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
 }
 
-function format_tasks(): FormattedTasks {
+type Tasks = { }
+
+function format_tasks(tasks: Tasks): FormattedTasks {
     const header = "Current Tasks:\n"
-    const current_tasks = ""
+    const current_tasks = "" // seq_reduce(seq_map(tasks.tasks, format_task), join_lines)
     const formatted_task_list = header + current_tasks
     return { value: formatted_task_list }
 }
