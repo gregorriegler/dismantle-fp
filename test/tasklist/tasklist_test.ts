@@ -1,7 +1,17 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import { Seq, seq_fold, seq_is_empty, seq_map, seq_maybe_first_value, seq_of_array, seq_of_empty, seq_of_singleton } from "../seq";
+import {
+    Seq,
+    seq_first,
+    seq_fold,
+    seq_is_empty,
+    seq_map,
+    seq_maybe_first_value,
+    seq_of_array,
+    seq_of_empty,
+    seq_of_singleton, SeqElement
+} from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_2 } from "./map";
@@ -91,6 +101,15 @@ describe("TaskList App", () => {
 
             expect(formatted_tasks.value).to.eq("Current Tasks:\n")
         })
+
+        it("adds a Task", () => {
+            const tasks = tasks_create()
+
+            const result = tasks_add(tasks, "Buy a Milk");
+
+            const formatted_tasks = tasks_format(result);
+            expect(formatted_tasks.value).to.eq("Current Tasks:\n( ) Buy a Milk\n")
+        })
     })
 })
 
@@ -128,7 +147,7 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 }
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-    let tasks = { elements: seq_of_empty() } // maybe create as first command
+    let tasks = tasks_create() // maybe create as first command
     // TODO let is mutation
     const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
         // TODO constraints, no anonymous function
@@ -195,7 +214,10 @@ function tasks_format(tasks: Tasks): FormattedTasks {
     if (seq_is_empty(tasks.elements)) {
         current_tasks = ""
     } else {
-        current_tasks = "( ) foo\n"
+        const stringSeqElement: SeqElement<string> = seq_first(tasks.elements)
+        const head = stringSeqElement.head
+        const s = maybe_value(head, lazy(""))
+        current_tasks = "( ) " + s + "\n"
     }
     const formatted_task_list = header + current_tasks
     return { value: formatted_task_list }
