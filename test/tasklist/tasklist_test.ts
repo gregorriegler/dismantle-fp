@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_singleton } from "../seq";
+import { Seq, seq_fold, seq_is_empty, seq_map, seq_maybe_first_value, seq_of_array, seq_of_empty, seq_of_singleton } from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_2 } from "./map";
@@ -72,7 +72,7 @@ describe("TaskList App", () => {
                 expect(output).to.eq("")
             })
             // TODO NEXT
-            xit("creates the task", () => {
+            it("creates the task", () => {
                 task_list(["create foo", "list"])
                 expect(output).to.eq("Current Tasks:\n( ) foo\n")
             })
@@ -89,6 +89,10 @@ describe("TaskList App", () => {
 /*
  * Pure (Domain)
  */
+
+type Tasks = {
+    elements: Seq<string>
+}
 
 // named pair of Tasks and lazy Write
 type CommandResult = {
@@ -112,13 +116,15 @@ function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Wr
 }
 
 function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-    const tasks = {} // maybe create as first command
+    let tasks = { elements: seq_of_empty() } // maybe create as first command
+    // TODO let is mutation
     const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
         // TODO constraints, no anonymous function
         const command = command_by_name(command_name)
         const current_command = seq_of_singleton(command_name);
         const executed_command = maybe_map(command, f => f(current_command, tasks))
         const foo = maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
+        tasks = foo.new_tasks
         return foo.output
     })
 
@@ -128,13 +134,13 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
 
 function command_by_name(name: string): Maybe<Command> {
     const lookup: Map<Command> = map_of_2("list", formatted_tasks_writer,
-                                        "create foo", add_task)
+                                          "create foo", add_task)
     return map_get(lookup, name)
 }
 
 function add_task(args: Seq<string>, tasks: Tasks): CommandResult {
     return {
-        new_tasks: tasks,
+        new_tasks: tasks_add(tasks, "foo"), // TODO add more tasks
         output: (w) => {    }
     }
 }
@@ -143,7 +149,7 @@ function add_task(args: Seq<string>, tasks: Tasks): CommandResult {
 function formatted_tasks_writer(args: Seq<string>, tasks: Tasks): CommandResult {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string);
 
-    const formatted_task_list = format_tasks(tasks)
+    const formatted_task_list = tasks_format(tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
     return {
@@ -170,13 +176,21 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
 }
 
-type Tasks = { }
-
-function format_tasks(tasks: Tasks): FormattedTasks {
+function tasks_format(tasks: Tasks): FormattedTasks {
     const header = "Current Tasks:\n"
-    const current_tasks = "" // seq_reduce(seq_map(tasks.tasks, format_task), join_lines)
+    let current_tasks
+    // seq_fold(seq_map(tasks.elements, format_task), join_lines)
+    if (seq_is_empty(tasks.elements)) {
+        current_tasks = ""
+    } else {
+        current_tasks = "( ) foo\n"
+    }
     const formatted_task_list = header + current_tasks
     return { value: formatted_task_list }
+}
+
+function tasks_add(tasks: Tasks, new_task: string): Tasks {
+    return { elements: seq_of_singleton(new_task) }
 }
 
 /*
