@@ -1,17 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import {
-    Seq,
-    seq_first,
-    seq_fold,
-    seq_is_empty,
-    seq_map,
-    seq_maybe_first_value,
-    seq_of_array,
-    seq_of_empty,
-    seq_of_singleton, SeqElement
-} from "../seq";
+import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_empty, seq_of_singleton } from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_2 } from "./map";
@@ -122,7 +112,7 @@ type Tasks = {
 }
 
 function tasks_create(): Tasks {
-    return { elements: seq_of_empty() }
+    return {elements: seq_of_empty()}
 }
 
 // named pair of Tasks and lazy Write
@@ -165,14 +155,15 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
 
 function command_by_name(name: string): Maybe<Command> {
     const lookup: Map<Command> = map_of_2("list", formatted_tasks_writer,
-                                          "create foo", add_task)
+        "create foo", add_task)
     return map_get(lookup, name)
 }
 
 function add_task(args: Seq<string>, tasks: Tasks): CommandResult {
     return {
         new_tasks: tasks_add(tasks, "foo"), // TODO add more tasks
-        output: (w) => {    }
+        output: (w) => {
+        }
     }
 }
 
@@ -209,22 +200,21 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
 
 function tasks_format(tasks: Tasks): FormattedTasks {
     const header = "Current Tasks:\n"
-    let current_tasks
-    // seq_fold(seq_map(tasks.elements, format_task), join_lines)
-    if (seq_is_empty(tasks.elements)) {
-        current_tasks = ""
-    } else {
-        const stringSeqElement: SeqElement<string> = seq_first(tasks.elements)
-        const head = stringSeqElement.head
-        const s = maybe_value(head, lazy(""))
-        current_tasks = "( ) " + s + "\n"
-    }
-    const formatted_task_list = header + current_tasks
-    return { value: formatted_task_list }
+    const formatted_tasks = seq_map(tasks.elements, task_format)
+    const formatted_task_list = header + seq_fold(formatted_tasks, joinStrings, "")
+    return {value: formatted_task_list}
+}
+
+function task_format(task: string) {
+    return "( ) " + task + "\n";
+}
+
+function joinStrings(a: string, b: string) {
+    return a + b;
 }
 
 function tasks_add(tasks: Tasks, new_task: string): Tasks {
-    return { elements: seq_of_singleton(new_task) }
+    return {elements: seq_of_singleton(new_task)}
 }
 
 /*
