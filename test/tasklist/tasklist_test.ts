@@ -55,7 +55,7 @@ describe("TaskList App", () => {
             expect(output).to.eq("Invalid Command: \"invalid-command\"\n")
         })
 
-        it("rejects invalid commands", () => {
+        it("rejects invalid commands (creates list processing)", () => {
             task_list(["invalid-1", "invalid-2"])
             expect(output).to.eq(
                 "Invalid Command: \"invalid-1\"\n" +
@@ -71,8 +71,8 @@ describe("TaskList App", () => {
                 task_list(["create foo"])
                 expect(output).to.eq("")
             })
-            // TODO NEXT
-            it("creates the task", () => {
+
+            it("creates the task (defines the design with fakes)", () => {
                 task_list(["create foo", "list"])
                 expect(output).to.eq("Current Tasks:\n( ) foo\n")
             })
