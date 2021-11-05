@@ -78,6 +78,7 @@ describe("TaskList App", () => {
             })
         })
 
+        // TODO testcase: create foo, list (only foo), create bar, list (both)
     })
 
     describe("TaskList Domain", () => {
@@ -89,7 +90,13 @@ describe("TaskList App", () => {
  * Pure (Domain)
  */
 
-type Command = (args: Seq<string>, tasks: Tasks) => F1<Write<string>, void>
+// named pair of Tasks and lazy Write
+type CommandResult = {
+    new_tasks: Tasks,
+    output: F1<Write<string>, void>
+}
+
+type Command = (args: Seq<string>, tasks: Tasks) => CommandResult
 
 interface FormattedTasks {
     value: string;
@@ -111,8 +118,8 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
         const command = command_by_name(command_name)
         const current_command = seq_of_singleton(command_name);
         const executed_command = maybe_map(command, f => f(current_command, tasks))
-
-        return maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
+        const foo = maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
+        return foo.output
     })
 
     return seq_fold(seq, combiner, _ => {
@@ -125,21 +132,27 @@ function command_by_name(name: string): Maybe<Command> {
     return map_get(lookup, name)
 }
 
-function add_task(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
-    return (w) => {}
+function add_task(args: Seq<string>, tasks: Tasks): CommandResult {
+    return {
+        new_tasks: tasks,
+        output: (w) => {    }
+    }
 }
 
 // list command
-function formatted_tasks_writer(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
+function formatted_tasks_writer(args: Seq<string>, tasks: Tasks): CommandResult {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string);
 
     const formatted_task_list = format_tasks(tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
-    return write_formatted_tasks
+    return {
+        new_tasks: tasks,
+        output: write_formatted_tasks
+    }
 }
 
-function invalid_command_writer(args: Seq<string>, tasks: Tasks): F1<Write<string>, void> {
+function invalid_command_writer(args: Seq<string>, tasks: Tasks): CommandResult {
     const identity = identity1 as F1<string, string>;
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
@@ -147,7 +160,10 @@ function invalid_command_writer(args: Seq<string>, tasks: Tasks): F1<Write<strin
     const formatted_invalid_command = "Invalid Command: \"" + command_name + "\"\n"
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
 
-    return write_invalid_command
+    return {
+        new_tasks: tasks,
+        output: write_invalid_command
+    }
 }
 
 function formatted_tasks_to_string(fts: FormattedTasks) {
