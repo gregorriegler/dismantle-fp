@@ -1,7 +1,16 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
-import { Seq, seq_fold, seq_map, seq_maybe_first_value, seq_of_array, seq_of_empty, seq_of_singleton } from "../seq";
+import {
+    Seq,
+    seq_fold,
+    seq_join,
+    seq_map,
+    seq_maybe_first_value,
+    seq_of_array,
+    seq_of_empty,
+    seq_of_singleton
+} from "../seq";
 import { F1, identity1, lazy } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_2 } from "./map";
@@ -100,6 +109,20 @@ describe("TaskList App", () => {
             const formatted_tasks = tasks_format(result);
             expect(formatted_tasks.value).to.eq("Current Tasks:\n( ) Buy a Milk\n")
         })
+
+        it("adds two Tasks", () => {
+            let tasks = tasks_create()
+
+            tasks = tasks_add(tasks, "Buy a Milk")
+            const result = tasks_add(tasks, "Buy Coffee")
+
+            const formatted_tasks = tasks_format(result)
+            expect(formatted_tasks.value).to.eq(
+                "Current Tasks:\n" +
+                "( ) Buy a Milk\n" +
+                "( ) Buy Coffee\n"
+            )
+        })
     })
 })
 
@@ -111,22 +134,41 @@ type Tasks = {
     elements: Seq<string>
 }
 
+interface FormattedTasks {
+    value: string;
+}
+
 function tasks_create(): Tasks {
     return {elements: seq_of_empty()}
 }
 
+function tasks_add(tasks: Tasks, new_task: string): Tasks {
+    return {elements: seq_join(tasks.elements, seq_of_singleton(new_task))}
+}
+
+function tasks_format(tasks: Tasks): FormattedTasks {
+    const header = "Current Tasks:\n"
+    const formatted_tasks = seq_map(tasks.elements, task_format)
+    const formatted_task_list = header + seq_fold(formatted_tasks, joinStrings, "")
+    return {value: formatted_task_list}
+}
+
+function task_format(task: string) {
+    return "( ) " + task + "\n";
+}
+
+function joinStrings(a: string, b: string) {
+    return a + b;
+}
+
 // named pair of Tasks and lazy Write
+
 type CommandResult = {
     new_tasks: Tasks,
     output: F1<Write<string>, void>
 }
 
 type Command = (args: Seq<string>, tasks: Tasks) => CommandResult
-
-interface FormattedTasks {
-    value: string;
-}
-
 // TODO move to writer
 // TODO need type 'WriterApply' in writer for F1<Write<string>, void>
 function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Write<string>, void> {
@@ -196,25 +238,6 @@ function invalid_command_writer(args: Seq<string>, tasks: Tasks): CommandResult 
 
 function formatted_tasks_to_string(fts: FormattedTasks) {
     return fts.value
-}
-
-function tasks_format(tasks: Tasks): FormattedTasks {
-    const header = "Current Tasks:\n"
-    const formatted_tasks = seq_map(tasks.elements, task_format)
-    const formatted_task_list = header + seq_fold(formatted_tasks, joinStrings, "")
-    return {value: formatted_task_list}
-}
-
-function task_format(task: string) {
-    return "( ) " + task + "\n";
-}
-
-function joinStrings(a: string, b: string) {
-    return a + b;
-}
-
-function tasks_add(tasks: Tasks, new_task: string): Tasks {
-    return {elements: seq_of_singleton(new_task)}
 }
 
 /*
