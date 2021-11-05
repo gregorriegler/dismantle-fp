@@ -163,95 +163,78 @@ function joinStrings(a: string, b: string) {
 
 // named pair of Tasks and lazy Write
 
-type CommandResult = {
-    new_tasks: Tasks,
-    output: F1<Write<string>, void>
+type ApplicationState = {
+    tasks: Tasks,
+    write: F1<Write<string>, void>
 }
 
-type Command = (args: Seq<string>, tasks: Tasks) => CommandResult
+type Command = (command_name: string, state: ApplicationState) => ApplicationState
+
+function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
+    const state: ApplicationState = seq_fold(
+        command_names,
+        (current_state: ApplicationState, command_name: string): ApplicationState  => {
+            const command = command_by_name(command_name)
+            const executed_command = maybe_map(command, f => f(command_name, current_state))
+            const new_state: ApplicationState = maybe_value(executed_command, lazy(command_invalid(command_name, current_state)))
+            return {
+                tasks: new_state.tasks, // we drop the old state
+                write: combine_writers(current_state.write, new_state.write)
+            }
+        },
+        {
+            tasks: tasks_create(),
+            write: () => {}
+        }
+    );
+    return state.write
+}
+
 // TODO move to writer
 // TODO need type 'WriterApply' in writer for F1<Write<string>, void>
-function combiner(a: F1<Write<string>, void>, b: F1<Write<string>, void>): F1<Write<string>, void> {
+function combine_writers<T>(a: F1<T, void>, b: F1<T, void>): F1<T, void> {
     return (write) => {
         a(write)
         b(write)
     }
 }
 
-function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
-    const final: CommandResult = seq_fold(
-        command_names,
-        (current: CommandResult, command_name: string): CommandResult  => {
-            const command = command_by_name(command_name)
-            const current_command = seq_of_singleton(command_name);
-            const executed_command = maybe_map(command, f => f(current_command, current.new_tasks))
-            const result: CommandResult = maybe_value(executed_command, lazy(invalid_command_writer(current_command, current.new_tasks)))
-            return {
-                new_tasks: result.new_tasks,
-                output: combiner(current.output, result.output)
-            }
-        },
-        {
-            new_tasks: tasks_create(),
-            output: () => {}
-        }
-    );
-    return final.output
-    // let tasks = tasks_create() // maybe create as first command
-    //
-    // // TODO let is mutation
-    // const seq: Seq<F1<Write<string>, void>> = seq_map(command_names, command_name => {
-    //     // TODO constraints, no anonymous function
-    //     const command = command_by_name(command_name)
-    //     const current_command = seq_of_singleton(command_name);
-    //     const executed_command = maybe_map(command, f => f(current_command, tasks))
-    //     const foo = maybe_value(executed_command, lazy(invalid_command_writer(current_command, tasks)))
-    //     tasks = foo.new_tasks
-    //     return foo.output
-    // })
-    //
-    // return seq_fold(seq, combiner, _ => {
-    // })
-}
-
 function command_by_name(name: string): Maybe<Command> {
-    const lookup: Map<Command> = map_of_2("list", formatted_tasks_writer,
-        "create foo", add_task)
+    const lookup: Map<Command> = map_of_2("list", command_list,
+        "create foo", command_add_task)
     return map_get(lookup, name)
 }
 
-function add_task(args: Seq<string>, tasks: Tasks): CommandResult {
+function command_add_task(command_name: string, state: ApplicationState): ApplicationState {
     return {
-        new_tasks: tasks_add(tasks, "foo"), // TODO add more tasks
-        output: (w) => {
+        tasks: tasks_add(state.tasks, "foo"), // TODO add more tasks
+        write: (w) => {
         }
     }
 }
 
-// list command
-function formatted_tasks_writer(args: Seq<string>, tasks: Tasks): CommandResult {
+function command_list(command_name: string, state: ApplicationState): ApplicationState {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string);
 
-    const formatted_task_list = tasks_format(tasks)
+    const formatted_task_list = tasks_format(state.tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
     return {
-        new_tasks: tasks,
-        output: write_formatted_tasks
+        tasks: state.tasks,
+        write: write_formatted_tasks
     }
 }
 
-function invalid_command_writer(args: Seq<string>, tasks: Tasks): CommandResult {
+function command_invalid(command_name: string, state: ApplicationState): ApplicationState {
     const identity = identity1 as F1<string, string>;
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
-    const command_name = seq_maybe_first_value(args, lazy("no command given"));
     const formatted_invalid_command = "Invalid Command: \"" + command_name + "\"\n"
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
 
     return {
-        new_tasks: tasks,
-        output: write_invalid_command
+        tasks: state.tasks,
+        write: write_invalid_command
     }
 }
 
