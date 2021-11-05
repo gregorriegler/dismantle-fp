@@ -67,15 +67,18 @@ describe("TaskList App", () => {
         // Test list
         // * kein command
 
-        it("creates task command exists", () => {
-            task_list(["create foo"])
-            expect(output).to.eq("")
+        describe("create task", () => {
+            it("command exists", () => {
+                task_list(["create foo"])
+                expect(output).to.eq("")
+            })
+            // TODO NEXT
+            xit("creates the task", () => {
+                task_list(["create foo", "list"])
+                expect(output).to.eq("Current Tasks:\n( ) foo\n")
+            })
         })
-        // TODO NEXT
-        xit("creates task", () => {
-            task_list(["create foo", "list"])
-            expect(output).to.eq("Current Tasks:\n( ) foo\n")
-        })
+
     })
 
     describe("TaskList Domain", () => {
