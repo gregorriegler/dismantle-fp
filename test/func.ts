@@ -25,7 +25,7 @@ export interface F3<T, U, V, R> {
  *
  * @param IO The type of the value that is going to be written
  */
- export type Write<IO> = F1<IO, void>
+export type Write<IO> = F1<IO, void>
 
 export function identity1<T>(a: T): T {
     return a
@@ -100,6 +100,13 @@ export function compose6<T, U, V, W, X, Y, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V,
     return compose2(compose5(a, b, c, d, e), f)
 }
 
+export function sequence_writes<T>(a: Write<T>, b: Write<T>): Write<T> {
+    return (write) => {
+        a(write)
+        b(write)
+    }
+}
+
 export function lazy<R>(value: R): F0<R> {
     return () => value
 }
@@ -117,5 +124,9 @@ export function inc(a: number): number {
 }
 
 export function add(a: number, b: number): number {
+    return a + b
+}
+
+export function join(a: string, b: string): string {
     return a + b
 }
