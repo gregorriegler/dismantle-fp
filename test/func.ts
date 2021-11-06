@@ -5,6 +5,7 @@
 export interface F0<R> {
     (): R
 }
+export type Read<R> = F0<R>
 
 export interface F1<T, R> {
     (t: T): R
@@ -17,6 +18,8 @@ export interface F2<T, U, R> {
 export interface F3<T, U, V, R> {
     (t: T, u: U, v: V): R
 }
+
+export type Write<W> = F1<W, void>
 
 export function identity1<T>(a: T): T {
     return a
