@@ -13,7 +13,7 @@ export interface WeatherEntry {
     Dy: string
     MxT: number
     MnT: number
-    spread(): number;
+    spread(): number
 }
 
 
@@ -50,7 +50,7 @@ function splitIntoLines(fileText: string): Seq<string> {
 }
 
 function trimLines(lines: Seq<string>) {
-    return seq_map(lines, trim);
+    return seq_map(lines, trim)
 }
 
 function trim(line: string): string {
@@ -58,7 +58,7 @@ function trim(line: string): string {
 }
 
 function filterNonEmptyLines(trimmedLines: Seq<string>) {
-    return seq_filter(trimmedLines, isNonEmptyLine);
+    return seq_filter(trimmedLines, isNonEmptyLine)
 }
 
 function isNonEmptyLine(line: string): boolean {
@@ -66,7 +66,7 @@ function isNonEmptyLine(line: string): boolean {
 }
 
 function filterDataLines(nonEmptyLines: Seq<string>) {
-    return seq_filter(nonEmptyLines, startsWithDigit);
+    return seq_filter(nonEmptyLines, startsWithDigit)
 }
 
 function startsWithDigit(nonEmptyLine: string): boolean {
@@ -75,7 +75,7 @@ function startsWithDigit(nonEmptyLine: string): boolean {
 }
 
 function parseWeatherDataEntries(dataLines: Seq<string>) {
-    return seq_map(dataLines, parseWeatherData);
+    return seq_map(dataLines, parseWeatherData)
 }
 
 function parseWeatherData(dataLine: string): WeatherEntry {
@@ -91,7 +91,7 @@ function parseWeatherData(dataLine: string): WeatherEntry {
 }
 
 function getMinWeatherEntry(dataEntries: Seq<WeatherEntry>) {
-    return seq_fold(dataEntries, minEntry, { Dy: "", MxT: 0, MnT: 0, spread() { return 999 } } as WeatherEntry);
+    return seq_fold(dataEntries, minEntry, { Dy: "", MxT: 0, MnT: 0, spread() { return 999 } } as WeatherEntry)
 }
 
 function minEntry<T extends { spread(): number }>(a: T, b: T): T {
@@ -175,7 +175,7 @@ export interface FootballEntry {
     Team: string
     F: number
     A: number
-    spread(): number;
+    spread(): number
 }
 
 export function find_min_goal_spread(fileText: string): string {
@@ -221,7 +221,6 @@ describe("Football Data (reuse Weather Data)", () => {
     })
 })
 
-
 // -------- requirement 3 ---------
 
-// TODO data entries and parse data are different. Should we do sth about it?
+// TODO Datamunging - data entries and parse data are different. Should we do sth about it?
