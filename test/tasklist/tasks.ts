@@ -10,7 +10,7 @@ import {
 import { F1, identity1, join, lazy } from "../func"
 import { Maybe, maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
-import { sequence_writes as write_in_sequence, Write, WriteApplied } from "../datamunging/write"
+import { null_write, sequence_writes as write_in_sequence, Write, WriteApplied } from "../datamunging/write"
 
 /*
  * Pure (Domain)
@@ -76,19 +76,18 @@ export function execute_commands_by_name(command_names: Seq<string>): WriteAppli
     return state.write
 }
 
-function command_by_name(name: string): Maybe<Command> {
+function command_by_name(command_name: string): Maybe<Command> {
     const lookup: Map<Command> = map_of_2( //
         "list", command_list, //
         "create foo", command_add_task, //
     )
-    return map_get(lookup, name)
+    return map_get(lookup, command_name)
 }
 
-function command_add_task(_: string, state: ApplicationState): ApplicationState {
+function command_add_task(command_name: string, state: ApplicationState): ApplicationState {
     return {
         tasks: tasks_add(state.tasks, "foo"), // TODO add more tasks
-        write: (w) => {
-        }
+        write: null_write
     }
 }
 

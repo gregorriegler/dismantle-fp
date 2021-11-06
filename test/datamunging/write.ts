@@ -1,7 +1,7 @@
+import { F0, F1 } from "../func"
 /*
  * General support functions to enable FP style programming.
  */
-import { F0, F1 } from "../func"
 
 export type Read<R> = F0<R>
 
@@ -14,6 +14,10 @@ export type Read<R> = F0<R>
 export type Write<IO> = F1<IO, void>
 
 export type WriteApplied<IO> = Write<Write<IO>>
+
+export function null_write<T>(_: T): void {
+
+}
 
 export function sequence_writes<T>(a: Write<T>, b: Write<T>): Write<T> {
     return (write) => {
