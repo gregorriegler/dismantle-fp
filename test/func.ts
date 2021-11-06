@@ -5,7 +5,6 @@
 export interface F0<R> {
     (): R
 }
-export type Read<R> = F0<R>
 
 export interface F1<T, R> {
     (t: T): R
@@ -18,14 +17,6 @@ export interface F2<T, U, R> {
 export interface F3<T, U, V, R> {
     (t: T, u: U, v: V): R
 }
-
-/**
- * A Function that writes our Value (IO) to some output
- * This is the part with side-effects (non-pure, void)
- *
- * @param IO The type of the value that is going to be written
- */
-export type Write<IO> = F1<IO, void>
 
 export function identity1<T>(a: T): T {
     return a
@@ -98,13 +89,6 @@ export function compose5<T, U, V, W, X, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, W>
 
 export function compose6<T, U, V, W, X, Y, R>(a: F1<T, U>, b: F1<U, V>, c: F1<V, W>, d: F1<W, X>, e: F1<X, Y>, f: F1<Y, R>): F1<T, R> {
     return compose2(compose5(a, b, c, d, e), f)
-}
-
-export function sequence_writes<T>(a: Write<T>, b: Write<T>): Write<T> {
-    return (write) => {
-        a(write)
-        b(write)
-    }
 }
 
 export function lazy<R>(value: R): F0<R> {

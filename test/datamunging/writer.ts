@@ -1,4 +1,5 @@
-import { compose2, curry2, curry3, F1, identity1, Write } from "../func"
+import { compose2, curry2, curry3, F1, identity1 } from "../func"
+import { Write } from "./write"
 
 /**
  * Writer monad which is a container (so it is an object)
@@ -62,7 +63,7 @@ function writer_ap1<T, IO>(writer: Writer<T, IO>, io_write: Write<IO>): Write<T>
     return (t: T) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }
 
-function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): F1<Write<IO>, void> {
+function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): Write<Write<IO>> {
     // is this useful? We evaluate
     return (io_write: Write<IO>) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }

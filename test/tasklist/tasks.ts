@@ -7,9 +7,10 @@ import {
     seq_of_empty,
     seq_of_singleton
 } from "../seq"
-import { F1, identity1, join, lazy, sequence_writes, Write } from "../func"
+import { F1, identity1, join, lazy } from "../func"
 import { Maybe, maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
+import { sequence_writes as write_in_sequence, Write } from "../datamunging/write"
 
 /*
  * Pure (Domain)
@@ -64,7 +65,7 @@ export function execute_commands_by_name(command_names: Seq<string>): Write<Writ
             const new_state: ApplicationState = maybe_value(executed_command, lazy(command_invalid(command_name, current_state)))
             return {
                 tasks: new_state.tasks, // we drop the old state
-                write: sequence_writes(current_state.write, new_state.write)
+                write: write_in_sequence(current_state.write, new_state.write)
             }
         },
         {

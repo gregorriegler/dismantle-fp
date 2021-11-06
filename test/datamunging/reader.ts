@@ -1,5 +1,6 @@
 import { readFileSync } from "fs"
-import { compose2, F1, identity1, Read } from "../func"
+import { compose2, F1, identity1 } from "../func"
+import { Read } from "./write"
 
 export function io_read_file(fileName: string): Read<string> {
     return () => readFileSync(fileName).toString()
