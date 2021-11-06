@@ -9,7 +9,8 @@ import {
     maybe_lift,
     maybe_map,
     maybe_none,
-    maybe_of
+    maybe_of,
+    maybe_of_nullable
 } from "./maybe_union"
 
 describe("Maybe (Monad) second version using lift+bind", () => {
@@ -19,9 +20,19 @@ describe("Maybe (Monad) second version using lift+bind", () => {
             expectEmpty(maybe)
         })
 
-        it("with a value is not none", () => {
+        it("with a value", () => {
             const maybe = maybe_of(1)
             expect(maybe_is_none(maybe)).to.be.false
+        })
+
+        it("with a value is not none", () => {
+            const maybe = maybe_of_nullable(1)
+            expect(maybe_is_none(maybe)).to.be.false
+        })
+
+        it("with a value which is null", () => {
+            const maybe = maybe_of_nullable(null)
+            expectEmpty(maybe)
         })
     })
 
