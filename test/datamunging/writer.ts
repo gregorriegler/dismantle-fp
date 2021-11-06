@@ -1,14 +1,4 @@
-import { compose2, curry2, curry3, F1, identity1 } from "../func"
-
-
-/**
- * A Function that writes our Value (IO) to some output
- * This is the part with side-effects (non-pure, void)
- *
- * @param IO The type of the value that is going to be written
- * @param io The value that is going to be written
- */
-export type Write<IO> = (io: IO) => void
+import { compose2, curry2, curry3, F1, identity1, Write } from "../func"
 
 /**
  * Writer monad which is a container (so it is an object)
@@ -17,39 +7,45 @@ export type Write<IO> = (io: IO) => void
  * @param IO The type that is going to be written to the sink
  */
 export interface Writer<T, IO> extends Object {
+}
+
+interface PrivateWriter<T, IO> extends Writer<T, IO> {
     readonly transform: F1<T, IO>
 }
 
 export function new_writer<IO>(): Writer<IO, IO> {
-    return { transform: identity1 }
+    return {
+        transform: identity1
+    } as PrivateWriter<IO, IO>
 }
 
 export function writer_of<T, IO>(f: F1<T, IO>): Writer<T, IO> {
-    const writer: Writer<IO, IO> = new_writer();
+    const writer: Writer<IO, IO> = new_writer()
     return writer_map(writer, f)
 }
 
 export function writer_map<V, T, IO>(writer: Writer<T, IO>, f: F1<V, T>): Writer<V, IO> {
-    return { transform: (compose2(f, writer.transform)) }
+    return {
+        transform: (compose2(f, (writer as PrivateWriter<T, IO>).transform))
+    } as PrivateWriter<V, IO>
 }
 
-// TODO add lift and map uses list -> WriterF1 for lifted F1s, only list and invoke separately
+// TODO Writer (maybe) add lift and map uses lift -> WriterF1 for lifted F1s, only list and invoke separately
 
 export type MapForWriter<V, T, IO> = F1<F1<V, T>, Writer<V, IO>>
 
 /**
- * shortcut for curried map of a Writer
- * @param writer
+ * Shortcut for curried map of a Writer.
  */
 export function create_map_for_writer<V, T, IO>(writer: Writer<T, IO>): MapForWriter<V, T, IO> {
     const writer_map_curried = curry2(writer_map)
     return writer_map_curried(writer)
 }
 
-// TODO do we need flatMap? Not a monad without flatMap.
+// TODO Writer do we need flatMap? Not a monad without flatMap.
 
 /**
- * executes the actual writing (non-pure, returns void)
+ * Executes the actual writing (non-pure, returns void)
  *
  * @type T The type we want to write
  * @type IO The type that is going to be written (after transformation)
@@ -63,15 +59,15 @@ export function writer_apply<T, IO>(writer: Writer<T, IO>, t: T, io_write: Write
 
 function writer_ap1<T, IO>(writer: Writer<T, IO>, io_write: Write<IO>): Write<T> {
     // is this useful? We return a Write
-    return (t: T) => io_write(writer.transform(t))
+    return (t: T) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }
 
 function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): F1<Write<IO>, void> {
     // is this useful? We evaluate
-    return (io_write: Write<IO>) => io_write(writer.transform(t))
+    return (io_write: Write<IO>) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }
 
-export type ApplyForWriter<T, IO> = F1<T, F1<Write<IO>, void>>
+export type ApplyForWriter<T, IO> = F1<T, Write<Write<IO>>>
 
 export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForWriter<T, IO> {
     const writer_apply_curried = curry3(writer_apply)
@@ -80,5 +76,5 @@ export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForW
 
 export function create_apply_writer_for_transformation<T, IO>(transformation: F1<T, IO>): ApplyForWriter<T, IO> {
     const writer = writer_of(transformation)
-    return create_apply_for_writer(writer);
+    return create_apply_for_writer(writer)
 }

@@ -19,7 +19,13 @@ export interface F3<T, U, V, R> {
     (t: T, u: U, v: V): R
 }
 
-export type Write<W> = F1<W, void>
+/**
+ * A Function that writes our Value (IO) to some output
+ * This is the part with side-effects (non-pure, void)
+ *
+ * @param IO The type of the value that is going to be written
+ */
+ export type Write<IO> = F1<IO, void>
 
 export function identity1<T>(a: T): T {
     return a

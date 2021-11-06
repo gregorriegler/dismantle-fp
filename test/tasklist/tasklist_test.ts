@@ -1,17 +1,16 @@
 import { expect } from "chai"
 import { describe } from "mocha";
-import { create_apply_writer_for_transformation, Write } from "../datamunging/writer";
+import { create_apply_writer_for_transformation } from "../datamunging/writer";
 import {
     Seq,
     seq_fold,
     seq_join,
     seq_map,
-    seq_first_maybe_value,
     seq_of_array,
     seq_of_empty,
     seq_of_singleton
 } from "../seq";
-import { F1, identity1, lazy } from "../func";
+import { F1, identity1, lazy, Write } from "../func";
 import { Maybe, maybe_map, maybe_value } from "../maybe_union";
 import { Map, map_get, map_of_2 } from "./map";
 
@@ -165,12 +164,12 @@ function joinStrings(a: string, b: string) {
 
 type ApplicationState = {
     tasks: Tasks,
-    write: F1<Write<string>, void>
+    write: Write<Write<string>>
 }
 
 type Command = (command_name: string, state: ApplicationState) => ApplicationState
 
-function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>, void> {
+function execute_commands_by_name(command_names: Seq<string>): Write<Write<string>> {
     const state: ApplicationState = seq_fold(
         command_names,
         (current_state: ApplicationState, command_name: string): ApplicationState  => {
@@ -191,8 +190,8 @@ function execute_commands_by_name(command_names: Seq<string>): F1<Write<string>,
 }
 
 // TODO move to writer
-// TODO need type 'WriterApply' in writer for F1<Write<string>, void>
-function combine_writers<T>(a: F1<T, void>, b: F1<T, void>): F1<T, void> {
+// TODO need type 'WriterApply' in writer for Write<Write<string>>
+function combine_writers<T>(a: Write<T>, b: Write<T>): Write<T> {
     return (write) => {
         a(write)
         b(write)
