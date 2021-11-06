@@ -10,7 +10,7 @@ import {
 import { F1, identity1, join, lazy } from "../func"
 import { Maybe, maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
-import { sequence_writes as write_in_sequence, Write } from "../datamunging/write"
+import { sequence_writes as write_in_sequence, Write, WriteApplied } from "../datamunging/write"
 
 /*
  * Pure (Domain)
@@ -51,12 +51,12 @@ function formatted_tasks_to_string(fts: FormattedTasks) {
 
 type ApplicationState = {
     tasks: Tasks,
-    write: Write<Write<string>>
+    write: WriteApplied<string>
 }
 
 type Command = (command_name: string, state: ApplicationState) => ApplicationState
 
-export function execute_commands_by_name(command_names: Seq<string>): Write<Write<string>> {
+export function execute_commands_by_name(command_names: Seq<string>): WriteApplied<string> {
     const state: ApplicationState = seq_fold(
         command_names,
         (current_state: ApplicationState, command_name: string): ApplicationState => {
@@ -75,8 +75,6 @@ export function execute_commands_by_name(command_names: Seq<string>): Write<Writ
     )
     return state.write
 }
-
-// TODO need type 'WriterApply' in writer for Write<Write<string>>
 
 function command_by_name(name: string): Maybe<Command> {
     const lookup: Map<Command> = map_of_2( //

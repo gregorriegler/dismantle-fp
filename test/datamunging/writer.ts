@@ -1,5 +1,5 @@
 import { compose2, curry2, curry3, F1, identity1 } from "../func"
-import { Write } from "./write"
+import { Write, WriteApplied } from "./write"
 
 /**
  * Writer monad which is a container (so it is an object)
@@ -63,12 +63,12 @@ function writer_ap1<T, IO>(writer: Writer<T, IO>, io_write: Write<IO>): Write<T>
     return (t: T) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }
 
-function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): Write<Write<IO>> {
+function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): WriteApplied<IO> {
     // is this useful? We evaluate
     return (io_write: Write<IO>) => io_write((writer as PrivateWriter<T, IO>).transform(t))
 }
 
-export type ApplyForWriter<T, IO> = F1<T, Write<Write<IO>>>
+export type ApplyForWriter<T, IO> = F1<T, WriteApplied<IO>>
 
 export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForWriter<T, IO> {
     const writer_apply_curried = curry3(writer_apply)

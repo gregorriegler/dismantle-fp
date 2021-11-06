@@ -13,6 +13,8 @@ export type Read<R> = F0<R>
  */
 export type Write<IO> = F1<IO, void>
 
+export type WriteApplied<IO> = Write<Write<IO>>
+
 export function sequence_writes<T>(a: Write<T>, b: Write<T>): Write<T> {
     return (write) => {
         a(write)
