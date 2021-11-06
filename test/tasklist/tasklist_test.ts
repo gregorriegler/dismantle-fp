@@ -6,7 +6,7 @@ import {
     seq_fold,
     seq_join,
     seq_map,
-    seq_maybe_first_value,
+    seq_first_maybe_value,
     seq_of_array,
     seq_of_empty,
     seq_of_singleton

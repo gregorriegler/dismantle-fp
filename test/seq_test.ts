@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { add, compose2, F1, inc } from "./func"
+import { add, compose2, F1, inc, lazy, should_not_call0 } from "./func"
 import { expectValue } from "./maybe_expects"
 import { maybe_none, maybe_of } from "./maybe_union"
 import {
@@ -14,7 +14,8 @@ import {
     seq_of_singleton,
     seq_of_supplier,
     seq_fold,
-    seq_filter
+    seq_filter,
+    seq_first_maybe_value
 } from "./seq"
 import { expect_seq_n_values } from "./seq_expects"
 
@@ -392,7 +393,25 @@ describe("Seq (Monad)", () => {
         })
     })
 
-    // TODO Seq implement reduce, forEach
-    // TODO Seq implement length - two cases: finite length, infinite length (Math.infinity)
-    // TODO Seq toString max elements in case of infinite seq
+    describe("first element", () => {
+        it("value", () => {
+            const seq = seq_of_array([1, 2])
+
+            const value = seq_first_maybe_value(seq, should_not_call0)
+
+            expect(value).to.eq(1)
+        })
+
+        it("empty", () => {
+            const seq = seq_of_empty()
+
+            const value = seq_first_maybe_value(seq, lazy(1))
+
+            expect(value).to.eq(1)
+        })
+    })
+
+    // TODO Seq reduce, forEach - when needed
+    // TODO Seq length - two cases: finite length, infinite length (Math.infinity)
+    // TODO Seq toString - case of infinite seq
 })

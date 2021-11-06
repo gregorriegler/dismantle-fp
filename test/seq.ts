@@ -203,14 +203,7 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
         return seq_fold(seq_tail(seq), combine, current)
     }
 
-    return seq_first_map(seq, combineRecursively, () => initial)
-}
-
-export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
-    if (seq_is_empty(seq)) {
-        return none()
-    }
-    return maybe_fold(seq_first(seq).head, some, none)
+    return seq_first_maybe_map(seq, combineRecursively, () => initial)
 }
 
 interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> {
@@ -263,7 +256,15 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-// TODO Test
-export function seq_maybe_first_value<T>(seq: Seq<T>, default_value: () => T) {
-    return maybe_value(seq_head(seq), default_value);
+// --- convenience functions for seq-maybe combinations
+
+export function seq_first_maybe_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
+    if (seq_is_empty(seq)) {
+        return none()
+    }
+    return maybe_fold(seq_first(seq).head, some, none)
+}
+
+export function seq_first_maybe_value<T>(seq: Seq<T>, default_value: () => T): T {
+    return maybe_value(seq_head(seq), default_value)
 }
