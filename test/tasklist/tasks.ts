@@ -1,16 +1,9 @@
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
-import {
-    Seq,
-    seq_fold,
-    seq_join,
-    seq_map,
-    seq_of_empty,
-    seq_of_singleton
-} from "../seq"
+import { Seq, seq_fold, seq_join, seq_map, seq_of_empty, seq_of_singleton } from "../seq"
 import { F1, identity1, join, lazy } from "../func"
 import { Maybe, maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
-import { null_write, sequence_writes as write_in_sequence, Write, WriteApplied } from "../datamunging/write"
+import { null_write, sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 
 /*
  * Pure (Domain)
@@ -31,21 +24,14 @@ export function tasks_add(tasks: Tasks, new_task: TaskName): Tasks {
 export function tasks_format(tasks: Tasks): FormattedTasks {
     const header = "Current Tasks:\n"
     const formatted_tasks = seq_map(tasks, task_format)
-    const formatted_task_list = header + seq_fold(formatted_tasks, join, "")
-    return { value: formatted_task_list }
+    return header + seq_fold(formatted_tasks, join, "")
 }
 
 function task_format(task: TaskName) {
     return "( ) " + task + "\n"
 }
 
-interface FormattedTasks {
-    value: string
-}
-
-function formatted_tasks_to_string(fts: FormattedTasks) {
-    return fts.value
-}
+type FormattedTasks = string
 
 // named pair of Tasks and lazy Write
 
@@ -92,7 +78,7 @@ function command_add_task(command_name: string, state: ApplicationState): Applic
 }
 
 function command_list(_: string, state: ApplicationState): ApplicationState {
-    const apply_formatted_tasks_writer = create_apply_writer_for_transformation(formatted_tasks_to_string)
+    const apply_formatted_tasks_writer = create_apply_writer_for_transformation(identity1) // TODO I think this is what new_writer should be doing
 
     const formatted_task_list = tasks_format(state.tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)

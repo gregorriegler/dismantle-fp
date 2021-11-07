@@ -7,7 +7,7 @@ describe("TaskList Domain", () => {
         const tasks = tasks_create()
         const formatted_tasks = tasks_format(tasks);
 
-        expect(formatted_tasks.value).to.eq("Current Tasks:\n")
+        expect(formatted_tasks).to.eq("Current Tasks:\n")
     })
 
     it("adds a Task", () => {
@@ -16,7 +16,7 @@ describe("TaskList Domain", () => {
         const result = tasks_add(tasks, "Buy a Milk");
 
         const formatted_tasks = tasks_format(result);
-        expect(formatted_tasks.value).to.eq("Current Tasks:\n( ) Buy a Milk\n")
+        expect(formatted_tasks).to.eq("Current Tasks:\n( ) Buy a Milk\n")
     })
 
     it("adds two Tasks", () => {
@@ -26,7 +26,7 @@ describe("TaskList Domain", () => {
         const result = tasks_add(tasks, "Buy Coffee")
 
         const formatted_tasks = tasks_format(result)
-        expect(formatted_tasks.value).to.eq(
+        expect(formatted_tasks).to.eq(
             "Current Tasks:\n" +
             "( ) Buy a Milk\n" +
             "( ) Buy Coffee\n"
