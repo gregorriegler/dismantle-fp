@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { add, compose2, F1, inc } from "./func"
+import { add, compose2, F1, inc, lazy } from "./func"
 import { expectValue } from "./maybe_expects"
 import { maybe_none, maybe_of } from "./maybe_union"
 import {
@@ -133,6 +133,18 @@ describe("Seq (Monad)", () => {
 
             expect(act).to.throw("head was called")
         })
+
+     		it("map evalates once each element", () => {
+     			  let count = 0
+     		    const seq = seq_of_array(["a", "b"])
+     		    const mapped_seq = seq_map(seq, (s) => { 
+     		      	count++
+     		    	  return s; 
+     		    })
+     		    expect(count).to.eq(0) // lazy
+            expect_seq_n_values(mapped_seq, "a", "b")
+     		    expect(count).to.eq(2) 
+     		})
     })
 
     describe("bind and flatMap", () => {
@@ -313,6 +325,19 @@ describe("Seq (Monad)", () => {
 
             expect(result).to.equal(6)
         })
+
+    		it("fold evalates once each element", () => {
+    			  let count = 0
+    		    const seq = seq_of_array(["a", "b"])
+    		    const mapped_seq = seq_map(seq, (s) => { 
+    		      	count++
+    		    	  return s; 
+    		    })
+    		    
+    		    const folded = seq_fold(mapped_seq, (x,y) => x+y, "")
+    		    expect(folded).to.eq("ab")
+    		    expect(count).to.eq(2)
+    		})
     })
 
     describe("toString", () => {
