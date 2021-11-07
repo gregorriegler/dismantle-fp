@@ -18,21 +18,19 @@ import { null_write, sequence_writes as write_in_sequence, Write, WriteApplied }
 
 type TaskName = string // prob. need a wrapper Task for this to contain additional state like "completed"
 
-interface Tasks {
-    elements: Seq<TaskName>
-}
+type Tasks = Seq<TaskName>
 
 export function tasks_create(): Tasks {
-    return { elements: seq_of_empty() }
+    return seq_of_empty()
 }
 
 export function tasks_add(tasks: Tasks, new_task: TaskName): Tasks {
-    return { elements: seq_join(tasks.elements, seq_of_singleton(new_task)) }
+    return seq_join(tasks, seq_of_singleton(new_task))
 }
 
 export function tasks_format(tasks: Tasks): FormattedTasks {
     const header = "Current Tasks:\n"
-    const formatted_tasks = seq_map(tasks.elements, task_format)
+    const formatted_tasks = seq_map(tasks, task_format)
     const formatted_task_list = header + seq_fold(formatted_tasks, join, "")
     return { value: formatted_task_list }
 }
