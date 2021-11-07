@@ -111,6 +111,6 @@ describe("PrimeFactors (application of Seq)", () => {
         it("of multiple", () => {
             const seq = prime_factors_generate(2 * 2 * 11)
             expect_seq_n_values(seq, 2, 2, 11)
-        })
+        }).timeout(3000)
     })
 })
