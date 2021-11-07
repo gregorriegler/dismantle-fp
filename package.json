@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register \"test/**/*_test.ts\"",
+    "test": "mocha -r ts-node/register \"test/seq_test.ts\"",
     "test:watch": "mocha -r ts-node/register -R min -w --watch-files . \"test/**/*_test.ts\""
   },
   "keywords": [],
