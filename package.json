@@ -1,8 +1,7 @@
 {
   "name": "dismantle-fp",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Dismantle the Ivory Tower (FP Deep Dive)",
   "scripts": {
     "test": "mocha -r ts-node/register \"test/**/*_test.ts\"",
     "test:watch": "mocha -r ts-node/register -R min -w --watch-files . \"test/**/*_test.ts\""
@@ -11,13 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/chai": "^4.2.15",
-    "@types/mocha": "^8.2.1",
-    "@types/node": "^14.14.29",
-    "chai": "^4.3.0",
-    "mocha": "^8.3.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^4.6.2",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
     "nyc": "^15.1.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "^7.0.1",
     "typescript": "^4.1.5"
   }
 }
