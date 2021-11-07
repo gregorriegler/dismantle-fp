@@ -38,7 +38,7 @@ type ApplicationState = {
     write: WriteApplied<string>
 }
 
-type CommandAction = (command_name: string, state: ApplicationState) => ApplicationState
+type CommandAction = (state: ApplicationState, command_name: string) => ApplicationState
 
 type Command = {
     name: string,
@@ -50,7 +50,7 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const state: ApplicationState = seq_fold(
         commands,
         (current_state: ApplicationState, command: Command): ApplicationState => {
-            const new_state = command.action(command.name, current_state)
+            const new_state = command.action(current_state, command.name)
             return {
                 tasks: new_state.tasks, // we drop the old state
                 write: write_in_sequence(current_state.write, new_state.write)
@@ -69,18 +69,18 @@ function command_by_name(command_name: string): Command {
         "list", {name: "list", action: command_list}, //
         "create foo", {name: "create foo", action: command_add_task}, //
     )
-    const mapGet = map_get(lookup, command_name);
-    return maybe_value(mapGet, lazy({name: command_name, action: command_invalid}))
+    const maybe_command = map_get(lookup, command_name);
+    return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid}))
 }
 
-function command_add_task(command_name: string, state: ApplicationState): ApplicationState {
+function command_add_task(state: ApplicationState, _: string): ApplicationState {
     return {
         tasks: tasks_add(state.tasks, "foo"), // TODO add more tasks
         write: null_write
     }
 }
 
-function command_list(_: string, state: ApplicationState): ApplicationState {
+function command_list(state: ApplicationState, _: string): ApplicationState {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(identity1) // TODO I think this is what new_writer should be doing
 
     const formatted_task_list = tasks_format(state.tasks)
@@ -92,7 +92,7 @@ function command_list(_: string, state: ApplicationState): ApplicationState {
     }
 }
 
-function command_invalid(command_name: string, state: ApplicationState): ApplicationState {
+function command_invalid(state: ApplicationState, command_name: string): ApplicationState {
     const identity = identity1 as F1<string, string>
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
