@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { seq_of_array } from "../seq";
-import { execute_commands_by_name } from "./tasks";
+import { task_list } from "./tasks";
 
 /**
  * # Phase 1
@@ -39,19 +39,19 @@ describe("TaskList App Top Level (outside-in)", () => {
     })
 
     it("starts empty", () => {
-        task_list(["list"])
+        task_list_app(["list"])
         expect(output).to.eq("Current Tasks:\n")
     })
 
     // create task was too big step -> go back
 
     it("rejects (single) invalid command", () => {
-        task_list(["invalid-command"])
+        task_list_app(["invalid-command"])
         expect(output).to.eq("Invalid Command: \"invalid-command\"\n")
     })
 
     it("rejects invalid commands (creates list processing)", () => {
-        task_list(["invalid-1", "invalid-2"])
+        task_list_app(["invalid-1", "invalid-2"])
         expect(output).to.eq(
             "Invalid Command: \"invalid-1\"\n" +
             "Invalid Command: \"invalid-2\"\n"
@@ -63,12 +63,12 @@ describe("TaskList App Top Level (outside-in)", () => {
 
     describe("create task", () => {
         it("command exists", () => {
-            task_list(["create foo"])
+            task_list_app(["create foo"])
             expect(output).to.eq("")
         })
 
         it("creates the task (defines the design with fakes)", () => {
-            task_list(["create foo", "list"])
+            task_list_app(["create foo", "list"])
             expect(output).to.eq("Current Tasks:\n( ) foo\n")
         })
     })
@@ -79,9 +79,9 @@ describe("TaskList App Top Level (outside-in)", () => {
 /*
  * Top Level
  */
-function task_list(args: string[]): void {
+function task_list_app(args: string[]): void {
     const commands = seq_of_array(args);
-    const writer = execute_commands_by_name(commands)
+    const writer = task_list(commands)
     writer(io_console_print)
 }
 

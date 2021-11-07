@@ -10,8 +10,8 @@ import { null_write, sequence_writes as write_in_sequence, WriteApplied } from "
  */
 
 type TaskName = string // prob. need a wrapper Task for this to contain additional state like "completed"
-
 type Tasks = Seq<TaskName>
+type FormattedTasks = string
 
 export function tasks_create(): Tasks {
     return seq_of_empty()
@@ -31,8 +31,6 @@ function task_format(task: TaskName) {
     return "( ) " + task + "\n"
 }
 
-type FormattedTasks = string
-
 // named pair of Tasks and lazy Write
 
 type ApplicationState = {
@@ -42,7 +40,7 @@ type ApplicationState = {
 
 type Command = (command_name: string, state: ApplicationState) => ApplicationState
 
-export function execute_commands_by_name(command_names: Seq<string>): WriteApplied<string> {
+export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const state: ApplicationState = seq_fold(
         command_names,
         (current_state: ApplicationState, command_name: string): ApplicationState => {
@@ -56,7 +54,7 @@ export function execute_commands_by_name(command_names: Seq<string>): WriteAppli
         },
         {
             tasks: tasks_create(),
-            write: () => { }
+            write: null_write
         }
     )
     return state.write
