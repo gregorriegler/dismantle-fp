@@ -16,15 +16,17 @@ import { null_write, sequence_writes as write_in_sequence, Write, WriteApplied }
  * Pure (Domain)
  */
 
+type TaskName = string // prob. need a wrapper Task for this to contain additional state like "completed"
+
 interface Tasks {
-    elements: Seq<string>
+    elements: Seq<TaskName>
 }
 
 export function tasks_create(): Tasks {
     return { elements: seq_of_empty() }
 }
 
-export function tasks_add(tasks: Tasks, new_task: string): Tasks {
+export function tasks_add(tasks: Tasks, new_task: TaskName): Tasks {
     return { elements: seq_join(tasks.elements, seq_of_singleton(new_task)) }
 }
 
@@ -35,7 +37,7 @@ export function tasks_format(tasks: Tasks): FormattedTasks {
     return { value: formatted_task_list }
 }
 
-function task_format(task: string) {
+function task_format(task: TaskName) {
     return "( ) " + task + "\n"
 }
 
