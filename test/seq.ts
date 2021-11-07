@@ -200,22 +200,25 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
 }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
-    // console.log("seq_fold called on " + seq.toString()) // 3 elements
-    function combineRecursively(head: T) {
+    const first = seq_first(seq)
+    function combineRecursively(head: T): R {
         const current = combine(initial, head)
-        console.log("combine called on " + head)
-        return seq_fold(seq_tail(seq), combine, current)
+        return seq_fold(first.tail, combine, current)
     }
 
-    return seq_first_map(seq, combineRecursively, () => initial)
+    if (maybe_is_none(first.head)) {
+        return initial
+    }
+
+    return maybe_fold(first.head, combineRecursively, () => initial)
 }
 
 export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
-    const head = seq_head(seq)
-    if (maybe_is_none(head)) {
+    const first = seq_first(seq)
+    if (maybe_is_none(first.head)) {
         return none()
     }
-    return maybe_fold(head, some, none)
+    return maybe_fold(first.head, some, none)
 }
 
 interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> {
