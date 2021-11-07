@@ -100,6 +100,7 @@ export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
 
 export type SeqF1<T, R> = F1<Seq<T>, Seq<R>>
 
+// TODO evaluation: remove double evaluation of seq_first - use cached
 export function seq_lift<T, R>(f: F1<T, R>): SeqF1<T, R> {
     return (seq): Seq<R> => {
         return {
@@ -171,10 +172,12 @@ function bind_seq_value<T, R>(bindSeq: BoundSeq<T, R>, f: F1<T, Seq<R>>): Maybe<
     return bindSeq.value
 }
 
+// TODO evaluation: check all calls for double evaluation of seq_first
 export function seq_is_empty<T>(seq: Seq<T>): boolean {
     return maybe_is_none(seq_head(seq))
 }
 
+// TODO evaluation: remove double evaluation of seq_first - use cached
 export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     return {
         head: () => {
