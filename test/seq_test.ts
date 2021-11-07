@@ -331,6 +331,8 @@ describe("Seq (Monad)", () => {
     		    const seq = seq_of_array(["a", "b"])
     		    const mapped_seq = seq_map(seq, (s) => { 
     		      	count++
+    		      	console.log("f called " + count + " times with " + s)
+    		      	// console.trace("f called " + count + " times with " + s)
     		    	  return s; 
     		    })
     		    
@@ -339,6 +341,79 @@ describe("Seq (Monad)", () => {
     		    expect(count).to.eq(2)
     		})
     })
+    		/*
+Trace: f called 1 times with a
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_head (seq.ts:261:12)
+    at seq_is_empty (seq.ts:175:26)
+    at seq_first_map (seq.ts:212:9)
+    at seq_fold (seq.ts:208:12)
+    at Context.<anonymous> (seq_test.ts:338:34)
+Trace: f called 2 times with a
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_first_map (seq.ts:215:23)
+    at seq_fold (seq.ts:208:12)
+    at Context.<anonymous> (seq_test.ts:338:34)
+combine called on a
+Trace: f called 3 times with a
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_tail (seq.ts:265:12)
+    at combineRecursively (seq.ts:205:25)
+    at maybe_union.ts:71:69
+    at maybe_fold (maybe_union.ts:67:36)
+    at seq_first_map (seq.ts:215:22)
+    at seq_fold (seq.ts:208:12)
+Trace: f called 4 times with b
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_head (seq.ts:261:12)
+    at seq_is_empty (seq.ts:175:26)
+    at seq_first_map (seq.ts:212:9)
+    at seq_fold (seq.ts:208:12)
+    at combineRecursively (seq.ts:205:16)
+    at maybe_union.ts:71:69
+    at maybe_fold (maybe_union.ts:67:36)
+    at seq_first_map (seq.ts:215:22)
+    at seq_fold (seq.ts:208:12)
+    at Context.<anonymous> (seq_test.ts:338:34)
+Trace: f called 5 times with b
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_first_map (seq.ts:215:23)
+    at seq_fold (seq.ts:208:12)
+    at combineRecursively (seq.ts:205:16)
+    at maybe_union.ts:71:69
+    at maybe_fold (maybe_union.ts:67:36)
+    at seq_first_map (seq.ts:215:22)
+    at seq_fold (seq.ts:208:12)
+    at Context.<anonymous> (seq_test.ts:338:34)
+combine called on b
+Trace: f called 6 times with b
+    at maybe_union.ts:55:60
+    at Object.head (seq.ts:106:38)
+    at seq_first (seq.ts:94:31)
+    at seq_tail (seq.ts:265:12)
+    at combineRecursively (seq.ts:205:25)
+    at maybe_union.ts:71:69
+    at maybe_fold (maybe_union.ts:67:36)
+    at seq_first_map (seq.ts:215:22)
+    at seq_fold (seq.ts:208:12)
+    at combineRecursively (seq.ts:205:16)
+    at maybe_union.ts:71:69
+    at maybe_fold (maybe_union.ts:67:36)
+    at seq_first_map (seq.ts:215:22)
+    at seq_fold (seq.ts:208:12)
+    at Context.<anonymous> (seq_test.ts:338:34)
+      1) fold evalates once each element    		
+    		*/
 
     describe("toString", () => {
         it("renders empty seq", () => {

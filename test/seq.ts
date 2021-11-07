@@ -178,15 +178,19 @@ export function seq_is_empty<T>(seq: Seq<T>): boolean {
 export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     return {
         head: () => {
-            if (!seq_is_empty(first)) {
-                return seq_head(first)
+        	  const head = seq_head(first) // TODO only eval once
+            if (!maybe_is_none(head)) {
+                return head
             } else {
                 return seq_head(second)
             }
         },
         tail: () => {
-            if (!seq_is_empty(first)) {
-                return seq_join(seq_tail(first), second)
+		        if (!seq_is_empty(first)) {
+    						return seq_join(seq_tail(first), second)
+//        	  const head = seq_head(first)
+//            if (!maybe_is_none(head)) {
+//                return seq_join(head.tail, second)
             } else {
                 return seq_tail(second)
             }
@@ -198,8 +202,10 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
 }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
+    // console.log("seq_fold called on " + seq.toString()) // 3 elements
     function combineRecursively(head: T) {
         const current = combine(initial, head)
+        console.log("combine called on " + head)
         return seq_fold(seq_tail(seq), combine, current)
     }
 
