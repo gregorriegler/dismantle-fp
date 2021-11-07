@@ -38,14 +38,17 @@ type ApplicationState = {
     write: WriteApplied<string>
 }
 
-type Command = (command_name: string, state: ApplicationState) => ApplicationState
+type Command = {
+    name: string,
+    action: (command_name: string, state: ApplicationState) => ApplicationState
+}
 
 export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const state: ApplicationState = seq_fold(
         command_names,
         (current_state: ApplicationState, command_name: string): ApplicationState => {
             const command = command_by_name(command_name)
-            const executed_command = maybe_map(command, f => f(command_name, current_state))
+            const executed_command = maybe_map(command, f => f.action(f.name, current_state))
             const new_state: ApplicationState = maybe_value(executed_command, lazy(command_invalid(command_name, current_state)))
             return {
                 tasks: new_state.tasks, // we drop the old state
@@ -62,8 +65,8 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
 
 function command_by_name(command_name: string): Maybe<Command> {
     const lookup: Map<Command> = map_of_2( //
-        "list", command_list, //
-        "create foo", command_add_task, //
+        "list", { name: "list", action: command_list }, //
+        "create foo", { name: "create foo", action: command_add_task }, //
     )
     return map_get(lookup, command_name)
 }
