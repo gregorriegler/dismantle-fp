@@ -17,7 +17,7 @@ import {
     seq_filter,
     seq_first_maybe_value
 } from "./seq"
-import { expect_seq_n_values } from "./seq_expects"
+import { expect_seq_n_values, Invocation } from "./seq_expects"
 
 const nextTwoNumbers: (n: number) => Seq<number> = (n) => seq_of_array([n + 1, n + 2])
 
@@ -27,22 +27,6 @@ const BAD_SEQ_1 = {
 }
 
 const BAD_SEQ_2 = seq_join(seq_of_singleton(1), BAD_SEQ_1)
-
-class Invocation {
-    public count: number = 0
-    public wrap<T>(seq: Seq<T>): Seq<T> {
-        return seq_map(seq, (t) => {
-            this.count++
-            return t
-        })
-    }
-    public expectNone(): void {
-        expect(this.count).to.eq(0)
-    }
-    public expect(n: number): void {
-        expect(this.count).to.eq(n)
-    }
-}
 
 describe("Seq (Monad)", () => {
     let invocation: Invocation
@@ -135,6 +119,18 @@ describe("Seq (Monad)", () => {
             expect_seq_n_values(mapped, 2, 3)
         })
 
+        // TODO lift evaluates once each element
+        xit("lift evaluates once each element", () => {
+            const seq = invocation.wrap(seq_of_array([1, 2]))
+
+            const lifted = seq_lift((a: number) => (a + 1))
+
+            const mapped = lifted(seq)
+            invocation.expectNone() // lazy
+            expect_seq_n_values(mapped, 2, 3)
+            invocation.expect(2)
+        })
+
         it("maps lazy, fail on first element", () => {
             const seq = BAD_SEQ_1
             const mapped = seq_map(seq, inc)
@@ -157,10 +153,9 @@ describe("Seq (Monad)", () => {
         })
 
         it("map evaluates once each element", () => {
-            const seq = seq_of_array(["a", "b"])
-            const mapped_seq = invocation.wrap(seq)
+            const seq = invocation.wrap(seq_of_array(["a", "b"]))
             invocation.expectNone() // lazy
-            expect_seq_n_values(mapped_seq, "a", "b")
+            expect_seq_n_values(seq, "a", "b")
             invocation.expect(2)
         })
     })
@@ -317,6 +312,18 @@ describe("Seq (Monad)", () => {
 
             expect(act).to.throw("head was called")
         })
+
+        // TODO join evaluates once each element
+        xit("join evaluates once each element", () => {
+            const seq1 = invocation.wrap(seq_of_array([1, 2]))
+            const seq2 = invocation.wrap(seq_of_array([3, 4]))
+
+            const joined = seq_join(seq1, seq2)
+            invocation.expectNone() // lazy
+
+            expect_seq_n_values(joined, 1, 2, 3, 4)
+            invocation.expect(4)
+        })
     })
 
     describe("fold", () => {
@@ -345,12 +352,11 @@ describe("Seq (Monad)", () => {
         })
 
         it("fold evaluates once each element", () => {
-            const seq = seq_of_array(["a", "b"])
-            const mapped_seq = invocation.wrap(seq)
+            const seq = invocation.wrap(seq_of_array(["a", "b"]))
 
-            const folded = seq_fold(mapped_seq, (x, y) => x + y, "")
-
+            const folded = seq_fold(seq, (x, y) => x + y, "")
             expect(folded).to.eq("ab")
+
             invocation.expect(2)
         })
     })
@@ -429,6 +435,16 @@ describe("Seq (Monad)", () => {
             const filtered = seq_filter(seq, (_) => false)
 
             expect_seq_n_values(filtered)
+        })
+
+        it("filter evaluates once each element", () => {
+            const seq = invocation.wrap(seq_of_array([1, 2]))
+
+            const filtered = seq_filter(seq, (_) => true)
+            invocation.expectNone() // lazy
+
+            expect_seq_n_values(filtered, 1, 2)
+            invocation.expect(2)
         })
     })
 
