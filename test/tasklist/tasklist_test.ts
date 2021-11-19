@@ -71,9 +71,15 @@ describe("TaskList App Top Level (outside-in)", () => {
             task_list_app(["create foo", "list"])
             expect(output).to.eq("Current Tasks:\n( ) foo\n")
         })
-    })
 
-    // TODO testcase: create foo, list (only foo), create bar, list (both)
+        it("outputs intermediate result", () => {
+            task_list_app(["create foo", "list", "create bar", "list"])
+            expect(output).to.eq(
+                "Current Tasks:\n( ) foo\n" +
+                "Current Tasks:\n( ) foo\n( ) bar\n"
+            )
+        })
+    })
 })
 
 /*
