@@ -38,7 +38,7 @@ type ApplicationState = {
     write: WriteApplied<string>
 }
 
-type CommandAction = (state: ApplicationState, command_name: string) => ApplicationState
+type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
 
 type Command = {
     name: string,
@@ -66,19 +66,18 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
 }
 
 export function command_by_name(command_name: string): Command {
+    const values = command_name.split(' ')
     const lookup: Map<Command> = map_of_2( //
-        "list", {name: "list", action: command_list, argument: ""}, //
-        "create", {name: "create foo", action: command_add_task, argument: "foo"}, //
+        "list", {name: "list", action: command_list, argument: values[1]}, //
+        "create", {name: "create", action: command_add_task, argument: values[1]}, //
     )
-    const value = command_name.split(' ')[0]
-    const maybe_command = map_get(lookup, value)
+    const maybe_command = map_get(lookup, values[0])
     return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid, argument: command_name}))
 }
 
-function command_add_task(state: ApplicationState, command_name: string): ApplicationState {
-    const value = command_name.split(' ')[1]
+function command_add_task(state: ApplicationState, task_name: string): ApplicationState {
     return {
-        tasks: tasks_add(state.tasks, command_name), // TODO add more tasks
+        tasks: tasks_add(state.tasks, task_name),
         write: null_write
     }
 }
