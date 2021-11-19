@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { seq_of_array } from "../seq";
-import { task_list } from "./tasks";
+import { task_list, UserInput } from "./tasks";
 
 /**
  * # Phase 1
@@ -85,7 +85,7 @@ describe("TaskList App Top Level (outside-in)", () => {
 /*
  * Top Level
  */
-function task_list_app(args: string[]): void {
+function task_list_app(args: UserInput[]): void {
     const commands = seq_of_array(args);
     const writer = task_list(commands)
     writer(io_console_print)

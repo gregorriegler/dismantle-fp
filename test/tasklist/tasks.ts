@@ -40,6 +40,10 @@ function task_format(task: Task): string {
     return open + task + next
 }
 
+/*
+ * Pure (what kind of code?)
+ */
+
 // named pair of Tasks and lazy Write
 
 type ApplicationState = {
@@ -54,10 +58,9 @@ export function application_state_create(): ApplicationState {
     }
 }
 
-type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
 type Command = (state: ApplicationState) => ApplicationState
 
-export function task_list(command_names: Seq<string>): WriteApplied<string> {
+export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
     const commands = seq_map(command_names, command_by_name);
     const state = seq_fold(commands, commands_fold, application_state_create())
     return state.write
@@ -71,20 +74,29 @@ function commands_fold(current_state: ApplicationState, command: Command): Appli
     }
 }
 
-export function command_by_name(command_name: string): Command {
-    const command_parts = command_name.split(' ')
-    const lookup: Map<CommandAction> = map_of_2( //
+type CommandTemplate = (state: ApplicationState, argument: string) => ApplicationState
+
+export type UserInput = string
+
+// TODO string is user input
+export function command_by_name(user_input: UserInput): Command {
+    const template_lookup: Map<CommandTemplate> = map_of_2( //
         "list", state_list_tasks, //
         "create", state_add_task, //
     )
-    const maybe_action = map_get(lookup, command_parts[0])
-    const maybe_command = maybe_map(maybe_action, action => command_create(action, command_parts[1]))
-    const invalid_command = command_create(state_write_invalid_command, command_name);
+
+    const command_parts = user_input.split(' ')
+    const command_name = command_parts[0]
+    const command_argument = command_parts[1]
+
+    const maybe_action = map_get(template_lookup, command_name)
+    const maybe_command = maybe_map(maybe_action, action => command_create(action, command_argument))
+    const invalid_command = command_create(state_write_invalid_command, user_input);
     const lazy_invalid_command = lazy(invalid_command)
     return maybe_value(maybe_command, lazy_invalid_command)
 }
 
-function command_create(action: CommandAction, argument: string): Command {
+function command_create(action: CommandTemplate, argument: string): Command {
     return state => action(state, argument)
 }
 
