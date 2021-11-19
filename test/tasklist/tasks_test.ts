@@ -1,14 +1,9 @@
 import { expect } from "chai"
 import { describe } from "mocha"
 import { expect_seq_n_values } from "../seq_expects"
-import {
-    application_state_create,
-    command_from_input,
-    task_create,
-    tasks_add,
-    tasks_create,
-    tasks_format
-} from "./tasks"
+import { command_from_input } from "./commands"
+import { task_create, tasks_add, tasks_create, tasks_format } from "./tasks"
+import { application_state_create } from "./use_cases"
 
 describe("TaskList Domain", () => {
     it("formats empty Tasks", () => {

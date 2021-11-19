@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha";
 import { seq_of_array } from "../seq";
-import { task_list, UserInput } from "./tasks";
+import { task_list, UserInput } from "./commands";
 
 /**
  * # Phase 1
