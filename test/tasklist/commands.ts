@@ -5,6 +5,15 @@ import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 import { add_task, ApplicationState, application_state_create, list_tasks, write_invalid_command } from "./use_cases"
 
+/*
+ * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
+ * String ist nicht in Domain aber das Mapping kann pure gemacht werden.
+ * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
+ *
+ * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
+ * Dann folden wir den State ueber die Commands. Am Ende wandert der State in einen Writer zum Save.
+ */
+
 type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
