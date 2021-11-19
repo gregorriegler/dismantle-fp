@@ -1,13 +1,13 @@
 import { expect } from "chai"
-import { describe } from "mocha";
-import { task_list_app } from "./app";
+import { describe } from "mocha"
+import { task_list_app } from "./app"
 
 /**
  * # Phase 1
- * - create a task with name
- * - create a task with name
- * - display list of tasks
+ * - create a task with name (DONE)
+ * - display list of tasks (DONE)
  * - tasks saved as file to disk
+ * - load from disk
  *
  * # Phase 2
  * - update an existing task its name
@@ -16,7 +16,7 @@ import { task_list_app } from "./app";
  * # Phase 3
  * - add additional description, update it
  */
-describe("TaskList App Top Level (outside-in)", () => {
+describe("App/TaskList Top Level (outside-in)", () => {
     let originalConsole = console.log
     let output: String
 
@@ -57,8 +57,10 @@ describe("TaskList App Top Level (outside-in)", () => {
         )
     })
 
-    // Test list
-    // * kein command
+    it("allows empty commands", () => {
+        task_list_app([])
+        expect(output).to.eq("")
+    })
 
     describe("create task", () => {
         it("command exists", () => {

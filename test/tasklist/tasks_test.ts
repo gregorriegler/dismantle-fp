@@ -5,7 +5,7 @@ import { command_from_input } from "./commands"
 import { task_create, tasks_add, tasks_create, tasks_format } from "./tasks"
 import { application_state_create } from "./use_cases"
 
-describe("TaskList Domain", () => {
+describe("Tasks/TaskList Domain", () => {
     it("formats empty Tasks", () => {
         const tasks = tasks_create()
         const formatted_tasks = tasks_format(tasks)
@@ -37,7 +37,7 @@ describe("TaskList Domain", () => {
     })
 })
 
-describe("TaskList Commands", () => {
+describe("Commands", () => {
     describe("Add Task", () => {
         it("adds a Task", () => {
             const command = command_from_input("create bar")
