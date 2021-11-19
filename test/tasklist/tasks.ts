@@ -42,7 +42,8 @@ type CommandAction = (state: ApplicationState, command_name: string) => Applicat
 
 type Command = {
     name: string,
-    action: CommandAction
+    action: CommandAction,
+    argument: string
 }
 
 export function task_list(command_names: Seq<string>): WriteApplied<string> {
@@ -50,7 +51,7 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const state: ApplicationState = seq_fold(
         commands,
         (current_state: ApplicationState, command: Command): ApplicationState => {
-            const new_state = command.action(current_state, command.name)
+            const new_state = command.action(current_state, command.argument)
             return {
                 tasks: new_state.tasks, // we drop the old state
                 write: write_in_sequence(current_state.write, new_state.write)
@@ -66,18 +67,18 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
 
 export function command_by_name(command_name: string): Command {
     const lookup: Map<Command> = map_of_2( //
-        "list", {name: "list", action: command_list}, //
-        "create", {name: "create foo", action: command_add_task}, //
+        "list", {name: "list", action: command_list, argument: ""}, //
+        "create", {name: "create foo", action: command_add_task, argument: "foo"}, //
     )
     const value = command_name.split(' ')[0]
     const maybe_command = map_get(lookup, value)
-    return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid}))
+    return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid, argument: command_name}))
 }
 
 function command_add_task(state: ApplicationState, command_name: string): ApplicationState {
     const value = command_name.split(' ')[1]
     return {
-        tasks: tasks_add(state.tasks, value), // TODO add more tasks
+        tasks: tasks_add(state.tasks, command_name), // TODO add more tasks
         write: null_write
     }
 }
