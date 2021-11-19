@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { describe } from "mocha"
 import { null_write } from "../datamunging/write"
 import { expect_seq_n_values } from "../seq_expects"
-import { command_by_name, tasks_add, tasks_create, tasks_format } from "./tasks"
+import { application_state_create, command_by_name, tasks_add, tasks_create, tasks_format } from "./tasks"
 
 describe("TaskList Domain", () => {
     it("formats empty Tasks", () => {
@@ -41,10 +41,7 @@ describe("TaskList Commands", () => {
         it("adds a Task", () => {
             const command = command_by_name("create bar")
 
-            const new_state = command.action({
-                tasks: tasks_create(),
-                write: null_write
-            }, command.argument)
+            const new_state = command.action(application_state_create(), command.argument)
 
             const result = new_state.tasks
             expect_seq_n_values(result, "bar")

@@ -38,6 +38,13 @@ type ApplicationState = {
     write: WriteApplied<string>
 }
 
+export function application_state_create(): ApplicationState {
+    return {
+        tasks: tasks_create(),
+        write: null_write
+    }
+}
+
 type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
 
 type Command = {
@@ -56,10 +63,7 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
                 write: write_in_sequence(current_state.write, new_state.write)
             }
         },
-        {
-            tasks: tasks_create(),
-            write: null_write
-        }
+        application_state_create()
     )
     return state.write
 }
