@@ -3,7 +3,7 @@ import { describe } from "mocha"
 import { expect_seq_n_values } from "../seq_expects"
 import {
     application_state_create,
-    command_by_name,
+    command_from_input,
     task_create,
     tasks_add,
     tasks_create,
@@ -45,7 +45,7 @@ describe("TaskList Domain", () => {
 describe("TaskList Commands", () => {
     describe("Add Task", () => {
         it("adds a Task", () => {
-            const command = command_by_name("create bar")
+            const command = command_from_input("create bar")
 
             const new_state = command(application_state_create())
 

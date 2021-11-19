@@ -6,7 +6,7 @@ import { Map, map_get, map_of_2 } from "./map"
 import { null_write, sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 
 /*
- * Pure (Domain)
+ * Pure (Domain) is most inner.
  */
 
 type TaskName = string // prob. need a wrapper Task for this to contain additional state like "completed"
@@ -61,7 +61,7 @@ export function application_state_create(): ApplicationState {
 type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
-    const commands = seq_map(command_names, command_by_name);
+    const commands = seq_map(command_names, command_from_input);
     const state = seq_fold(commands, commands_fold, application_state_create())
     return state.write
 }
@@ -74,42 +74,43 @@ function commands_fold(current_state: ApplicationState, command: Command): Appli
     }
 }
 
-type CommandTemplate = (state: ApplicationState, argument: string) => ApplicationState
+// --- Templates ---
 
 export type UserInput = string
+type CommandTemplate = (state: ApplicationState, argument: string) => ApplicationState
 
-// TODO string is user input
-export function command_by_name(user_input: UserInput): Command {
+export function command_from_input(user_input: UserInput): Command {
     const template_lookup: Map<CommandTemplate> = map_of_2( //
-        "list", state_list_tasks, //
-        "create", state_add_task, //
+        "list", list_tasks, //
+        "create", add_task, //
     )
 
-    const command_parts = user_input.split(' ')
-    const command_name = command_parts[0]
-    const command_argument = command_parts[1]
+    const input_parts = user_input.split(' ', 2)
+    const name = input_parts[0]
+    const argument = input_parts[1]
 
-    const maybe_action = map_get(template_lookup, command_name)
-    const maybe_command = maybe_map(maybe_action, action => command_create(action, command_argument))
-    const invalid_command = command_create(state_write_invalid_command, user_input);
-    const lazy_invalid_command = lazy(invalid_command)
-    return maybe_value(maybe_command, lazy_invalid_command)
+    const template = map_get(template_lookup, name)
+    const command = maybe_map(template, t => command_create(t, argument))
+
+    const invalid_command = command_create(write_invalid_command, user_input);
+
+    return maybe_value(command, lazy(invalid_command))
 }
 
-function command_create(action: CommandTemplate, argument: string): Command {
-    return state => action(state, argument)
+function command_create(template: CommandTemplate, argument: string): Command {
+    return state => template(state, argument)
 }
 
-function state_add_task(state: ApplicationState, task_name: string): ApplicationState {
-    const adder = tasks_adder(state.tasks);
+function add_task(state: ApplicationState, task_name: string): ApplicationState {
     const task = task_create(task_name);
+    const add = tasks_adder(state.tasks);
     return {
-        tasks: adder(task),
+        tasks: add(task),
         write: null_write
     }
 }
 
-function state_list_tasks(state: ApplicationState, _: string): ApplicationState {
+function list_tasks(state: ApplicationState, _: string): ApplicationState {
     const apply_formatted_tasks_writer = create_apply_writer_for_transformation(identity1) // TODO I think this is what new_writer should be doing
 
     const formatted_task_list = tasks_format(state.tasks)
@@ -127,7 +128,7 @@ function format_invalid_command_name(command_name: string) {
     return header + command_name + footer;
 }
 
-function state_write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
+function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
     const identity = identity1 as F1<string, string>
     const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
