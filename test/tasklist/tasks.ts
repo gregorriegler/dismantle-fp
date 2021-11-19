@@ -64,12 +64,12 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
     return state.write
 }
 
-function command_by_name(command_name: string): Command {
+export function command_by_name(command_name: string): Command {
     const lookup: Map<Command> = map_of_2( //
         "list", {name: "list", action: command_list}, //
         "create foo", {name: "create foo", action: command_add_task}, //
     )
-    const maybe_command = map_get(lookup, command_name);
+    const maybe_command = map_get(lookup, command_name)
     return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid}))
 }
 
