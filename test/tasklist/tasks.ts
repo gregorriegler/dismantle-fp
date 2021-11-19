@@ -10,14 +10,19 @@ import { null_write, sequence_writes as write_in_sequence, WriteApplied } from "
  */
 
 type TaskName = string // prob. need a wrapper Task for this to contain additional state like "completed"
-type Tasks = Seq<TaskName>
+type Task = TaskName
+type Tasks = Seq<Task>
 type FormattedTasks = string
+
+export function task_create(name: TaskName): Task {
+    return name
+}
 
 export function tasks_create(): Tasks {
     return seq_of_empty()
 }
 
-export function tasks_add(tasks: Tasks, new_task: TaskName): Tasks {
+export function tasks_add(tasks: Tasks, new_task: Task): Tasks {
     return seq_join(tasks, seq_of_singleton(new_task))
 }
 
@@ -27,7 +32,7 @@ export function tasks_format(tasks: Tasks): FormattedTasks {
     return header + seq_fold(formatted_tasks, join, "")
 }
 
-function task_format(task: TaskName) {
+function task_format(task: Task) {
     return "( ) " + task + "\n"
 }
 
@@ -71,18 +76,20 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
 export function command_by_name(command_name: string): Command {
     const command_parts = command_name.split(' ')
     const lookup: Map<CommandAction> = map_of_2( //
-      "list", command_list, //
-      "create", command_add_task, //
+        "list", command_list, //
+        "create", command_add_task, //
     )
     const maybe_action = map_get(lookup, command_parts[0])
-    const maybe_command = maybe_map(maybe_action, action => {return {action: action, argument: command_parts[1] }})
-    const invalid_command = lazy({ action: command_invalid, argument: command_name })
+    const maybe_command = maybe_map(maybe_action, action => {
+        return {action: action, argument: command_parts[1]}
+    })
+    const invalid_command = lazy({action: command_invalid, argument: command_name})
     return maybe_value(maybe_command, invalid_command)
 }
 
 function command_add_task(state: ApplicationState, task_name: string): ApplicationState {
     return {
-        tasks: tasks_add(state.tasks, task_name),
+        tasks: tasks_add(state.tasks, task_create(task_name)),
         write: null_write
     }
 }
