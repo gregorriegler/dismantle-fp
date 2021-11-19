@@ -38,13 +38,13 @@ describe("TaskList Domain", () => {
 
 describe("TaskList Commands", () => {
     describe("Add Task", () => {
-        xit("adds a Task", () => {
+        it("adds a Task", () => {
             const command = command_by_name("create bar")
 
             const new_state = command.action({
                 tasks: tasks_create(),
                 write: null_write
-            }, command.name)
+            }, command.argument)
 
             const result = new_state.tasks
             expect_seq_n_values(result, "bar")
