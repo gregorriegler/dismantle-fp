@@ -1,7 +1,7 @@
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
 import { Seq, seq_fold, seq_join, seq_map, seq_of_empty, seq_of_singleton } from "../seq"
 import { F1, identity1, join, lazy } from "../func"
-import { Maybe, maybe_map, maybe_value } from "../maybe_union"
+import { maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { null_write, sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 
@@ -41,7 +41,6 @@ type ApplicationState = {
 type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
 
 type Command = {
-    name: string,
     action: CommandAction,
     argument: string
 }
@@ -66,13 +65,15 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
 }
 
 export function command_by_name(command_name: string): Command {
-    const values = command_name.split(' ')
-    const lookup: Map<Command> = map_of_2( //
-        "list", {name: "list", action: command_list, argument: values[1]}, //
-        "create", {name: "create", action: command_add_task, argument: values[1]}, //
+    const command_parts = command_name.split(' ')
+    const lookup: Map<CommandAction> = map_of_2( //
+      "list", command_list, //
+      "create", command_add_task, //
     )
-    const maybe_command = map_get(lookup, values[0])
-    return maybe_value(maybe_command, lazy({name: command_name, action: command_invalid, argument: command_name}))
+    const maybe_action = map_get(lookup, command_parts[0])
+    const maybe_command = maybe_map(maybe_action, action => {return {action: action, argument: command_parts[1] }})
+    const invalid_command = lazy({ action: command_invalid, argument: command_name })
+    return maybe_value(maybe_command, invalid_command)
 }
 
 function command_add_task(state: ApplicationState, task_name: string): ApplicationState {
