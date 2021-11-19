@@ -55,13 +55,7 @@ export function application_state_create(): ApplicationState {
 }
 
 type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
-type FooAction = (state: ApplicationState) => ApplicationState
-
-// TODO: everything is a command
-type Command = {
-    action: CommandAction,
-    argument: string
-}
+type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const commands = seq_map(command_names, command_by_name);
@@ -69,26 +63,15 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
     return state.write
 }
 
-function commands_fold(current_state: ApplicationState, command: FooAction): ApplicationState {
-    const command_f = executing_command(command);
-    const new_state = command_f(current_state)
+function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
+    const new_state = command(current_state)
     return {
         tasks: new_state.tasks, // we drop the old state
         write: write_in_sequence(current_state.write, new_state.write)
     }
 }
 
-const executing_command = curry2(command_execute)
-
-export function command_execute(command: FooAction, current_state: ApplicationState): ApplicationState {
-    return command(current_state)
-}
-
-function command_create(action: CommandAction, argument: string): FooAction {
-    return state => action(state, argument)
-}
-
-export function command_by_name(command_name: string): FooAction {
+export function command_by_name(command_name: string): Command {
     const command_parts = command_name.split(' ')
     const lookup: Map<CommandAction> = map_of_2( //
         "list", state_list_tasks, //
@@ -99,6 +82,10 @@ export function command_by_name(command_name: string): FooAction {
     const invalid_command = command_create(state_write_invalid_command, command_name);
     const lazy_invalid_command = lazy(invalid_command)
     return maybe_value(maybe_command, lazy_invalid_command)
+}
+
+function command_create(action: CommandAction, argument: string): Command {
+    return state => action(state, argument)
 }
 
 function state_add_task(state: ApplicationState, task_name: string): ApplicationState {

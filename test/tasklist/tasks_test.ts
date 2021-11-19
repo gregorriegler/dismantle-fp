@@ -4,7 +4,6 @@ import { expect_seq_n_values } from "../seq_expects"
 import {
     application_state_create,
     command_by_name,
-    command_execute,
     task_create,
     tasks_add,
     tasks_create,
@@ -48,7 +47,7 @@ describe("TaskList Commands", () => {
         it("adds a Task", () => {
             const command = command_by_name("create bar")
 
-            const new_state = command_execute(command, application_state_create())
+            const new_state = command(application_state_create())
 
             expect_seq_n_values(new_state.tasks, task_create("bar"))
         })
