@@ -1,7 +1,7 @@
-import { null_write, WriteApplied } from "../datamunging/write";
-import { create_apply_writer_for_transformation } from "../datamunging/writer";
-import { F1, identity1 } from "../func";
-import { Tasks, tasks_adder, tasks_create, tasks_format, task_create } from "./tasks";
+import { null_write, WriteApplied } from "../datamunging/write"
+import { create_apply_writer_for_transformation } from "../datamunging/writer"
+import { F1, identity1 } from "../func"
+import { Tasks, tasks_adder, tasks_create, tasks_format, task_create } from "./tasks"
 
 /*
  * ? = Pure (Application)
@@ -21,8 +21,8 @@ export function application_state_create(): ApplicationState {
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-    const task = task_create(task_name);
-    const add = tasks_adder(state.tasks);
+    const task = task_create(task_name)
+    const add = tasks_adder(state.tasks)
     return {
         tasks: add(task),
         write: null_write
@@ -55,7 +55,7 @@ export function write_invalid_command(state: ApplicationState, command_name: str
 }
 
 function format_invalid_command_name(command_name: string) {
-    const header = "Invalid Command: \"";
-    const footer = "\"\n";
-    return header + command_name + footer;
+    const header = "Invalid Command: " + "\""
+    const footer = "\"" + "\n"
+    return header + command_name + footer
 }

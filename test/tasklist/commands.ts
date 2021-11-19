@@ -17,7 +17,7 @@ import { add_task, ApplicationState, application_state_create, list_tasks, write
 type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
-    const commands = seq_map(command_names, command_from_input);
+    const commands = seq_map(command_names, command_from_input)
     const state = seq_fold(commands, commands_fold, application_state_create())
     return state.write
 }
@@ -39,14 +39,14 @@ export function command_from_input(user_input: UserInput): Command {
         "create", add_task, //
     )
 
-    const input_parts = user_input.split(' ', 2)
+    const input_parts = user_input.split(" ", 2)
     const name = input_parts[0]
     const argument = input_parts[1]
 
     const template = map_get(template_lookup, name)
     const command = maybe_map(template, t => command_create(t, argument))
 
-    const invalid_command = command_create(write_invalid_command, user_input);
+    const invalid_command = command_create(write_invalid_command, user_input)
 
     return maybe_value(command, lazy(invalid_command))
 }

@@ -31,7 +31,7 @@ export function tasks_format(tasks: Tasks): FormattedTasks {
 }
 
 function task_format(task: Task): string {
-    const open = "( ) ";
-    const next = "\n";
+    const open = "( ) "
+    const next = "\n"
     return open + task + next
 }
