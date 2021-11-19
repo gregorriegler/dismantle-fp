@@ -1,7 +1,15 @@
 import { expect } from "chai"
 import { describe } from "mocha"
 import { expect_seq_n_values } from "../seq_expects"
-import { application_state_create, command_by_name, task_create, tasks_add, tasks_create, tasks_format } from "./tasks"
+import {
+    application_state_create,
+    command_by_name,
+    command_execute,
+    task_create,
+    tasks_add,
+    tasks_create,
+    tasks_format
+} from "./tasks"
 
 describe("TaskList Domain", () => {
     it("formats empty Tasks", () => {
@@ -40,10 +48,9 @@ describe("TaskList Commands", () => {
         it("adds a Task", () => {
             const command = command_by_name("create bar")
 
-            const new_state = command.action(application_state_create(), command.argument)
+            const new_state = command_execute(command, application_state_create())
 
-            const result = new_state.tasks
-            expect_seq_n_values(result, "bar")
+            expect_seq_n_values(new_state.tasks, task_create("bar"))
         })
     })
 })

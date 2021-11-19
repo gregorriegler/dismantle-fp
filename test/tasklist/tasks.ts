@@ -59,18 +59,20 @@ type Command = {
 
 export function task_list(command_names: Seq<string>): WriteApplied<string> {
     const commands = seq_map(command_names, command_by_name);
-    const state: ApplicationState = seq_fold(
-        commands,
-        (current_state: ApplicationState, command: Command): ApplicationState => {
-            const new_state = command.action(current_state, command.argument)
-            return {
-                tasks: new_state.tasks, // we drop the old state
-                write: write_in_sequence(current_state.write, new_state.write)
-            }
-        },
-        application_state_create()
-    )
+    const state: ApplicationState = seq_fold(commands, commands_fold, application_state_create())
     return state.write
+}
+
+function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
+    const new_state = command_execute(command, current_state)
+    return {
+        tasks: new_state.tasks, // we drop the old state
+        write: write_in_sequence(current_state.write, new_state.write)
+    }
+}
+
+export function command_execute(command: Command, current_state: ApplicationState): ApplicationState {
+    return command.action(current_state, command.argument);
 }
 
 export function command_by_name(command_name: string): Command {
