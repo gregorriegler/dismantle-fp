@@ -181,7 +181,7 @@ export function seq_is_empty<T>(seq: Seq<T>): boolean {
 export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     return {
         head: () => {
-        	  const head = seq_first(first) // TODO only eval once
+            const head = seq_first(first)
             if (!maybe_is_none(head.head)) {
                 return head.head
             } else {
@@ -189,9 +189,9 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
             }
         },
         tail: () => {
-        	  const head = seq_first(first)
-		        if (!maybe_is_none(head.head)) {
-    						return seq_join(head.tail, second)
+            const head = seq_first(first)
+            if (!maybe_is_none(head.head)) {
+                return seq_join(head.tail, second)
             } else {
                 return seq_tail(second)
             }
