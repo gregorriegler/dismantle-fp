@@ -55,6 +55,7 @@ export function application_state_create(): ApplicationState {
 }
 
 type CommandAction = (state: ApplicationState, argument: string) => ApplicationState
+type FooAction = (state: ApplicationState) => ApplicationState
 
 // TODO: everything is a command
 type Command = {
@@ -68,7 +69,7 @@ export function task_list(command_names: Seq<string>): WriteApplied<string> {
     return state.write
 }
 
-function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
+function commands_fold(current_state: ApplicationState, command: FooAction): ApplicationState {
     const command_f = executing_command(command);
     const new_state = command_f(current_state)
     return {
@@ -79,15 +80,15 @@ function commands_fold(current_state: ApplicationState, command: Command): Appli
 
 const executing_command = curry2(command_execute)
 
-export function command_execute(command: Command, current_state: ApplicationState): ApplicationState {
-    return command.action(current_state, command.argument)
+export function command_execute(command: FooAction, current_state: ApplicationState): ApplicationState {
+    return command(current_state)
 }
 
-function command_create(action: CommandAction, argument: string): Command {
-    return {action: action, argument: argument}
+function command_create(action: CommandAction, argument: string): FooAction {
+    return state => action(state, argument)
 }
 
-export function command_by_name(command_name: string): Command {
+export function command_by_name(command_name: string): FooAction {
     const command_parts = command_name.split(' ')
     const lookup: Map<CommandAction> = map_of_2( //
         "list", state_list_tasks, //
