@@ -1,37 +1,34 @@
 import { F2 } from "../func"
 
-export type Pair<L_NAME extends string, L, R_NAME extends string, R> = {
-    [key in L_NAME]: L
-} & { // & = intersection type
-        [key in R_NAME]: R
-    } & { // TODO hide these fields from outside
-        _l_name: L_NAME
-        _r_name: R_NAME
-    }
-
-export function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
-    left_name: L_NAME,
-    left: L,
-    right_name: R_NAME,
-    right: R
-): Pair<L_NAME, L, R_NAME, R> {
-    return {
-        [left_name]: left,
-        [right_name]: right,
-        _l_name: left_name,
-        _r_name: right_name
-    } as Pair<L_NAME, L, R_NAME, R>
+type Single<K, V> = {
+    [K: string]: V;
 }
 
-export function pair_map<L_NAME extends string, L, NEW_L, R_NAME extends string, R, NEW_R>(
-    pair: Pair<L_NAME, L, R_NAME, R>,
-    map_l: F2<L, R, NEW_L>,
-    map_r: F2<L, R, NEW_R>,
+export type Pair<K1, V1, K2, V2> = Single<K1, V1> & Single<K2, V2>
+
+export function pair_of<K1 extends string, V1, K2 extends string, V2>(
+    left_name: K1,
+    left: V1,
+    right_name: K2,
+    right: V2
+): Pair<K1, V1, K2, V2> {
+    return {
+        [left_name]: left,
+        [right_name]: right
+    } as Pair<K1, V1, K2, V2>
+}
+
+export function pair_map<K1 extends string, V1, NEW_V1, K2 extends string, V2, NEW_V2>(
+    pair: Pair<K1, V1, K2, V2>,
+    map_l: F2<V1, V2, NEW_V1>,
+    map_r: F2<V1, V2, NEW_V2>,
 ) {
+    const left_name = Object.keys(pair)[0];
+    const right_name = Object.keys(pair)[1];
     return pair_of(
-        pair._l_name,
-        map_l(pair[pair._l_name], pair[pair._r_name]),
-        pair._r_name,
-        map_r(pair[pair._l_name], pair[pair._r_name])
+        left_name,
+        map_l(pair[left_name], pair[right_name]),
+        right_name,
+        map_r(pair[left_name], pair[right_name])
     )
 }
