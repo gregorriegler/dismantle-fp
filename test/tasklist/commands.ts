@@ -8,9 +8,9 @@ import {
     ApplicationState,
     application_state_create,
     list_tasks,
-    write_invalid_command,
-    pair_of
+    write_invalid_command
 } from "./use_cases"
+import { pair_of } from "./pair"
 
 /*
  * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
@@ -32,6 +32,7 @@ export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
 function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
     const new_state = command(current_state)
 
+    // TODO use pair_map
     return pair_of(
         'tasks', new_state.tasks, // we drop the old state
         'write', write_in_sequence(current_state.write, new_state.write)

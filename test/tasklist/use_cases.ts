@@ -1,47 +1,12 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
-import { F1, F2, identity1 } from "../func"
+import { F1, identity1, lazy } from "../func"
+import { Pair, pair_map, pair_of } from "./pair"
 import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
  * ? = Pure (Application)
  */
-
-type Pair<L_NAME extends string, L, R_NAME extends string, R> = {
-    [key in L_NAME]: L
-} & { // & = intersection type
-        [key in R_NAME]: R
-    } & { // TODO hide these fields from outside
-        _l_name: L_NAME
-        _r_name: R_NAME
-    }
-
-export function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
-    left_name: L_NAME,
-    left: L,
-    right_name: R_NAME,
-    right: R
-): Pair<L_NAME, L, R_NAME, R> {
-    return {
-        [left_name]: left,
-        [right_name]: right,
-        _l_name: left_name,
-        _r_name: right_name
-    } as Pair<L_NAME, L, R_NAME, R>
-}
-
-function pair_map<L_NAME extends string, L, NEW_L, R_NAME extends string, R, NEW_R>(
-    pair: Pair<L_NAME, L, R_NAME, R>,
-    map_l: F2<L, R, NEW_L>,
-    map_r: F2<L, R, NEW_R>,
-) {
-    return pair_of(
-        pair._l_name,
-        map_l(pair[pair._l_name], pair[pair._r_name]),
-        pair._r_name,
-        map_r(pair[pair._l_name], pair[pair._r_name])
-    )
-}
 
 export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
 
@@ -53,7 +18,7 @@ export function application_state_create(): ApplicationState {
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-    return pair_map(state, task_adder(task_name), _ => null_write)
+    return pair_map(state, task_adder(task_name), lazy(null_write))
 }
 
 export function list_tasks(state: ApplicationState, _: string): ApplicationState {
