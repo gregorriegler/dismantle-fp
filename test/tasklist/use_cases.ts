@@ -1,6 +1,6 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
-import { F1, identity1 } from "../func"
+import { F1, F2, identity1 } from "../func"
 import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
@@ -30,39 +30,16 @@ export function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
     } as Pair<L_NAME, L, R_NAME, R>
 }
 
-function pair_map_l2left<L_NAME extends string, L, NEW_L, R_NAME extends string, R>(
+function pair_map<L_NAME extends string, L, NEW_L, R_NAME extends string, R, NEW_R>(
     pair: Pair<L_NAME, L, R_NAME, R>,
-    map: (l: L) => NEW_L
+    map_l: F2<L, R, NEW_L>,
+    map_r: F2<L, R, NEW_R>,
 ) {
     return pair_of(
         pair._l_name,
-        map(pair[pair._l_name]),
+        map_l(pair[pair._l_name], pair[pair._r_name]),
         pair._r_name,
-        pair[pair._r_name]
-    )
-}
-
-function pair_map_r2right<L_NAME extends string, L, R_NAME extends string, R, NEW_R>(
-    pair: Pair<L_NAME, L, R_NAME, R>,
-    map: (r: R) => NEW_R
-) {
-    return pair_of(
-        pair._l_name,
-        pair[pair._l_name],
-        pair._r_name,
-        map(pair[pair._r_name])
-    )
-}
-
-function pair_map_l2right<L_NAME extends string, L, R_NAME extends string, R, NEW_R>(
-    pair: Pair<L_NAME, L, R_NAME, R>,
-    map: (l: L) => NEW_R
-) {
-    return pair_of(
-        pair._l_name,
-        pair[pair._l_name],
-        pair._r_name,
-        map(pair[pair._l_name])
+        map_r(pair[pair._l_name], pair[pair._r_name])
     )
 }
 
@@ -76,12 +53,11 @@ export function application_state_create(): ApplicationState {
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-    const added_task = pair_map_l2left(state, task_adder(task_name))
-    return pair_map_r2right(added_task, _ => null_write)
+    return pair_map(state, task_adder(task_name), _ => null_write)
 }
 
 export function list_tasks(state: ApplicationState, _: string): ApplicationState {
-    return pair_map_l2right(state, tasks_writer)
+    return pair_map(state,identity1, tasks_writer)
 }
 
 function tasks_writer(tasks: Tasks): WriteApplied<string> {
@@ -92,7 +68,7 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
 }
 
 export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
-    return pair_map_r2right(state, invalid_command_writer(command_name))
+    return pair_map(state, identity1, invalid_command_writer(command_name))
 }
 
 function invalid_command_writer(command_name: string) : F1<any, WriteApplied<string>> {
