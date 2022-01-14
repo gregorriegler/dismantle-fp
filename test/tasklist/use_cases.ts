@@ -1,7 +1,7 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
 import { F1, identity1 } from "../func"
-import { Tasks, tasks_adder, tasks_create, tasks_format, task_create } from "./tasks"
+import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
  * ? = Pure (Application)
@@ -11,7 +11,7 @@ type Pair<L_NAME extends string, L, R_NAME extends string, R> = {
     [key in L_NAME]: L
 } & { // & = intersection type
     [key in R_NAME]: R
-} & {
+} & { // TODO hide these fields from outside
     _l_name: L_NAME
     _r_name: R_NAME
 }
@@ -42,6 +42,18 @@ function pair_map_left<L_NAME extends string, L, NEW_L, R_NAME extends string, R
     )
 }
 
+function pair_map_right<L_NAME extends string, L, R_NAME extends string, R, NEW_R>(
+    pair: Pair<L_NAME, L, R_NAME, R>,
+    map: (r: R) => NEW_R
+) {
+    return pair_of(
+        pair._l_name,
+        pair[pair._l_name],
+        pair._r_name,
+        map(pair[pair._r_name])
+    )
+}
+
 export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
 
 export function application_state_create(): ApplicationState {
@@ -52,13 +64,10 @@ export function application_state_create(): ApplicationState {
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-    const task = task_create(task_name)
-    const add = tasks_adder(state.tasks)
-
-    return pair_of(
-        'tasks', add(task),
-        'write', null_write
-    );
+    const added_task = pair_map_left(state, task_adder(task_name));
+    return pair_map_right(added_task, _ => {
+        return null_write;
+    })
 }
 
 export function list_tasks(state: ApplicationState, _: string): ApplicationState {
