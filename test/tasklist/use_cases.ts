@@ -92,16 +92,18 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
 }
 
 export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
-    const identity = identity1 as F1<string, string>
-    const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
+    return pair_map_r2right(state, invalid_command_writer(command_name))
+}
 
-    const formatted_invalid_command = format_invalid_command_name(command_name)
-    const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
+function invalid_command_writer(command_name: string) : F1<any, WriteApplied<string>> {
+    return (_) => {
+        const identity = identity1 as F1<string, string>
+        const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
-    return pair_of(
-        'tasks', state.tasks,
-        'write', write_invalid_command
-    )
+        const formatted_invalid_command = format_invalid_command_name(command_name)
+        const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
+        return write_invalid_command
+    }
 }
 
 function format_invalid_command_name(command_name: string) {
