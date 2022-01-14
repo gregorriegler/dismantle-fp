@@ -7,11 +7,13 @@ import { Tasks, tasks_adder, tasks_create, tasks_format, task_create } from "./t
  * ? = Pure (Application)
  */
 
-// named pair of Tasks and lazy Write
-export type ApplicationState = {
-    tasks: Tasks,
-    write: WriteApplied<string>
+type Pair<LEFT_NAME extends string, LEFT, RIGHT_NAME extends string, RIGHT> = {
+    [key in LEFT_NAME]: LEFT
+} & { // & = intersection type
+    [key in RIGHT_NAME]: RIGHT
 }
+
+export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
 
 export function application_state_create(): ApplicationState {
     return {
