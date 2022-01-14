@@ -7,22 +7,22 @@ import { Tasks, tasks_adder, tasks_create, tasks_format, task_create } from "./t
  * ? = Pure (Application)
  */
 
-type Pair<LEFT_NAME extends string, LEFT, RIGHT_NAME extends string, RIGHT> = {
-    [key in LEFT_NAME]: LEFT
+type Pair<L_NAME extends string, L, R_NAME extends string, R> = {
+    [key in L_NAME]: L
 } & { // & = intersection type
-    [key in RIGHT_NAME]: RIGHT
+    [key in R_NAME]: R
 }
 
-function pair_of<LEFT_NAME extends string, LEFT, RIGHT_NAME extends string, RIGHT>(
-    left_name: LEFT_NAME,
-    left: LEFT,
-    right_name: RIGHT_NAME,
-    right: RIGHT
-): Pair<LEFT_NAME, LEFT, RIGHT_NAME, RIGHT> {
+function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
+    left_name: L_NAME,
+    left: L,
+    right_name: R_NAME,
+    right: R
+): Pair<L_NAME, L, R_NAME, R> {
     return {
         [left_name]: left,
         [right_name]: right
-    } as Pair<LEFT_NAME, LEFT, RIGHT_NAME, RIGHT>
+    } as Pair<L_NAME, L, R_NAME, R>
 }
 
 export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
