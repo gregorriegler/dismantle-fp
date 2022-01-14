@@ -3,7 +3,14 @@ import { lazy } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
-import { add_task, ApplicationState, application_state_create, list_tasks, write_invalid_command } from "./use_cases"
+import {
+    add_task,
+    ApplicationState,
+    application_state_create,
+    list_tasks,
+    write_invalid_command,
+    pair_of
+} from "./use_cases"
 
 /*
  * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
@@ -24,10 +31,11 @@ export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
 
 function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
     const new_state = command(current_state)
-    return {
-        tasks: new_state.tasks, // we drop the old state
-        write: write_in_sequence(current_state.write, new_state.write)
-    }
+
+    return pair_of(
+        'tasks', new_state.tasks, // we drop the old state
+        'write', write_in_sequence(current_state.write, new_state.write)
+    );
 }
 
 export type UserInput = string

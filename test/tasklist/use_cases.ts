@@ -11,9 +11,12 @@ type Pair<L_NAME extends string, L, R_NAME extends string, R> = {
     [key in L_NAME]: L
 } & { // & = intersection type
     [key in R_NAME]: R
+} & {
+    _l_name: L_NAME
+    _r_name: R_NAME
 }
 
-function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
+export function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
     left_name: L_NAME,
     left: L,
     right_name: R_NAME,
@@ -21,23 +24,41 @@ function pair_of<L_NAME extends string, L, R_NAME extends string, R>(
 ): Pair<L_NAME, L, R_NAME, R> {
     return {
         [left_name]: left,
-        [right_name]: right
+        [right_name]: right,
+        _l_name: left_name,
+        _r_name: right_name
     } as Pair<L_NAME, L, R_NAME, R>
+}
+
+function pair_map_left<L_NAME extends string, L, NEW_L, R_NAME extends string, R>(
+    pair: Pair<L_NAME, L, R_NAME, R>,
+    map: (l: L) => NEW_L
+) {
+    return pair_of(
+        pair._l_name,
+        map(pair[pair._l_name]),
+        pair._r_name,
+        pair[pair._r_name]
+    )
 }
 
 export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
 
 export function application_state_create(): ApplicationState {
-    return pair_of('tasks', tasks_create(), 'write', null_write);
+    return pair_of(
+        'tasks', tasks_create(),
+        'write', null_write
+    );
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
     const task = task_create(task_name)
     const add = tasks_adder(state.tasks)
-    return {
-        tasks: add(task),
-        write: null_write
-    }
+
+    return pair_of(
+        'tasks', add(task),
+        'write', null_write
+    );
 }
 
 export function list_tasks(state: ApplicationState, _: string): ApplicationState {
@@ -46,10 +67,10 @@ export function list_tasks(state: ApplicationState, _: string): ApplicationState
     const formatted_task_list = tasks_format(state.tasks)
     const write_formatted_tasks = apply_formatted_tasks_writer(formatted_task_list)
 
-    return {
-        tasks: state.tasks,
-        write: write_formatted_tasks
-    }
+    return pair_of(
+        'tasks', state.tasks,
+        'write', write_formatted_tasks
+    );
 }
 
 export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
@@ -59,10 +80,10 @@ export function write_invalid_command(state: ApplicationState, command_name: str
     const formatted_invalid_command = format_invalid_command_name(command_name)
     const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
 
-    return {
-        tasks: state.tasks,
-        write: write_invalid_command
-    }
+    return pair_of(
+        'tasks', state.tasks,
+        'write', write_invalid_command
+    );
 }
 
 function format_invalid_command_name(command_name: string) {
