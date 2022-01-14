@@ -13,13 +13,22 @@ type Pair<LEFT_NAME extends string, LEFT, RIGHT_NAME extends string, RIGHT> = {
     [key in RIGHT_NAME]: RIGHT
 }
 
+function pair_of<LEFT_NAME extends string, LEFT, RIGHT_NAME extends string, RIGHT>(
+    left_name: LEFT_NAME,
+    left: LEFT,
+    right_name: RIGHT_NAME,
+    right: RIGHT
+): Pair<LEFT_NAME, LEFT, RIGHT_NAME, RIGHT> {
+    return {
+        [left_name]: left,
+        [right_name]: right
+    } as Pair<LEFT_NAME, LEFT, RIGHT_NAME, RIGHT>
+}
+
 export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
 
 export function application_state_create(): ApplicationState {
-    return {
-        tasks: tasks_create(),
-        write: null_write
-    }
+    return pair_of('tasks', tasks_create(), 'write', null_write);
 }
 
 export function add_task(state: ApplicationState, task_name: string): ApplicationState {
