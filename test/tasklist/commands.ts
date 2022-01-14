@@ -1,5 +1,5 @@
 import { Seq, seq_fold, seq_map } from "../seq"
-import { lazy } from "../func"
+import { identity1, lazy } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
@@ -10,7 +10,7 @@ import {
     list_tasks,
     write_invalid_command
 } from "./use_cases"
-import { pair_of } from "./pair"
+import { pair_map } from "./pair"
 
 /*
  * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
@@ -31,12 +31,8 @@ export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
 
 function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
     const new_state = command(current_state)
-
-    // TODO use pair_map
-    return pair_of(
-        'tasks', new_state.tasks, // we drop the old state
-        'write', write_in_sequence(current_state.write, new_state.write)
-    );
+    const merged_write = write_in_sequence(current_state.write, new_state.write)
+    return pair_map(new_state, identity1, lazy(merged_write))
 }
 
 export type UserInput = string
