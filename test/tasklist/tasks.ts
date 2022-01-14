@@ -26,7 +26,7 @@ export function task_adder(task_name: string): F1<Tasks, Tasks> {
     }
 }
 
-export function tasks_add(tasks: Tasks, new_task: Task): Tasks {
+function tasks_add(tasks: Tasks, new_task: Task): Tasks {
     return seq_join(tasks, seq_of_singleton(new_task))
 }
 
