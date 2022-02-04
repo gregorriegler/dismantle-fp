@@ -22,7 +22,7 @@ export function add_task(state: ApplicationState, task_name: string): Applicatio
 }
 
 export function list_tasks(state: ApplicationState, _: string): ApplicationState {
-    return pair_map(state,identity1, tasks_writer)
+    return pair_map(state, identity1, tasks_writer)
 }
 
 function tasks_writer(tasks: Tasks): WriteApplied<string> {
@@ -33,11 +33,11 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
 }
 
 export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
-    return pair_map(state, identity1, invalid_command_writer(command_name))
+    return pair_map(state, identity1, create_map_writer_to_invalid_command_writer_for(command_name))
 }
 
-function invalid_command_writer(command_name: string) : F1<any, WriteApplied<string>> {
-    return (_) => {
+function create_map_writer_to_invalid_command_writer_for(command_name: string) : F1<WriteApplied<string>, WriteApplied<string>> {
+    function map_writer_to_invalid_command_writer(_: WriteApplied<string>) {
         const identity = identity1 as F1<string, string>
         const apply_invalid_command_writer = create_apply_writer_for_transformation(identity)
 
@@ -45,6 +45,7 @@ function invalid_command_writer(command_name: string) : F1<any, WriteApplied<str
         const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
         return write_invalid_command
     }
+    return map_writer_to_invalid_command_writer
 }
 
 function format_invalid_command_name(command_name: string) {
