@@ -59,6 +59,7 @@ export function command_from_input(user_input: UserInput): Command {
     return maybe_value(command, lazy(invalid_command))
 }
 
+// is generic in 4 variables ...
 function command_create(template: CommandTemplate, argument: string): Command {
     return state => template(state, argument)
 }
