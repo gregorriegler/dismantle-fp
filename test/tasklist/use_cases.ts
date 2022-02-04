@@ -1,7 +1,7 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
 import { F0, F1, F2, identity1, lazy } from "../func"
-import { Pair, pair_map, pair_of } from "./pair"
+import { Pair, pair_map, pair_of, Single } from "./pair"
 import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
@@ -18,7 +18,7 @@ export function application_state_create(): ApplicationState {
 }
 
 // export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-export function add_task<K1, K2, V2>(state: Pair<K1, Tasks, K2, WriteApplied<V2>>, task_name: string):
+export function add_task<K1, K2, V2>(state: Single<K1, Tasks>, task_name: string):
         Pair<K1, Tasks, K2, WriteApplied<V2>> {
     return pair_map(state, task_adder(task_name), lazy(null_write))
 }

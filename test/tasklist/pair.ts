@@ -1,6 +1,6 @@
 import { F2 } from "../func"
 
-type Single<K, V> = {
+export type Single<K, V> = {
     [K: string]: V;
 }
 
