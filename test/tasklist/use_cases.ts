@@ -8,24 +8,19 @@ import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
  * ? = Pure (Application)
  */
 
-export type ApplicationState = Pair<'tasks', Tasks, 'write', WriteApplied<string>>
+export type ApplicationState = Pair<Tasks, WriteApplied<string>>
 
 export function application_state_create(): ApplicationState {
-    return pair_of(
-        'tasks', tasks_create(),
-        'write', null_write
-    )
+    return pair_of(tasks_create(), null_write)
 }
 
 // export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-export function add_task<K1, K2, V2>(state: Single<K1, Tasks>, task_name: string):
-        Pair<K1, Tasks, K2, WriteApplied<V2>> {
+export function add_task<V2>(state: Pair<Tasks, WriteApplied<V2>>, task_name: string): Pair<Tasks, WriteApplied<V2>> {
     return pair_map(state, task_adder(task_name), lazy(null_write))
 }
 
 // export function list_tasks(state: ApplicationState, _: string): ApplicationState {
-export function list_tasks<K1, K2, V2>(state: Pair<K1, Tasks, K2, WriteApplied<V2>>, _: string):
-        Pair<K1, Tasks, K2, WriteApplied<string>> {
+export function list_tasks<V2>(state: Pair<Tasks, WriteApplied<V2>>, _: string): Pair<Tasks, WriteApplied<string>> {
     return pair_map(state, identity1, tasks_writer)
 }
 
@@ -37,8 +32,8 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
 }
 
 // export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
-export function write_invalid_command<K1, V1, K2>(state: Pair<K1, V1, K2, WriteApplied<string>>, command_name: string):
-        Pair<K1, V1, K2, WriteApplied<string>> {
+export function write_invalid_command<V1>(state: Pair<V1, WriteApplied<string>>, command_name: string):
+    Pair<V1, WriteApplied<string>> {
     return pair_map(state, identity1, create_map_writer_to_invalid_command_writer_for(command_name))
 }
 
@@ -53,6 +48,7 @@ function create_map_writer_to_invalid_command_writer_for(command_name: string): 
         const write_invalid_command = apply_invalid_command_writer(formatted_invalid_command)
         return write_invalid_command
     }
+
     return map_writer_to_invalid_command_writer
 }
 

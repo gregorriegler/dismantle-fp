@@ -44,7 +44,7 @@ describe("Commands", () => {
 
             const new_state = command(application_state_create())
 
-            expect_seq_n_values(new_state.tasks, task_create("bar"))
+            expect_seq_n_values(new_state.left, task_create("bar"))
         })
     })
 })
