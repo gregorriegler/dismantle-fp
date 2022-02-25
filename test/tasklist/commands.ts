@@ -1,5 +1,5 @@
 import { Seq, seq_fold, seq_map } from "../seq"
-import { identity1, lazy } from "../func"
+import { curry2, F1, identity1, lazy, partial2_2 } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
@@ -23,7 +23,7 @@ export function task_list(command_input: Seq<UserInput>): WriteApplied<string> {
 
 // function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
 function commands_fold<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, command: CommandX<V1, V2, V3, V2>):
-        Pair<V3, WriteApplied<V2>> {
+    Pair<V3, WriteApplied<V2>> {
     // works with domain objects, folds domain
     const new_state = command(current_state)
     const merged_write = write_in_sequence(current_state.right, new_state.right)
@@ -32,6 +32,8 @@ function commands_fold<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, co
 
 export type UserInput = string
 type CommandTemplate = (state: ApplicationState, argument: string) => ApplicationState
+
+// type CommandTemplate2 = (argument: string) => Command;
 
 export function command_from_input(user_input: UserInput): Command {
     // this is boundary, low level code
@@ -45,11 +47,17 @@ export function command_from_input(user_input: UserInput): Command {
     const argument = input_parts[1]
 
     const template = map_get(template_lookup, name)
-    const command = maybe_map(template, t => command_create(t, argument))
+
+    const command_create_with_argument = command_create_with(argument);
+    const command = maybe_map(template, command_create_with_argument)
 
     const invalid_command = command_create(write_invalid_command, user_input)
 
     return maybe_value(command, lazy(invalid_command))
+}
+
+function command_create_with(argument: string): F1<CommandTemplate, Command> {
+    return (template: CommandTemplate) => command_create(template, argument);
 }
 
 function command_create(template: CommandTemplate, argument: string): Command {
