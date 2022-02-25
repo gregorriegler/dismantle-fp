@@ -21,7 +21,11 @@ export function add_task<V2>(state: Pair<Tasks, WriteApplied<V2>>, task_name: st
 
 // export function list_tasks(state: ApplicationState, _: string): ApplicationState {
 export function list_tasks<V2>(state: Pair<Tasks, WriteApplied<V2>>, _: string): Pair<Tasks, WriteApplied<string>> {
-    return pair_map(state, identity1, tasks_writer)
+    return list_tasks1(_)(state)
+}
+
+export function list_tasks1<V2>(_: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<string>>> {
+    return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, identity1, tasks_writer)
 }
 
 function tasks_writer(tasks: Tasks): WriteApplied<string> {
