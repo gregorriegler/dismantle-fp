@@ -33,7 +33,7 @@ export function maybe_of_nullable<T>(value: T | undefined | null): Maybe<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return { value: value, hint: "Value", toString: () => value + "" }
+    return {value: value, hint: "Value", toString: () => value + ""}
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
@@ -47,6 +47,11 @@ export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
 export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
     return maybe_lift(f)(maybe)
 }
+
+export function maybe_map_i<T, R>(maybe: Maybe<T>): F1<F1<T, R>, Maybe<R>> {
+    return f => maybe_lift(f)(maybe)
+}
+
 
 export type MaybeF1<T, R> = F1<Maybe<T>, Maybe<R>>
 
