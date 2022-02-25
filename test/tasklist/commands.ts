@@ -12,20 +12,11 @@ import {
 } from "./use_cases"
 import { Pair, pair_map } from "./pair"
 
-/*
- * Gibt es einen pure Teil der nicht im Domain ist, wie zB convert von String auf Command.
- * String ist nicht in Domain aber das Mapping kann pure gemacht werden.
- * Es gibt einen funktionalen Teil im Boundary auch. Der ist nicht top level.
- *
- * Es ist eine Seq von Commands die wir folden. Am Anfang wird aus Reader ein State.
- * Dann folden wir den State ueber die Commands. Am Ende wandert der State in einen Writer zum Save.
- */
-
 type CommandX<V1, V2, V3, V4> = (state: Pair<V1, WriteApplied<V2>>) => Pair<V3, WriteApplied<V4>>
 type Command = (state: ApplicationState) => ApplicationState
 
-export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
-    const commands = seq_map(command_names, command_from_input)
+export function task_list(command_input: Seq<UserInput>): WriteApplied<string> {
+    const commands = seq_map(command_input, command_from_input)
     const state = seq_fold(commands, commands_fold, application_state_create())
     return state["right"] // this is the only time we use the K2, don't use K1 at all.
 }
@@ -33,6 +24,7 @@ export function task_list(command_names: Seq<UserInput>): WriteApplied<string> {
 // function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
 function commands_fold<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, command: CommandX<V1, V2, V3, V2>):
         Pair<V3, WriteApplied<V2>> {
+    // works with domain objects, folds domain
     const new_state = command(current_state)
     const merged_write = write_in_sequence(current_state.right, new_state.right)
     return pair_map(new_state, identity1, lazy(merged_write))
@@ -42,6 +34,7 @@ export type UserInput = string
 type CommandTemplate = (state: ApplicationState, argument: string) => ApplicationState
 
 export function command_from_input(user_input: UserInput): Command {
+    // this is boundary, low level code
     const template_lookup: Map<CommandTemplate> = map_of_2( //
         "list", list_tasks, //
         "create", add_task, //
@@ -59,7 +52,6 @@ export function command_from_input(user_input: UserInput): Command {
     return maybe_value(command, lazy(invalid_command))
 }
 
-// is generic in 4 variables ...
 function command_create(template: CommandTemplate, argument: string): Command {
     return state => template(state, argument)
 }

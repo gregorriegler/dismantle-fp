@@ -1,11 +1,11 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
-import { F0, F1, F2, identity1, lazy } from "../func"
-import { Pair, pair_map, pair_of, Single } from "./pair"
+import { F0, F1, identity1, lazy } from "../func"
+import { Pair, pair_map, pair_of } from "./pair"
 import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
- * ? = Pure (Application)
+ * Domain Logic = Pure (Application)
  */
 
 export type ApplicationState = Pair<Tasks, WriteApplied<string>>
