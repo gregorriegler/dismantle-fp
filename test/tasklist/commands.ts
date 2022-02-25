@@ -40,7 +40,13 @@ export function command_from_input(user_input: UserInput): Command {
     const argument = input_parts[1]
 
     const template = map_get(template_lookup, name)
-    const command = maybe_map(template, (t) => t(argument))
+
+    const command = maybe_map(template, apply_with_argument(argument))
+
     const invalid_command = write_invalid_command(user_input)
     return maybe_value(command, lazy(invalid_command))
+}
+
+function apply_with_argument(argument: string) {
+    return (template: CommandTemplate) => template(argument);
 }
