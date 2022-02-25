@@ -1,7 +1,7 @@
 import { F2 } from "../func"
 
 export type Single<K, V> = {
-    [K: string]: V;
+    [K: string]: V
 }
 
 export type Pair<V1, V2> = Single<"left", V1> & Single<"right", V2>
@@ -13,7 +13,7 @@ export function pair_of<V1, V2>(
     return {
         left: left,
         right: right
-    } as any as Pair<V1, V2> // TODO BÃ–SE
+    } as any as Pair<V1, V2> // TODO BÖSE
 }
 
 export function pair_map<V1, NEW_V1, V2, NEW_V2>(

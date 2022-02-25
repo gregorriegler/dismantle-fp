@@ -21,8 +21,8 @@ export function tasks_create(): Tasks {
 export function task_adder(task_name: string): F1<Tasks, Tasks> {
     return (tasks: Tasks): Tasks => {
         const task = task_create(task_name)
-        const add = curry2(tasks_add)(tasks);
-        return add(task);
+        const add = curry2(tasks_add)(tasks)
+        return add(task)
     }
 }
 

@@ -26,7 +26,7 @@ function commands_fold<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, co
 
 export type UserInput = string
 
-type CommandTemplate = (argument: string) => Command;
+type CommandTemplate = (argument: string) => Command
 
 export function command_from_input(user_input: UserInput): Command {
     // this is boundary, low level code
@@ -48,5 +48,5 @@ export function command_from_input(user_input: UserInput): Command {
 }
 
 function apply_with_argument(argument: string) {
-    return (template: CommandTemplate) => template(argument);
+    return (template: CommandTemplate) => template(argument)
 }

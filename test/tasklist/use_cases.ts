@@ -15,7 +15,7 @@ export function application_state_create(): ApplicationState {
 }
 
 export function add_task<V2>(task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
-    const concrete_task = task_adder(task_name);
+    const concrete_task = task_adder(task_name)
     return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, concrete_task, lazy(null_write))
 }
 
@@ -31,7 +31,7 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
 }
 
 export function write_invalid_command<V1>(command_name: string): F1<Pair<V1, WriteApplied<string>>, Pair<V1, WriteApplied<string>>> {
-    const mapR = create_map_writer_to_invalid_command_writer_for(command_name);
+    const mapR = create_map_writer_to_invalid_command_writer_for(command_name)
     return (state) => pair_map(state, identity1, mapR)
 }
 

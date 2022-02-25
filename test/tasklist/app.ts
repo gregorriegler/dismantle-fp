@@ -15,9 +15,9 @@ function io_console_print(message: string): void {
 }
 
 function main() {
-    task_list_app(process.argv.slice(2));
+    task_list_app(process.argv.slice(2))
 }
 
 if (require.main === module) {
-    main();
+    main()
 }
