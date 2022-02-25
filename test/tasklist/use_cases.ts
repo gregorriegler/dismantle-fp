@@ -14,17 +14,12 @@ export function application_state_create(): ApplicationState {
     return pair_of(tasks_create(), null_write)
 }
 
-// export function add_task(state: ApplicationState, task_name: string): ApplicationState {
-export function add_task<V2>(state: Pair<Tasks, WriteApplied<V2>>, task_name: string): Pair<Tasks, WriteApplied<V2>> {
-    return pair_map(state, task_adder(task_name), lazy(null_write))
+export function add_task<V2>(task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
+    const concrete_task = task_adder(task_name);
+    return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, concrete_task, lazy(null_write))
 }
 
-// export function list_tasks(state: ApplicationState, _: string): ApplicationState {
-export function list_tasks<V2>(state: Pair<Tasks, WriteApplied<V2>>, _: string): Pair<Tasks, WriteApplied<string>> {
-    return list_tasks1(_)(state)
-}
-
-export function list_tasks1<V2>(_: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<string>>> {
+export function list_tasks<V2>(_: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<string>>> {
     return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, identity1, tasks_writer)
 }
 
@@ -35,14 +30,11 @@ function tasks_writer(tasks: Tasks): WriteApplied<string> {
     return write_formatted_tasks
 }
 
-// export function write_invalid_command(state: ApplicationState, command_name: string): ApplicationState {
-export function write_invalid_command<V1>(state: Pair<V1, WriteApplied<string>>, command_name: string):
-    Pair<V1, WriteApplied<string>> {
-    return pair_map(state, identity1, create_map_writer_to_invalid_command_writer_for(command_name))
+export function write_invalid_command<V1>(command_name: string): F1<Pair<V1, WriteApplied<string>>, Pair<V1, WriteApplied<string>>> {
+    const mapR = create_map_writer_to_invalid_command_writer_for(command_name);
+    return (state) => pair_map(state, identity1, mapR)
 }
 
-//function create_map_writer_to_invalid_command_writer_for<V1, V2>(command_name: string): F2<V1, V2, WriteApplied<string>> {
-//    function map_writer_to_invalid_command_writer(v1: V1, v2: V2) {
 function create_map_writer_to_invalid_command_writer_for(command_name: string): F0<WriteApplied<string>> {
     function map_writer_to_invalid_command_writer() {
         const identity = identity1 as F1<string, string>
