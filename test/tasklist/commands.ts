@@ -1,6 +1,6 @@
 import { Seq, seq_fold, seq_map } from "../seq"
 import { identity1, lazy } from "../func"
-import { maybe_map, maybe_map_i, maybe_value } from "../maybe_union"
+import { maybe_map_i, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 import { add_task, application_state_create, ApplicationState, list_tasks, write_invalid_command } from "./use_cases"

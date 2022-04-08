@@ -1,5 +1,5 @@
 import { Seq, seq_fold, seq_join, seq_map, seq_of_empty, seq_of_singleton } from "../seq"
-import { curry2, F1, join } from "../func"
+import { F1, join } from "../func"
 
 /*
  * Model = Pure (Domain) is most inner.
@@ -19,15 +19,11 @@ export function tasks_create(): Tasks {
 }
 
 export function task_adder(task_name: string): F1<Tasks, Tasks> {
-    return (tasks: Tasks): Tasks => {
-        const task = task_create(task_name)
-        const add = curry2(tasks_add)(tasks)
-        return add(task)
+    function add_task(tasks: Tasks): Tasks {
+        const new_task = task_create(task_name)
+        return seq_join(tasks, seq_of_singleton(new_task))
     }
-}
-
-function tasks_add(tasks: Tasks, new_task: Task): Tasks {
-    return seq_join(tasks, seq_of_singleton(new_task))
+    return add_task;
 }
 
 export function tasks_format(tasks: Tasks): FormattedTasks {

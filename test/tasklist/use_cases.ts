@@ -14,9 +14,16 @@ export function application_state_create(): ApplicationState {
     return pair_of(tasks_create(), null_write)
 }
 
-export function add_task<V2>(task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
-    const concrete_task = task_adder(task_name)
-    return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, concrete_task, lazy(null_write))
+export function add_task<V2>(concrete_task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
+    // was kann ich öfter verwenden?
+    // wir haben das: task_adder(task_name)(tasks)
+    // ... kann selben Task zu verschiedenen Listen hinzufügen
+    // ... kann ich öfter verwenden
+    // Gregor will: tasks_addable(tasks)(task_from(task_name))
+    // ... kann von einer base Liste unterschiedliche Ableitungen/Varianten mit unterschiedlichen Tasks erstellen
+    // ... wäre mehr OO, weil this das erste ist
+    const add_concrete_task = task_adder(concrete_task_name)
+    return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, add_concrete_task, lazy(null_write))
 }
 
 export function list_tasks<V2>(_: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<string>>> {
