@@ -9,7 +9,7 @@ import {
     maybe_of,
     maybe_value
 } from "./maybe_union"
-import { F0, F1 } from "./func"
+import { F0, F1, F2 } from "./func"
 
 export interface Seq<T> extends Object {
 }
@@ -201,6 +201,23 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
         }
     } as PrivateSeq<T>
 }
+
+// TODO: We started with maybe_fold
+// export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
+//     return (seq: Seq<T>, initial: R) => {
+//         const first = seq_first(seq)
+//         function combineRecursively(head: T): R {
+//             const current = combine(initial, head)
+//             return seq_fold(first.tail, combine, current)
+//         }
+//
+//         if (maybe_is_none(first.head)) {
+//             return initial
+//         }
+//
+//         return maybe_fold(first.head, combineRecursively, () => initial)
+//     }
+// }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
     const first = seq_first(seq)

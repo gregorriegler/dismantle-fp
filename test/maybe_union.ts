@@ -33,7 +33,7 @@ export function maybe_of_nullable<T>(value: T | undefined | null): Maybe<T> {
 }
 
 export function maybe_of<T>(value: T): Maybe<T> {
-    return { value: value, hint: "Value", toString: () => value + "" }
+    return {value: value, hint: "Value", toString: () => value + ""}
 }
 
 export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
@@ -41,7 +41,11 @@ export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
-    return maybe_fold(maybe, identity1, default_value)
+    if (!maybe_is_none(maybe)) {
+        return (maybe as Value<T>).value;
+    } else {
+        return default_value();
+    }
 }
 
 export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
@@ -66,10 +70,26 @@ export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): MaybeF1<T, R> {
     return maybe => maybe_is_none(maybe) ? NONE : f(maybe.value)
 }
 
-export function maybe_fold<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): R {
-    return maybe_fold_i<T>(maybe)(some, none)
+export function maybe_fold<T, R>(maybe: Maybe<T>, combine: F1<T, R>, initial: F0<R>): R {
+    return maybe_value(maybe_lift(combine)(maybe), initial);
 }
 
-export function maybe_fold_i<T>(maybe: Maybe<T>): <R>(some: F1<T, R>, none: F0<R>) => R {
-    return <R>(some: F1<T, R>, none: F0<R>) => !maybe_is_none(maybe) ? some((maybe as Value<T>).value) : none()
+// maybe_fold(combine, initial)(maybe)
+export function maybe_foo<T, R>(combine: F1<T, R>, initial: F0<R>): F1<Maybe<T>, R> {
+    return (maybe: Maybe<T>) : R => {
+        if (!maybe_is_none(maybe)) {
+            return combine((maybe as Value<T>).value);
+        } else {
+            return initial();
+        }
+    }
+}
+
+
+export function maybe_fold2<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): R {
+    if (!maybe_is_none(maybe)) {
+        return some((maybe as Value<T>).value);
+    } else {
+        return none();
+    }
 }

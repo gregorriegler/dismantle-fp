@@ -1,4 +1,4 @@
-import { Seq, seq_fold, seq_map } from "../seq"
+import { Seq, seq_fold, seq_lift, seq_map } from "../seq"
 import { identity1, lazy } from "../func"
 import { maybe_map_i, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
@@ -10,7 +10,8 @@ type CommandX<V1, V2, V3, V4> = (state: Pair<V1, WriteApplied<V2>>) => Pair<V3, 
 type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_input: Seq<UserInput>): WriteApplied<string> {
-    const commands = seq_map(command_input, command_from_input)
+    const command_from_input_map = seq_lift(command_from_input);
+    const commands = command_from_input_map(command_input);
     const state = seq_fold(commands, commands_fold, application_state_create())
     return state["right"] // this is the only time we use the K2, don't use K1 at all.
 }
