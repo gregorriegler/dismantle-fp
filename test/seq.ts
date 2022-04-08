@@ -6,7 +6,7 @@ import {
     maybe_lift,
     maybe_map,
     maybe_none,
-    maybe_of,
+    maybe_of, maybe_or,
     maybe_value
 } from "./maybe_union"
 import { F0, F1, F2 } from "./func"
@@ -230,7 +230,8 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
         return initial
     }
 
-    return maybe_fold(first.head, combineRecursively, () => initial)
+    const mapped_maybe = maybe_lift(combineRecursively)(first.head);
+    return maybe_or(() => initial)(mapped_maybe);
 }
 
 export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {

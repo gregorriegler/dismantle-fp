@@ -1,4 +1,4 @@
-import { compose2, F0, F1, identity1 } from "./func"
+import { compose2, F0, F1 } from "./func"
 
 const NONE: None<never> = {
     hint: "None",
@@ -76,26 +76,8 @@ export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): MaybeF1<T, R> {
     return maybe => maybe_is_none(maybe) ? NONE : f(maybe.value)
 }
 
+// maybe_fold maps and gets a value, no benefit of using this function
 export function maybe_fold<T, R>(maybe: Maybe<T>, combine: F1<T, R>, initial: F0<R>): R {
-    return maybe_value(maybe_lift(combine)(maybe), initial);
-}
-
-// maybe_fold(combine, initial)(maybe)
-export function maybe_foo<T, R>(combine: F1<T, R>, initial: F0<R>): F1<Maybe<T>, R> {
-    return (maybe: Maybe<T>) : R => {
-        if (!maybe_is_none(maybe)) {
-            return combine((maybe as Value<T>).value);
-        } else {
-            return initial();
-        }
-    }
-}
-
-
-export function maybe_fold2<T, R>(maybe: Maybe<T>, some: F1<T, R>, none: F0<R>): R {
-    if (!maybe_is_none(maybe)) {
-        return some((maybe as Value<T>).value);
-    } else {
-        return none();
-    }
+    const mapped_maybe = maybe_lift(combine)(maybe);
+    return maybe_or(initial)(mapped_maybe);
 }
