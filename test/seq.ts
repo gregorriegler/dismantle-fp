@@ -91,7 +91,7 @@ function seq_to_string<T>(seq: PrivateSeq<T>): string {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return { head: privateSeq.head(), tail: privateSeq.tail() }
+    return {head: privateSeq.head(), tail: privateSeq.tail()}
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
@@ -202,36 +202,35 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     } as PrivateSeq<T>
 }
 
-// TODO: We started with maybe_fold
-// export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
-//     return (seq: Seq<T>, initial: R) => {
-//         const first = seq_first(seq)
-//         function combineRecursively(head: T): R {
-//             const current = combine(initial, head)
-//             return seq_fold(first.tail, combine, current)
-//         }
-//
-//         if (maybe_is_none(first.head)) {
-//             return initial
-//         }
-//
-//         return maybe_fold(first.head, combineRecursively, () => initial)
-//     }
-// }
+// TODO sehr kompliziert, vielleicht von neu schreiben probieren?
+export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
+    function combine_factory(tail: Seq<R>, initial: R) : F1<T,R> {
+        return function combine_recursively(head: T): R {
+            const current = combine(initial, head)
+            return lifted_combine(tail, current)
+        }
+    }
+
+    function lifted_combine(seq: Seq<T>, initial: R) {
+        const first = seq_first(seq)
+
+        const mapped_maybe = maybe_lift(combine_factory(first.tail, initial))(first.head);
+        return maybe_or(() => initial)(mapped_maybe);
+    }
+
+    return lifted_combine;
+}
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
-    const first = seq_first(seq)
-    function combineRecursively(head: T): R {
-        const current = combine(initial, head)
-        return seq_fold(first.tail, combine, current)
-    }
-
-    if (maybe_is_none(first.head)) {
-        return initial
-    }
-
-    const mapped_maybe = maybe_lift(combineRecursively)(first.head);
-    return maybe_or(() => initial)(mapped_maybe);
+    return seq_fold2(combine)(seq, initial)
+    // const first = seq_first(seq)
+    // function combineRecursively(head: T): R {
+    //     const current = combine(initial, head)
+    //     return seq_fold(first.tail, combine, current)
+    // }
+    //
+    // const mapped_maybe = maybe_lift(combineRecursively)(first.head);
+    // return maybe_or(() => initial)(mapped_maybe);
 }
 
 export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
