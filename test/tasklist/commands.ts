@@ -3,7 +3,7 @@ import { identity1, lazy } from "../func"
 import { maybe_map_i, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
-import { add_task, application_state_create, ApplicationState, list_tasks, write_invalid_command } from "./use_cases"
+import { application_state_map_add_task, application_state_create, ApplicationState, list_tasks, write_invalid_command } from "./use_cases"
 import { Pair, pair_map } from "./pair"
 
 type CommandX<V1, V2, V3, V4> = (state: Pair<V1, WriteApplied<V2>>) => Pair<V3, WriteApplied<V4>>
@@ -32,7 +32,7 @@ export function command_from_input(user_input: UserInput): Command {
     // this is boundary, low level code
     const template_lookup: Map<CommandTemplate> = map_of_2( //
         "list", list_tasks, //
-        "create", add_task, //
+        "create", application_state_map_add_task, //
     )
 
     const input_parts = user_input.split(" ", 2)

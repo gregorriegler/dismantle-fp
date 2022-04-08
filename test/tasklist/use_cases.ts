@@ -1,7 +1,7 @@
 import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
 import { F0, F1, identity1, lazy } from "../func"
-import { Pair, pair_map, pair_of } from "./pair"
+import { Pair, pair_lift, pair_map, pair_of } from "./pair"
 import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
@@ -14,7 +14,7 @@ export function application_state_create(): ApplicationState {
     return pair_of(tasks_create(), null_write)
 }
 
-export function add_task<V2>(concrete_task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
+export function application_state_map_add_task<V2>(concrete_task_name: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<V2>>> {
     // was kann ich öfter verwenden?
     // wir haben das: task_adder(task_name)(tasks)
     // ... kann selben Task zu verschiedenen Listen hinzufügen
@@ -23,7 +23,7 @@ export function add_task<V2>(concrete_task_name: string): F1<Pair<Tasks, WriteAp
     // ... kann von einer base Liste unterschiedliche Ableitungen/Varianten mit unterschiedlichen Tasks erstellen
     // ... wäre mehr OO, weil this das erste ist
     const add_concrete_task = task_adder(concrete_task_name)
-    return (state: Pair<Tasks, WriteApplied<V2>>) => pair_map(state, add_concrete_task, lazy(null_write))
+    return pair_lift(add_concrete_task, lazy(null_write))
 }
 
 export function list_tasks<V2>(_: string): F1<Pair<Tasks, WriteApplied<V2>>, Pair<Tasks, WriteApplied<string>>> {
