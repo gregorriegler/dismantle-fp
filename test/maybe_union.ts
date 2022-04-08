@@ -41,10 +41,16 @@ export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
-    if (!maybe_is_none(maybe)) {
-        return (maybe as Value<T>).value;
-    } else {
-        return default_value();
+    return maybe_or(default_value)(maybe);
+}
+
+export function maybe_or<T>(default_value: F0<T>): F1<Maybe<T>, T> {
+    return (maybe: Maybe<T>): T => {
+        if (!maybe_is_none(maybe)) {
+            return (maybe as Value<T>).value;
+        } else {
+            return default_value();
+        }
     }
 }
 
