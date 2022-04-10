@@ -22,13 +22,20 @@ import { expect_seq_n_values } from "../seq_expects"
  8^8 = 16.777.216 possible boards  = arrays of 8 numbers 1..8
  */
 
-type Queen = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+type Positions = 1 | 2
 
-interface ChessBoard {
-    "1": Queen
+type BoardPart<K extends Positions> = {
+    [K: string]: Positions
 }
+type Board<P extends Positions> =
+    P extends 1 ? BoardPart<1> :
+    P extends 2 ? BoardPart<1> & BoardPart<2> :
+    never
 
-function all_boards(size: number): Seq<ChessBoard> {
+function all_boards<SIZE extends Positions>(size: SIZE): Seq<Board<SIZE>> {
+    if (size === 1) {
+        return seq_of_singleton({ "1": 1 })
+    }
     return seq_of_singleton({ "1": 1 })
 }
 
@@ -38,6 +45,13 @@ describe("Eight Queens", () => {
         it("produces all combinations size 1", () => {
             const all_combinations = all_boards(1)
             expect_seq_n_values(all_combinations, { "1": 1 })
+        })
+
+        xit("produces all combinations size 2", () => {
+            const all_combinations = all_boards(2)
+            expect_seq_n_values(all_combinations,
+                { "1": 1, "2": 2 },
+                { "1": 2, "2": 1 })
         })
 
     })
