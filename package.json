@@ -4,7 +4,8 @@
   "description": "Dismantle the Ivory Tower (FP Deep Dive)",
   "scripts": {
     "test": "mocha -r ts-node/register \"test/**/*_test.ts\"",
-    "test:watch": "mocha -r ts-node/register -R min -w --watch-files . \"test/**/*_test.ts\""
+    "test:watch": "mocha -r ts-node/register -R min -w --watch-files . \"test/**/*_test.ts\"",
+    "test8": "mocha -r ts-node/register \"test/eight_queens/*_test.ts\""
   },
   "keywords": [],
   "author": "",
