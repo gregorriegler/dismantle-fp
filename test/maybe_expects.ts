@@ -11,5 +11,5 @@ export function expectEmpty(maybe: Maybe<any>) {
 export function expectValue<T>(maybe: Maybe<T>, expected: T) {
     expect(maybe_value(maybe, () => {
         throw new Error("expect value " + expected + ", found none")
-    })).to.equal(expected)
+    })).to.deep.equal(expected)
 }
