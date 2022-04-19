@@ -1,17 +1,17 @@
 import { expect } from "chai"
 import { F0, should_not_call0 } from "../func"
 import { maybe_value } from "../maybe_union"
-import { Seq, seq_first, seq_of_singleton } from "../seq"
+import { Seq, seq_bind, seq_first, seq_is_empty, seq_lift, seq_of_empty, seq_of_singleton } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
 
-export function array_lift<T, R>(mapFn: (value: T, index: number) => R): (items: T[]) => R[] {
+export function array_lift_index<T, R>(mapFn: (value: T, index: number) => R): (items: T[]) => R[] {
     return (items) => items.map(mapFn)
 }
 
 export function array_map<T, R>(items: T[], mapFn: (value: T, index: number) => R): R[] {
-    return array_lift(mapFn)(items)
+    return array_lift_index(mapFn)(items)
 }
 
 export function array_bind<T, R>(mapFn: (value: T, index: number) => R[]): (items: T[]) => R[] {
@@ -53,11 +53,11 @@ export function array_permutations<T>(items: T[]): T[][] {
         return [items]
     }
     function permutationsWithout(value: T, index: number): T[][] {
-        const removeCurrentItem = array_remover(index)
-        const remainingItems = removeCurrentItem(items)
-        const furtherPermutations = array_permutations(remainingItems)
+        const remove_current_item = array_remover(index)
+        const remaining_items = remove_current_item(items)
+        const further_permutations = array_permutations(remaining_items)
         const prepender = array_prepender(value)
-        return array_lift(prepender)(furtherPermutations)
+        return array_lift_index(prepender)(further_permutations)
     }
     return array_bind(permutationsWithout)(items)
 }
@@ -81,17 +81,17 @@ describe("array permutations", () => {
 
 export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
     return seq_of_singleton(items)
-    // if (items.length == 1) {
-    //     return [items]
+    // if (seq_is_empty(items)) {
+    //     return seq_of_empty()
     // }
-    // function permutationsWithout(value: T, index: number): T[][] {
-    //     const removeCurrentItem = array_remover(index)
-    //     const remainingItems = removeCurrentItem(items)
-    //     const furtherPermutations = array_permutations(remainingItems)
-    //     const prepender = array_prepender(value)
-    //     return array_lift(prepender)(furtherPermutations)
+    // function permutationsWithout(value: T, index: number): Seq<Seq<T>> {
+    //     const remove_current_item = seq_remover(index)
+    //     const remaining_items = remove_current_item(items)
+    //     const furtherPermutations = seq_permutations(remaining_items)
+    //     const prepender = seq_prepender(value)
+    //     return seq_lift(prepender)(furtherPermutations)
     // }
-    // return array_bind(permutationsWithout)(items)
+    // return seq_bind_index(permutationsWithout)(items)
 }
 
 export function expect_seq_seq_n_values<T>(seq: Seq<Seq<T>>, values: T[][]) {
