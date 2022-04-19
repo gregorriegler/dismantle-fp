@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-// retrofit array
+// --- retrofit array
 
 export function array_lift<T, R>(mapFn: (value: T, index: number) => R): (items: T[]) => R[] {
     return (items) => items.map(mapFn)
@@ -44,29 +44,31 @@ export function array_prepend<T>(items: T[], value: T): T[] {
 
 // --- permutations
 
-export function permutations<T>(items: T[]): T[][] {
+export function array_permutations<T>(items: T[]): T[][] {
     if (items.length == 1) {
         return [items]
     }
-    return array_flatmap(items, (value: T, index: number) => {
-        const remainingItems = array_remover(index)(items)
-        const furtherPermutations = permutations(remainingItems)
+    function permutationsWithout(value: T, index: number): T[][] {
+        const removeCurrentItem = array_remover(index)
+        const remainingItems = removeCurrentItem(items)
+        const furtherPermutations = array_permutations(remainingItems)
         const prepender = array_prepender(value)
         return array_lift(prepender)(furtherPermutations)
-    })
+    }
+    return array_bind(permutationsWithout)(items)
 }
 
-describe("permutations", () => {
+describe("array permutations", () => {
     it("of [1]", () => {
-        const p = permutations([1])
+        const p = array_permutations([1])
         expect(p).to.deep.equal([[1]])
     })
     it("of [1,2]", () => {
-        const p = permutations([1, 2])
+        const p = array_permutations([1, 2])
         expect(p).to.deep.equal([[1, 2], [2, 1]])
     })
     it("of [1,2,3]", () => {
-        const p = permutations([1, 2, 3])
+        const p = array_permutations([1, 2, 3])
         expect(p).to.deep.equal([[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]])
     })
 })
