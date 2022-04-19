@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { F0, should_not_call0 } from "../func"
 import { maybe_value } from "../maybe_union"
-import { Seq, seq_bind, seq_first, seq_is_empty, seq_join, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_prepender, seq_remover, seq_to_indexed } from "../seq"
+import { Indexed, Seq, seq_bind, seq_first, seq_is_empty, seq_join, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_prepender, seq_remover, seq_to_indexed } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
@@ -153,18 +153,25 @@ describe("Seq (Monad) extension", () => {
 // --- seq permutations
 
 export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
-    return seq_of_singleton(items)
-    // if (seq_is_empty(items)) {
-    //     return seq_of_empty()
-    // }
-    // function permutationsWithout(value: T, index: number): Seq<Seq<T>> {
-    //     const remove_current_item = seq_remover(index)
-    //     const remaining_items = remove_current_item(items)
-    //     const further_permutations = seq_permutations(remaining_items)
-    //     const prepender = seq_prepender(value)
-    //     return seq_lift(prepender)(further_permutations)
-    // }
-    // return seq_bind_with_index(permutationsWithout)(items)
+    if (seq_is_empty(items)) {
+        return seq_of_empty()
+    }
+
+    // return seq_of_singleton(items)
+    function permutationsWithout({ index, value }: Indexed<T>): Seq<Seq<T>> {
+        console.log("\nppp: " + index + "/" + value)
+        const remove_current_item = seq_remover(index)
+        const remaining_items = remove_current_item(items)
+        const further_permutations = seq_permutations(remaining_items)
+        if (seq_is_empty(further_permutations)) {
+            return seq_of_singleton(value)
+        }
+        const prepender = seq_prepender(value)
+        return seq_lift(prepender)(further_permutations)
+    }
+    const indexed = seq_to_indexed(items, 0)
+    console.log("\nIII: " + indexed.toString())
+    return seq_bind(permutationsWithout)(indexed)
 }
 
 export function expect_seq_seq_n_values<T>(seq: Seq<Seq<T>>, values: T[][]) {
@@ -181,6 +188,12 @@ export function expect_seq_seq_n_values<T>(seq: Seq<Seq<T>>, values: T[][]) {
 describe("seq permutations", () => {
     it("of [1]", () => {
         const seq = seq_permutations(seq_of_singleton(1))
+        console.log("\nXXX: " + seq.toString())
         expect_seq_seq_n_values(seq, [[1]])
+    })
+    it("of [1,2]", () => {
+        const seq = seq_permutations(seq_of_array([1, 2]))
+        console.log("\nXXX: " + seq.toString())
+        expect_seq_seq_n_values(seq, [[1, 2], [2, 1]])
     })
 })
