@@ -335,3 +335,7 @@ export function seq_remover(index: number): <T>(seq: Seq<T>) => Seq<T> {
         } as RemovedSeq<T>
     }
 }
+
+export function seq_prepender<T>(value: T): (seq: Seq<T>) => Seq<T> {
+    return (seq) => seq_join(seq_of_singleton(value), seq)
+}
