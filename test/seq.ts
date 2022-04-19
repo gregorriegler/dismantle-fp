@@ -311,7 +311,7 @@ interface RemovedSeq<T> extends PrivateSeq<T> {
     skipIndexed: () => void
 }
 
-export function seq_remover(index: number): <T>(seq: Seq<T>) => Seq<T> {
+export function seq_remover<T>(index: number): SeqF1<T, T> {
     return <T>(seq: Seq<T>): Seq<T> => {
         return {
             currentSeq: seq,
@@ -336,6 +336,31 @@ export function seq_remover(index: number): <T>(seq: Seq<T>) => Seq<T> {
     }
 }
 
-export function seq_prepender<T>(value: T): (seq: Seq<T>) => Seq<T> {
+export function seq_prepender<T>(value: T): SeqF1<T, T> {
     return (seq) => seq_join(seq_of_singleton(value), seq)
+}
+
+export interface Indexed<T> {
+    index: number,
+    value: T
+}
+
+export function seq_to_indexed<T>(seq: Seq<T>, start: number): Seq<Indexed<T>> {
+    return {
+        head: () => maybe_map(seq_head(seq), value => { return { index: start, value } }),
+        tail: () => seq_to_indexed(seq_tail(seq), start + 1),
+        toString() {
+            return seq_to_string(this)
+        }
+    } as PrivateSeq<T>
+}
+
+export function seq_from_indexed<T>(seq: Seq<Indexed<T>>): Seq<T> {
+    return {
+        head: () => maybe_map(seq_head(seq), indexed => indexed.value),
+        tail: () => seq_from_indexed(seq_tail(seq)),
+        toString() {
+            return seq_to_string(this)
+        }
+    } as PrivateSeq<T>
 }
