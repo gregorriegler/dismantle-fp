@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { F0, should_not_call0 } from "../func"
 import { maybe_value } from "../maybe_union"
-import { Seq, seq_bind, seq_first, seq_is_empty, seq_lift, seq_of_empty, seq_of_singleton } from "../seq"
+import { Seq, seq_bind, seq_first, seq_is_empty, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_remover } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
@@ -77,6 +77,47 @@ describe("array permutations", () => {
     })
 })
 
+describe("Seq (Monad) extension", () => {
+    describe("remover", () => {
+        it("remove from an empty seq", () => {
+            const seq = seq_of_empty()
+
+            const removed = seq_remover(0)(seq)
+
+            expect_seq_n_values(removed)
+        })
+
+        it("remove from single seq", () => {
+            const seq = seq_of_singleton(1)
+
+            const removed = seq_remover(0)(seq)
+
+            expect_seq_n_values(removed)
+        })
+        it("remove from seq beginning", () => {
+            const seq = seq_of_array([1, 2])
+
+            const removed = seq_remover(0)(seq)
+
+            expect_seq_n_values(removed, 2)
+        })
+        it("remove from seq end", () => {
+            const seq = seq_of_array([1, 2])
+
+            const removed = seq_remover(1)(seq)
+
+            expect_seq_n_values(removed, 1)
+        })
+        it("no remove from single seq", () => {
+            const seq = seq_of_singleton(1)
+
+            const removed = seq_remover(1)(seq)
+
+            expect_seq_n_values(removed, 1)
+        })
+    })
+})
+
 // --- seq permutations
 
 export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
@@ -111,4 +152,3 @@ describe("seq permutations", () => {
         expect_seq_seq_n_values(seq, [[1]])
     })
 })
-

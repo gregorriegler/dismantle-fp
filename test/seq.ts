@@ -91,7 +91,7 @@ function seq_to_string<T>(seq: PrivateSeq<T>): string {
 
 export function seq_first<T>(seq: Seq<T>): SeqElement<T> {
     const privateSeq = seq as PrivateSeq<T>
-    return {head: privateSeq.head(), tail: privateSeq.tail()}
+    return { head: privateSeq.head(), tail: privateSeq.tail() }
 }
 
 export function seq_map<T, R>(seq: Seq<T>, f: F1<T, R>): Seq<R> {
@@ -204,7 +204,7 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
 
 // TODO sehr kompliziert, vielleicht von neu schreiben probieren?
 export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
-    function combine_factory(tail: Seq<R>, initial: R) : F1<T,R> {
+    function combine_factory(tail: Seq<R>, initial: R): F1<T, R> {
         return function combine_recursively(head: T): R {
             const current = combine(initial, head)
             return lifted_combine(tail, current)
@@ -302,4 +302,36 @@ export function seq_first_maybe_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<
 
 export function seq_first_maybe_value<T>(seq: Seq<T>, default_value: () => T): T {
     return maybe_value(seq_head(seq), default_value)
+}
+
+// --- extra
+
+interface RemovedSeq<T> extends PrivateSeq<T> {
+    currentSeq: Seq<T>,
+    skipIndexed: () => void
+}
+
+export function seq_remover(index: number): <T>(seq: Seq<T>) => Seq<T> {
+    return <T>(seq: Seq<T>): Seq<T> => {
+        return {
+            currentSeq: seq,
+            skipIndexed() {
+                if (index == 0) {
+                    const first = seq_first(seq)
+                    this.currentSeq = first.tail
+                }
+            },
+            head() {
+                this.skipIndexed()
+                return seq_head(this.currentSeq)
+            },
+            tail() {
+                this.skipIndexed()
+                return seq_remover(index - 1)(seq_tail(this.currentSeq))
+            },
+            toString() {
+                return seq_to_string(this)
+            }
+        } as RemovedSeq<T>
+    }
 }
