@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { lazy } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
-import { Seq, seq_filter, seq_first, seq_of_array } from "../seq"
+import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed } from "../seq"
 
 // You must put eight chess queens on an 8×8 chessboard
 // such that none of them is able to capture any other
@@ -18,12 +18,11 @@ function filter_valid(queens: Seq<number>): boolean {
 
     function not_in_lower_diagonal(first_position: number) {
 
-        function is_in_lower_diagonal(position: number): boolean {
-            first_position += 1 // mutable :-(
-            return position == first_position
+        function is_in_lower_diagonal({ index, value: position }: Indexed<number>): boolean {
+            return position == first_position + index
         }
 
-        const remaining_positions = first.tail
+        const remaining_positions = seq_to_indexed(first.tail, 1)
         const positions_in_lower_diagonal = seq_filter(remaining_positions, is_in_lower_diagonal)
         const found = seq_first(positions_in_lower_diagonal)
         const has_any_lower_diagonal = maybe_map(found.head, (_) => true)
