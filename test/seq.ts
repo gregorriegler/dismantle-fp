@@ -113,6 +113,19 @@ export function seq_lift<T, R>(f: F1<T, R>): SeqF1<T, R> {
     }
 }
 
+// TODO evaluation: remove double evaluation of seq_first - use cached
+export function seq_lift2<T, R>(f: F1<Seq<T>, R>): F1<Seq<T>, Seq<R>> {
+    return (seq): Seq<R> => {
+        return {
+            head: () => maybe_map(seq_head(seq), (_) => f(seq)),
+            tail: () => seq_lift2(f)(seq_tail(seq)),
+            toString() {
+                return seq_to_string(this)
+            }
+        } as PrivateSeq<T>
+    }
+}
+
 export function seq_flat_map<T, R>(seq: Seq<T>, f: F1<T, Seq<R>>): Seq<R> {
     return seq_bind(f)(seq)
 }

@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { lazy } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
-import { Seq, seq_filter, seq_map, seq_fold, seq_first, seq_of_array, seq_to_indexed, Indexed } from "../seq"
+import { Seq, seq_filter, seq_map, seq_fold, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_lift2 } from "../seq"
 
 // You must put eight chess queens on an 8×8 chessboard
 // such that none of them is able to capture any other
@@ -13,9 +13,10 @@ import { Seq, seq_filter, seq_map, seq_fold, seq_first, seq_of_array, seq_to_ind
  */
 
 function are_queens_valid(queens: Seq<number>): boolean {
-    const first = seq_first(queens)
-    const first_queen_position = first.head
-    function x(): boolean {
+
+    function x(queens: Seq<number>): boolean {
+        const first = seq_first(queens)
+        const first_queen_position = first.head
 
         function not_in_lower_diagonal(first_position: number) {
 
@@ -34,11 +35,9 @@ function are_queens_valid(queens: Seq<number>): boolean {
         return maybe_value(lower_diagonal_valid, lazy(true))
     }
 
-    const xx = maybe_map(first_queen_position, () => x() && are_queens_valid(first.tail))
-    return maybe_value(xx, lazy(true))
-    // const has_no_lower_diagonals = seq_map(queens, not_in_lower_diagonal)
-    // const lower_diagonal_valid = seq_fold(has_no_lower_diagonals, (a, b) => a && b, true)
-    // return lower_diagonal_valid
+    const has_no_lower_diagonals = seq_lift2(x)(queens)
+    const lower_diagonal_valid = seq_fold(has_no_lower_diagonals, (a, b) => a && b, true)
+    return lower_diagonal_valid
 }
 
 describe("Eight Queens filtering", () => {
