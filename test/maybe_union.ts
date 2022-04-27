@@ -41,15 +41,15 @@ export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
 }
 
 export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
-    return maybe_or(default_value)(maybe);
+    return maybe_or(default_value)(maybe)
 }
 
 export function maybe_or<T>(default_value: F0<T>): F1<Maybe<T>, T> {
     return (maybe: Maybe<T>): T => {
         if (!maybe_is_none(maybe)) {
-            return (maybe as Value<T>).value;
+            return (maybe as Value<T>).value
         } else {
-            return default_value();
+            return default_value()
         }
     }
 }
@@ -78,6 +78,6 @@ export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): MaybeF1<T, R> {
 
 // maybe_fold maps and gets a value, no benefit of using this function
 export function maybe_fold<T, R>(maybe: Maybe<T>, combine: F1<T, R>, initial: F0<R>): R {
-    const mapped_maybe = maybe_lift(combine)(maybe);
-    return maybe_or(initial)(mapped_maybe);
+    const mapped_maybe = maybe_lift(combine)(maybe)
+    return maybe_or(initial)(mapped_maybe)
 }

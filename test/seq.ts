@@ -214,11 +214,11 @@ export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
     function lifted_combine(seq: Seq<T>, initial: R) {
         const first = seq_first(seq)
 
-        const mapped_maybe = maybe_lift(combine_factory(first.tail, initial))(first.head);
-        return maybe_or(() => initial)(mapped_maybe);
+        const mapped_maybe = maybe_lift(combine_factory(first.tail, initial))(first.head)
+        return maybe_or(() => initial)(mapped_maybe)
     }
 
-    return lifted_combine;
+    return lifted_combine
 }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
@@ -229,8 +229,8 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
     //     return seq_fold(first.tail, combine, current)
     // }
     //
-    // const mapped_maybe = maybe_lift(combineRecursively)(first.head);
-    // return maybe_or(() => initial)(mapped_maybe);
+    // const mapped_maybe = maybe_lift(combineRecursively)(first.head)
+    // return maybe_or(() => initial)(mapped_maybe)
 }
 
 export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {

@@ -23,7 +23,7 @@ export function task_adder(task_name: string): F1<Tasks, Tasks> {
         const new_task = task_create(task_name)
         return seq_join(tasks, seq_of_singleton(new_task))
     }
-    return add_task;
+    return add_task
 }
 
 export function tasks_format(tasks: Tasks): FormattedTasks {
