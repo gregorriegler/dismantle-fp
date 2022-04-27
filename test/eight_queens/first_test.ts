@@ -78,3 +78,5 @@ describe("Eight Queens filtering", () => {
 
     })
 })
+
+// TODO (Peter) calculate all queens and compare with Internet.
