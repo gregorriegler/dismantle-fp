@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import { F0, should_not_call0 } from "../func"
-import { maybe_value } from "../maybe_union"
+import { compose2, F0, should_not_call0 } from "../func"
+import { maybe_map, maybe_value } from "../maybe_union"
 import { Seq, seq_bind_with_index, seq_first, seq_is_empty, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_prepender, seq_remover } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
@@ -80,16 +80,19 @@ describe("array permutations", () => {
 // --- seq permutations
 
 export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
+    const seq_in_seq_singleton = compose2(seq_of_singleton, seq_of_singleton)
+
     function permutationsWithout(value: T, index: number): Seq<Seq<T>> {
         const remove_current_item = seq_remover<T>(index)
         const remaining_items = remove_current_item(items)
-        if (seq_is_empty(remaining_items)) {
-            return seq_of_singleton(seq_of_singleton(value))
-        }
-        const further_permutations = seq_permutations(remaining_items)
-
-        const prepender = seq_prepender(value)
-        return seq_lift(prepender)(further_permutations)
+        // workaround for if
+        const next_item = seq_first(remaining_items).head
+        const remaining_permutations = maybe_map(next_item, (_) => {
+            const further_permutations = seq_permutations(remaining_items)
+            const prepender = seq_prepender(value)
+            return seq_lift(prepender)(further_permutations)
+        })
+        return maybe_value(remaining_permutations, () => seq_in_seq_singleton(value))
     }
 
     return seq_bind_with_index(permutationsWithout)(items)
