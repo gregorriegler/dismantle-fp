@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { lazy } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
-import { Seq, seq_filter, seq_map, seq_fold, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_lift2 } from "../seq"
+import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_lift2, seq_is_empty, seq_fold2 } from "../seq"
 
 // You must put eight chess queens on an 8×8 chessboard
 // such that none of them is able to capture any other
@@ -12,32 +12,32 @@ import { Seq, seq_filter, seq_map, seq_fold, seq_first, seq_of_array, seq_to_ind
  2. Which ones are not ok?
  */
 
-function are_queens_valid(queens: Seq<number>): boolean {
+function not_in_first_diagonal(queen_positions: Seq<number>): boolean {
+    const first = seq_first(queen_positions)
+    const first_queen_position = first.head
+    const first_not_diagonal = maybe_map(first_queen_position, not_in_this_diagonal)
 
-    function x(queens: Seq<number>): boolean {
-        const first = seq_first(queens)
-        const first_queen_position = first.head
+    function not_in_this_diagonal(first_position: number) {
+        const remaining_positions = seq_to_indexed(first.tail, 1)
+        const positions_in_diagonal = seq_filter(remaining_positions, is_in_diagonal)
 
-        function not_in_lower_diagonal(first_position: number) {
-
-            function is_in_lower_diagonal({ index, value: position }: Indexed<number>): boolean {
-                return position == first_position + index || position == first_position - index
-            }
-
-            const remaining_positions = seq_to_indexed(first.tail, 1)
-            const positions_in_lower_diagonal = seq_filter(remaining_positions, is_in_lower_diagonal)
-            const first_found = seq_first(positions_in_lower_diagonal)
-            const has_any_lower_diagonal = maybe_map(first_found.head, (_) => true)
-            return !maybe_value(has_any_lower_diagonal, lazy(false))
+        function is_in_diagonal({ index, value: position }: Indexed<number>): boolean {
+            return position == first_position + index || position == first_position - index
         }
 
-        const lower_diagonal_valid = maybe_map(first_queen_position, not_in_lower_diagonal)
-        return maybe_value(lower_diagonal_valid, lazy(true))
+        return seq_is_empty(positions_in_diagonal)
     }
 
-    const has_no_lower_diagonals = seq_lift2(x)(queens)
-    const lower_diagonal_valid = seq_fold(has_no_lower_diagonals, (a, b) => a && b, true)
-    return lower_diagonal_valid
+    const empty_is_valid = lazy(true)
+    return maybe_value(first_not_diagonal, empty_is_valid)
+}
+
+export function are_queens_valid(queens: Seq<number>): boolean {
+    const not_in_any_diagonal = seq_lift2(not_in_first_diagonal)
+    const has_each_no_diagonal = not_in_any_diagonal(queens)
+    const all = seq_fold2<boolean, boolean>((a, b) => a && b)
+    const have_all_no_diagonal = all(has_each_no_diagonal, true)
+    return have_all_no_diagonal
 }
 
 describe("Eight Queens filtering", () => {
