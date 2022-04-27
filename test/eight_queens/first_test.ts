@@ -16,17 +16,22 @@ function filter_valid(queens: Seq<number>): boolean {
     const first = seq_first(queens)
     const first_queen_position = first.head
 
-    const mh = maybe_map(first_queen_position, (initial_position) => {
-        const s2 = seq_filter(first.tail, (qzueen_position) => {
-            initial_position += 1
-            return qzueen_position == initial_position
-        })
-        const found = seq_first(s2)
-        const m2 = maybe_map(found.head, (_) => true)
+    function not_in_lower_diagonal(first_position: number) {
 
-        return ! maybe_value(m2, lazy(false))
-    })
-    return maybe_value(mh, lazy(true))
+        function is_in_lower_diagonal(position: number): boolean {
+            first_position += 1 // mutable :-(
+            return position == first_position
+        }
+
+        const remaining_positions = first.tail
+        const positions_in_lower_diagonal = seq_filter(remaining_positions, is_in_lower_diagonal)
+        const found = seq_first(positions_in_lower_diagonal)
+        const has_any_lower_diagonal = maybe_map(found.head, (_) => true)
+        return !maybe_value(has_any_lower_diagonal, lazy(false))
+    }
+
+    const lower_diagonal_valid = maybe_map(first_queen_position, not_in_lower_diagonal)
+    return maybe_value(lower_diagonal_valid, lazy(true))
 }
 
 describe("Eight Queens", () => {
