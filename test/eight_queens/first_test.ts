@@ -19,13 +19,13 @@ function filter_valid(queens: Seq<number>): boolean {
     function not_in_lower_diagonal(first_position: number) {
 
         function is_in_lower_diagonal({ index, value: position }: Indexed<number>): boolean {
-            return position == first_position + index
+            return position == first_position + index || position == first_position - index
         }
 
         const remaining_positions = seq_to_indexed(first.tail, 1)
         const positions_in_lower_diagonal = seq_filter(remaining_positions, is_in_lower_diagonal)
-        const found = seq_first(positions_in_lower_diagonal)
-        const has_any_lower_diagonal = maybe_map(found.head, (_) => true)
+        const first_found = seq_first(positions_in_lower_diagonal)
+        const has_any_lower_diagonal = maybe_map(first_found.head, (_) => true)
         return !maybe_value(has_any_lower_diagonal, lazy(false))
     }
 
@@ -36,20 +36,26 @@ function filter_valid(queens: Seq<number>): boolean {
 describe("Eight Queens", () => {
     describe("by filtering", () => {
 
-        it("checks a sequence of 1", () => {
+        it("checks a sequence of dimension 1", () => {
             const queens = seq_of_array([1])
             const valid = filter_valid(queens)
             expect(valid).to.equal(true)
         })
 
-        it("find lower diagonal 2", () => {
+        it("find lower diagonal in dimension 2", () => {
             const queens = seq_of_array([1, 2])
             const valid = filter_valid(queens)
             expect(valid).to.equal(false)
         })
 
-        it("find lower diagonal 3", () => {
+        it("find lower diagonal in dimension 3", () => {
             const queens = seq_of_array([1, 99, 3])
+            const valid = filter_valid(queens)
+            expect(valid).to.equal(false)
+        })
+
+        it("find upper diagonal in dimension 2", () => {
+            const queens = seq_of_array([2, 1])
             const valid = filter_valid(queens)
             expect(valid).to.equal(false)
         })
