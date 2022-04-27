@@ -80,23 +80,27 @@ describe("array permutations", () => {
 // --- seq permutations
 
 export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
-    function permutationsWithout(value: T, index: number): Seq<Seq<T>> {
-        const seq_v = seq_of_singleton(value)
+    function permutations_without(item: T, at_index: number): Seq<Seq<T>> {
+        const current_item = seq_of_singleton(item)
 
-        const remove_current_item = seq_remover<T>(index)
+        const remove_current_item = seq_remover<T>(at_index)
         const remaining_items = remove_current_item(items)
-        // workaround for if
-        const next_item = seq_first(remaining_items).head
-        const remaining_permutations = maybe_map(next_item, (_) => {
-            const further_permutations = seq_permutations(remaining_items)
-            const prepender = seq_prepender(seq_v)
-            return seq_lift(prepender)(further_permutations)
-        })
 
-        return maybe_value(remaining_permutations, lazy(seq_of_singleton(seq_v)))
+        function recurse_next_permutations() {
+            const further_permutations = seq_permutations(remaining_items)
+            const prepender = seq_prepender(current_item)
+            return seq_lift(prepender)(further_permutations)
+        }
+
+        // workaround for if
+        const next_remaining_item = seq_first(remaining_items).head
+        const next_permutations = maybe_map(next_remaining_item, recurse_next_permutations)
+
+        const or_only_current_item = lazy(seq_of_singleton(current_item))
+        return maybe_value(next_permutations, or_only_current_item)
     }
 
-    return seq_bind_with_index(permutationsWithout)(items)
+    return seq_bind_with_index(permutations_without)(items)
 }
 
 describe("Seq permutations", () => {
