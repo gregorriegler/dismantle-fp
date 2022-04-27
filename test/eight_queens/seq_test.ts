@@ -43,14 +43,14 @@ describe("Seq (Monad) extension", () => {
         it("to empty", () => {
             const seq = seq_of_empty()
 
-            const prepended = seq_prepender(1)(seq)
+            const prepended = seq_prepender(seq_of_singleton(1))(seq)
 
             expect_seq_n_values(prepended, 1)
         })
         it("to seq", () => {
             const seq = seq_of_singleton(2)
 
-            const prepended = seq_prepender(1)(seq)
+            const prepended = seq_prepender(seq_of_singleton(1))(seq)
 
             expect_seq_n_values(prepended, 1, 2)
         })

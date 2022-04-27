@@ -336,8 +336,8 @@ export function seq_remover<T>(index: number): SeqF1<T, T> {
     }
 }
 
-export function seq_prepender<T>(value: T): SeqF1<T, T> {
-    return (seq) => seq_join(seq_of_singleton(value), seq)
+export function seq_prepender<T>(values: Seq<T>): SeqF1<T, T> {
+    return (seq) => seq_join(values, seq)
 }
 
 export interface Indexed<T> {
