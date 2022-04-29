@@ -40,26 +40,22 @@ export function maybe_f<T, R>(f: F1<T, R>): F1<T, Maybe<R>> {
     return compose2(f, maybe_of)
 }
 
-export function maybe_value<T>(maybe: Maybe<T>, default_value: F0<T>): T {
-    return maybe_or(default_value)(maybe)
+export function maybe_value<T>(maybe: Maybe<T>, else_value: F0<T>): T {
+    return maybe_make_or(else_value)(maybe)
 }
 
-export function maybe_or<T>(default_value: F0<T>): F1<Maybe<T>, T> {
+export function maybe_make_or<T>(else_value: F0<T>): F1<Maybe<T>, T> {
     return (maybe: Maybe<T>): T => {
         if (!maybe_is_none(maybe)) {
             return (maybe as Value<T>).value
         } else {
-            return default_value()
+            return else_value()
         }
     }
 }
 
 export function maybe_map<T, R>(maybe: Maybe<T>, f: F1<T, R>): Maybe<R> {
     return maybe_lift(f)(maybe)
-}
-
-export function maybe_map_i<T, R>(maybe: Maybe<T>): F1<F1<T, R>, Maybe<R>> {
-    return f => maybe_lift(f)(maybe)
 }
 
 export type MaybeF1<T, R> = F1<Maybe<T>, Maybe<R>>
@@ -79,5 +75,5 @@ export function maybe_bind<T, R>(f: F1<T, Maybe<R>>): MaybeF1<T, R> {
 // maybe_fold maps and gets a value, no benefit of using this function
 export function maybe_fold<T, R>(maybe: Maybe<T>, combine: F1<T, R>, initial: F0<R>): R {
     const mapped_maybe = maybe_lift(combine)(maybe)
-    return maybe_or(initial)(mapped_maybe)
+    return maybe_make_or(initial)(mapped_maybe)
 }

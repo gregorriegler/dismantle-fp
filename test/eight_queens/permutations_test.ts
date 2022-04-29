@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { F0, F2, lazy, should_not_call0 } from "../func"
-import { maybe_map, maybe_value } from "../maybe_union"
+import { maybe_map, maybe_make_or, maybe_value } from "../maybe_union"
 import { Seq, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, SeqF1, Indexed, seq_bind, seq_to_indexed } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
@@ -97,7 +97,7 @@ export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
         const next_permutations = maybe_map(next_remaining_item, recurse_next_permutations)
 
         const or_only_current_item = lazy(seq_of_singleton(current_item))
-        return maybe_value(next_permutations, or_only_current_item)
+        return maybe_make_or(or_only_current_item)(next_permutations)
     }
 
     return indexed_seq_bind(permutations_without)(items)

@@ -43,6 +43,10 @@ export function partial3_1<T, U, V, R>(f: F3<T, U, V, R>, first: T): F2<U, V, R>
     return (u: U, v: V) => f(first, u, v)
 }
 
+export function make_apply<T, U>(argument: T): F1<F1<T, U>, U> {
+    return (f: F1<T, U>) => f(argument)
+}
+
 /**
  * Curry a binary function (which is partially applied on first argument).
  */

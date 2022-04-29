@@ -6,7 +6,7 @@ import {
     maybe_lift,
     maybe_map,
     maybe_none,
-    maybe_of, maybe_or,
+    maybe_of, maybe_make_or,
     maybe_value
 } from "./maybe_union"
 import { F0, F1, F2 } from "./func"
@@ -234,7 +234,7 @@ export function seq_make_fold_by<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R
         const first = seq_first(seq)
 
         const mapped_maybe = maybe_lift(combine_factory(first.tail, initial))(first.head)
-        return maybe_or(() => initial)(mapped_maybe)
+        return maybe_make_or(() => initial)(mapped_maybe)
     }
 
     return lifted_combine

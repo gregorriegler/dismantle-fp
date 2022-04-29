@@ -1,6 +1,6 @@
 import { Seq, seq_make_fold_by, seq_lift } from "../seq"
-import { identity1, lazy } from "../func"
-import { maybe_map_i, maybe_value } from "../maybe_union"
+import { F1, identity1, lazy, make_apply } from "../func"
+import { maybe_make_or, maybe_lift } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
 import { sequence_writes as write_in_sequence, WriteApplied } from "../datamunging/write"
 import { application_state_map_add_task, application_state_create, ApplicationState, list_tasks, write_invalid_command } from "./use_cases"
@@ -34,7 +34,7 @@ function execute_command<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, 
 
 export type UserInput = string
 
-type CommandTemplate = (argument: string) => Command
+type CommandTemplate = F1<string, Command>
 
 export function command_from_input(user_input: UserInput): Command {
     // this is boundary, low level code
@@ -49,12 +49,11 @@ export function command_from_input(user_input: UserInput): Command {
 
     const template = map_get(template_lookup, name)
 
-    const command = maybe_map_i<CommandTemplate, Command>(template)(apply_with_argument(argument))
+    const apply_argument = make_apply<string, Command>(argument)
+    const apply_argument_to_template = maybe_lift<CommandTemplate, Command>(apply_argument)
+    const command = apply_argument_to_template(template)
 
     const invalid_command = write_invalid_command(user_input)
-    return maybe_value(command, lazy(invalid_command))
-}
-
-function apply_with_argument(argument: string) {
-    return (template: CommandTemplate) => template(argument)
+    const command_or_invalid_command = maybe_make_or(lazy(invalid_command))
+    return command_or_invalid_command(command)
 }
