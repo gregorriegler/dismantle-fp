@@ -1,4 +1,4 @@
-import { Seq, seq_fold, seq_lift, seq_map } from "../seq"
+import { Seq, seq_fold2 as seq_make_fold_by, seq_lift, seq_map } from "../seq"
 import { identity1, lazy } from "../func"
 import { maybe_map_i, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
@@ -10,14 +10,21 @@ type CommandX<V1, V2, V3, V4> = (state: Pair<V1, WriteApplied<V2>>) => Pair<V3, 
 type Command = (state: ApplicationState) => ApplicationState
 
 export function task_list(command_input: Seq<UserInput>): WriteApplied<string> {
+    const initial_state = application_state_create()
+
     const command_from_input_map = seq_lift(command_from_input)
     const commands = command_from_input_map(command_input)
-    const state = seq_fold(commands, commands_fold, application_state_create())
-    return state["right"] // this is the only time we use the K2, don't use K1 at all.
+
+    // const state = seq_fold(commands, commands_fold, application_state_create())
+    const new_state = fold_commands_by_execute(commands, initial_state)
+
+    return new_state["right"] // this is the only time we use the K2, don't use K1 at all.
 }
 
+const fold_commands_by_execute = seq_make_fold_by<Command, ApplicationState>(execute_command)
+
 // function commands_fold(current_state: ApplicationState, command: Command): ApplicationState {
-function commands_fold<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, command: CommandX<V1, V2, V3, V2>):
+function execute_command<V1, V2, V3>(current_state: Pair<V1, WriteApplied<V2>>, command: CommandX<V1, V2, V3, V2>):
     Pair<V3, WriteApplied<V2>> {
     // works with domain objects, folds domain
     const new_state = command(current_state)
