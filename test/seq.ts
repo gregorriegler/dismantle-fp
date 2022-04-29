@@ -358,11 +358,3 @@ export function indexed_seq_to_seq<T>(seq: Seq<Indexed<T>>): Seq<T> {
         }
     } as PrivateSeq<T>
 }
-
-export function indexed_seq_bind<T, R>(f: F2<T, number, Seq<R>>): SeqF1<T, R> {
-    const indexed_f = seq_bind(({ index, value }: Indexed<T>) => f(value, index))
-    return (seq): Seq<R> => {
-        const indexed = seq_to_indexed(seq, 0)
-        return indexed_f(indexed)
-    }
-}

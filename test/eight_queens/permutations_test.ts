@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import { F0, lazy, should_not_call0 } from "../func"
+import { F0, F2, lazy, should_not_call0 } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
-import { Seq, indexed_seq_bind, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at } from "../seq"
+import { Seq, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, SeqF1, Indexed, seq_bind, seq_to_indexed } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
@@ -101,6 +101,14 @@ export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
     }
 
     return indexed_seq_bind(permutations_without)(items)
+}
+
+function indexed_seq_bind<T, R>(f: F2<T, number, Seq<R>>): SeqF1<T, R> {
+    const indexed_f = seq_bind(({ index, value }: Indexed<T>) => f(value, index))
+    return (seq): Seq<R> => {
+        const indexed = seq_to_indexed(seq, 0)
+        return indexed_f(indexed)
+    }
 }
 
 describe("Seq permutations", () => {
