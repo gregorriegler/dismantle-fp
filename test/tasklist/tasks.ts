@@ -1,4 +1,4 @@
-import { Seq, seq_fold, seq_join, seq_lift, seq_make_append_by, seq_make_fold_by, seq_map, seq_of_empty, seq_of_singleton } from "../seq"
+import { Seq, seq_lift, seq_make_append_by, seq_make_fold_by, seq_of_empty, seq_of_singleton } from "../seq"
 import { F1, join } from "../func"
 
 /*
