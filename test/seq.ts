@@ -220,7 +220,7 @@ export function seq_prepender<T>(values: Seq<T>): SeqF1<T, T> {
 }
 
 // TODO sehr kompliziert, vielleicht von neu schreiben probieren?
-export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
+export function seq_make_fold_by<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
     function combine_factory(tail: Seq<R>, initial: R): F1<T, R> {
         return function combine_recursively(head: T): R {
             const current = combine(initial, head)
@@ -239,7 +239,7 @@ export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
 }
 
 export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial: R): R {
-    return seq_fold2(combine)(seq, initial)
+    return seq_make_fold_by(combine)(seq, initial)
     // const first = seq_first(seq)
     // function combineRecursively(head: T): R {
     //     const current = combine(initial, head)

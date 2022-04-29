@@ -1,4 +1,4 @@
-import { Seq, seq_fold2 as seq_make_fold_by, seq_lift, seq_map } from "../seq"
+import { Seq, seq_make_fold_by, seq_lift } from "../seq"
 import { identity1, lazy } from "../func"
 import { maybe_map_i, maybe_value } from "../maybe_union"
 import { Map, map_get, map_of_2 } from "./map"
