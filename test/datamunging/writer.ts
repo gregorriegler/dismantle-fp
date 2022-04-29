@@ -70,12 +70,17 @@ function writer_ap2<T, IO>(writer: Writer<T, IO>, t: T): WriteApplied<IO> {
 
 export type ApplyForWriter<T, IO> = F1<T, WriteApplied<IO>>
 
-export function create_apply_for_writer<T, IO>(writer: Writer<T, IO>): ApplyForWriter<T, IO> {
+export function make_apply_to_writer<T, IO>(writer: Writer<T, IO>): ApplyForWriter<T, IO> {
     const writer_apply_curried = curry3(writer_apply)
     return writer_apply_curried(writer)
 }
 
-export function create_apply_writer_for_transformation<T, IO>(transformation: F1<T, IO>): ApplyForWriter<T, IO> {
+export function make_apply_writer_to_transformation<T, IO>(transformation: F1<T, IO>): ApplyForWriter<T, IO> {
     const writer = writer_of(transformation)
-    return create_apply_for_writer(writer)
+    return make_apply_to_writer(writer)
+}
+
+export function make_apply_writer<IO>(): ApplyForWriter<IO, IO> {
+    const writer = writer_of(identity1 as F1<IO,IO>)
+    return make_apply_to_writer(writer)
 }

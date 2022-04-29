@@ -1,4 +1,3 @@
-import { ListFormat } from "typescript"
 import { F1, F2 } from "../func"
 
 export type Single<K, V> = {
