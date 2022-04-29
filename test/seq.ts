@@ -252,14 +252,6 @@ export function seq_fold<T, R>(seq: Seq<T>, combine: (a: R, b: T) => R, initial:
     // return maybe_or(() => initial)(mapped_maybe)
 }
 
-export function seq_first_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
-    const first = seq_first(seq)
-    if (maybe_is_none(first.head)) {
-        return none()
-    }
-    return maybe_fold(first.head, some, none)
-}
-
 interface FilteredSeq<T> extends CachedCurrentSeqValueSeq<Maybe<T>, T, T> {
     advanceToFirst(): void
 }
