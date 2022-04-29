@@ -38,6 +38,13 @@ describe("Seq (Monad) extension", () => {
 
             expect_seq_n_values(removed, 1)
         })
+        it("remove multiple from seq", () => {
+            const seq = seq_of_array([1, 2, 3])
+
+            const removed = seq_remover(0)(seq_remover(0)(seq))
+
+            expect_seq_n_values(removed, 3)
+        })
     })
     describe("prepend", () => {
         it("to empty", () => {

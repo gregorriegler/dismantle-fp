@@ -215,6 +215,10 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     } as PrivateSeq<T>
 }
 
+export function seq_prepender<T>(values: Seq<T>): SeqF1<T, T> {
+    return (seq) => seq_join(values, seq)
+}
+
 // TODO sehr kompliziert, vielleicht von neu schreiben probieren?
 export function seq_fold2<T, R>(combine: (a: R, b: T) => R): F2<Seq<T>, R, R> {
     function combine_factory(tail: Seq<R>, initial: R): F1<T, R> {
@@ -347,10 +351,6 @@ export function seq_remover<T>(index: number): SeqF1<T, T> {
             }
         } as RemovedSeq<T>
     }
-}
-
-export function seq_prepender<T>(values: Seq<T>): SeqF1<T, T> {
-    return (seq) => seq_join(values, seq)
 }
 
 export interface Indexed<T> {
