@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { describe } from "mocha"
 import { expect_seq_n_values } from "../seq_expects"
 import { command_from_input } from "./commands"
-import { task_adder, task_create, tasks_create, tasks_format } from "./tasks"
+import { make_add_task_by_name, task_create, tasks_create, tasks_format } from "./tasks"
 import { application_state_create } from "./use_cases"
 
 describe("Tasks/TaskList Domain", () => {
@@ -16,7 +16,7 @@ describe("Tasks/TaskList Domain", () => {
     it("adds a Task", () => {
         const tasks = tasks_create()
 
-        const result = task_adder("Buy a Milk")(tasks)
+        const result = make_add_task_by_name("Buy a Milk")(tasks)
 
         const formatted_tasks = tasks_format(result)
         expect(formatted_tasks).to.eq("Current Tasks:\n( ) Buy a Milk\n")
@@ -25,8 +25,8 @@ describe("Tasks/TaskList Domain", () => {
     it("adds two Tasks", () => {
         let tasks = tasks_create()
 
-        tasks = task_adder("Buy a Milk")(tasks)
-        const result = task_adder("Buy Coffee")(tasks)
+        tasks = make_add_task_by_name("Buy a Milk")(tasks)
+        const result = make_add_task_by_name("Buy Coffee")(tasks)
 
         const formatted_tasks = tasks_format(result)
         expect(formatted_tasks).to.eq(

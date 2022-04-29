@@ -15,7 +15,6 @@ export function task_list(command_input: Seq<UserInput>): WriteApplied<string> {
     const command_from_input_map = seq_lift(command_from_input)
     const commands = command_from_input_map(command_input)
 
-    // const state = seq_fold(commands, commands_fold, application_state_create())
     const new_state = fold_commands_by_execute(commands, initial_state)
 
     return new_state["right"] // this is the only time we use the K2, don't use K1 at all.

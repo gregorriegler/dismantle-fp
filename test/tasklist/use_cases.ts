@@ -2,7 +2,7 @@ import { null_write, WriteApplied } from "../datamunging/write"
 import { create_apply_writer_for_transformation } from "../datamunging/writer"
 import { F0, F1, identity1, lazy } from "../func"
 import { Pair, pair_lift, pair_map, pair_of } from "./pair"
-import { task_adder, Tasks, tasks_create, tasks_format } from "./tasks"
+import { make_add_task_by_name, Tasks, tasks_create, tasks_format } from "./tasks"
 
 /*
  * Domain Logic = Pure (Application)
@@ -22,7 +22,7 @@ export function application_state_map_add_task<V2>(concrete_task_name: string): 
     // Gregor will: tasks_addable(tasks)(task_from(task_name))
     // ... kann von einer base Liste unterschiedliche Ableitungen/Varianten mit unterschiedlichen Tasks erstellen
     // ... wäre mehr OO, weil this das erste ist
-    const add_concrete_task = task_adder(concrete_task_name)
+    const add_concrete_task = make_add_task_by_name(concrete_task_name)
     return pair_lift(add_concrete_task, lazy(null_write))
 }
 

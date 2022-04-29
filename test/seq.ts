@@ -1,7 +1,6 @@
 import {
     Maybe,
     maybe_bind,
-    maybe_fold,
     maybe_is_none,
     maybe_lift,
     maybe_map,
@@ -219,6 +218,10 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
 
 export function seq_make_prepend_by<T>(values: Seq<T>): SeqF1<T, T> {
     return (seq) => seq_join(values, seq)
+}
+
+export function seq_make_append_by<T>(values: Seq<T>): SeqF1<T, T> {
+    return (seq) => seq_join(seq, values)
 }
 
 // TODO sehr kompliziert, vielleicht von neu schreiben probieren?
