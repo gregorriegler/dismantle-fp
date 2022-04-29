@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { F0, lazy, should_not_call0 } from "../func"
 import { maybe_map, maybe_value } from "../maybe_union"
-import { Seq, seq_bind_with_index, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_prepender, seq_remover } from "../seq"
+import { Seq, seq_bind_with_index, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_remover } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
@@ -88,7 +88,7 @@ export function seq_permutations<T>(items: Seq<T>): Seq<Seq<T>> {
 
         function recurse_next_permutations() {
             const further_permutations = seq_permutations(remaining_items)
-            const prepender = seq_prepender(current_item)
+            const prepender = seq_make_prepend_by(current_item)
             return seq_lift(prepender)(further_permutations)
         }
 

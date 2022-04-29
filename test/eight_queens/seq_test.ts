@@ -1,4 +1,4 @@
-import { seq_of_array, seq_of_empty, seq_of_singleton, seq_prepender, seq_remover, seq_to_indexed } from "../seq"
+import { seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_remover, seq_to_indexed } from "../seq"
 import { expect_seq_n_values } from "../seq_expects"
 
 describe("Seq (Monad) extension", () => {
@@ -50,14 +50,14 @@ describe("Seq (Monad) extension", () => {
         it("to empty", () => {
             const seq = seq_of_empty()
 
-            const prepended = seq_prepender(seq_of_singleton(1))(seq)
+            const prepended = seq_make_prepend_by(seq_of_singleton(1))(seq)
 
             expect_seq_n_values(prepended, 1)
         })
         it("to seq", () => {
             const seq = seq_of_singleton(2)
 
-            const prepended = seq_prepender(seq_of_singleton(1))(seq)
+            const prepended = seq_make_prepend_by(seq_of_singleton(1))(seq)
 
             expect_seq_n_values(prepended, 1, 2)
         })

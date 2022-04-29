@@ -102,6 +102,7 @@ export type SeqF1<T, R> = F1<Seq<T>, Seq<R>>
 
 // TODO evaluation: remove double evaluation of seq_first - use cached
 export function seq_lift<T, R>(f: F1<T, R>): SeqF1<T, R> {
+    // would be "seq_make_map_by"
     return (seq): Seq<R> => {
         return {
             head: () => maybe_lift(f)(seq_head(seq)),
@@ -114,11 +115,11 @@ export function seq_lift<T, R>(f: F1<T, R>): SeqF1<T, R> {
 }
 
 // TODO evaluation: remove double evaluation of seq_first - use cached
-export function seq_lift2<T, R>(f: F1<Seq<T>, R>): F1<Seq<T>, Seq<R>> {
+export function seq_reverse_bind<T, R>(f: F1<Seq<T>, R>): SeqF1<T, R> {
     return (seq): Seq<R> => {
         return {
             head: () => maybe_map(seq_head(seq), (_) => f(seq)),
-            tail: () => seq_lift2(f)(seq_tail(seq)),
+            tail: () => seq_reverse_bind(f)(seq_tail(seq)),
             toString() {
                 return seq_to_string(this)
             }
@@ -138,6 +139,7 @@ interface BoundSeq<T, R> extends CachedCurrentSeqValueSeq<Maybe<Seq<R>>, T, R> {
 }
 
 export function seq_bind<T, R>(f: F1<T, Seq<R>>): SeqF1<T, R> {
+    // would be "seq_make_flatmap_by"
     return (seq): Seq<R> => {
         return {
             value: undefined,
@@ -215,7 +217,7 @@ export function seq_join<T>(first: Seq<T>, second: Seq<T>): Seq<T> {
     } as PrivateSeq<T>
 }
 
-export function seq_prepender<T>(values: Seq<T>): SeqF1<T, T> {
+export function seq_make_prepend_by<T>(values: Seq<T>): SeqF1<T, T> {
     return (seq) => seq_join(values, seq)
 }
 
