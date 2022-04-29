@@ -1,4 +1,4 @@
-import { seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_remover, seq_to_indexed } from "../seq"
+import { seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, seq_to_indexed } from "../seq"
 import { expect_seq_n_values } from "../seq_expects"
 
 describe("Seq (Monad) extension", () => {
@@ -6,42 +6,42 @@ describe("Seq (Monad) extension", () => {
         it("remove from an empty seq", () => {
             const seq = seq_of_empty()
 
-            const removed = seq_remover(0)(seq)
+            const removed = seq_make_remove_at(0)(seq)
 
             expect_seq_n_values(removed)
         })
         it("remove from single seq", () => {
             const seq = seq_of_singleton(1)
 
-            const removed = seq_remover(0)(seq)
+            const removed = seq_make_remove_at(0)(seq)
 
             expect_seq_n_values(removed)
         })
         it("remove from seq beginning", () => {
             const seq = seq_of_array([1, 2])
 
-            const removed = seq_remover(0)(seq)
+            const removed = seq_make_remove_at(0)(seq)
 
             expect_seq_n_values(removed, 2)
         })
         it("remove from seq end", () => {
             const seq = seq_of_array([1, 2])
 
-            const removed = seq_remover(1)(seq)
+            const removed = seq_make_remove_at(1)(seq)
 
             expect_seq_n_values(removed, 1)
         })
         it("no remove from single seq", () => {
             const seq = seq_of_singleton(1)
 
-            const removed = seq_remover(1)(seq)
+            const removed = seq_make_remove_at(1)(seq)
 
             expect_seq_n_values(removed, 1)
         })
         it("remove multiple from seq", () => {
             const seq = seq_of_array([1, 2, 3])
 
-            const removed = seq_remover(0)(seq_remover(0)(seq))
+            const removed = seq_make_remove_at(0)(seq_make_remove_at(0)(seq))
 
             expect_seq_n_values(removed, 3)
         })

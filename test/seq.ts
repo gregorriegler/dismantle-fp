@@ -302,19 +302,6 @@ function seq_tail<T>(seq: Seq<T>): Seq<T> {
     return seq_first(seq).tail
 }
 
-// --- convenience functions for seq-maybe combinations
-
-export function seq_first_maybe_map<T, R>(seq: Seq<T>, some: F1<T, R>, none: F0<R>): R {
-    if (seq_is_empty(seq)) {
-        return none()
-    }
-    return maybe_fold(seq_first(seq).head, some, none)
-}
-
-export function seq_first_maybe_value<T>(seq: Seq<T>, default_value: () => T): T {
-    return maybe_value(seq_head(seq), default_value)
-}
-
 // --- extra
 
 interface RemovedSeq<T> extends PrivateSeq<T> {
@@ -322,7 +309,7 @@ interface RemovedSeq<T> extends PrivateSeq<T> {
     skipIndexed: () => void
 }
 
-export function seq_remover<T>(index: number): SeqF1<T, T> {
+export function seq_make_remove_at<T>(index: number): SeqF1<T, T> {
     return <T>(seq: Seq<T>): Seq<T> => {
         return {
             currentSeq: seq,
@@ -338,7 +325,7 @@ export function seq_remover<T>(index: number): SeqF1<T, T> {
             },
             tail() {
                 this.skipIndexed()
-                return seq_remover(index - 1)(seq_tail(this.currentSeq))
+                return seq_make_remove_at(index - 1)(seq_tail(this.currentSeq))
             },
             toString() {
                 return seq_to_string(this)
@@ -362,17 +349,17 @@ export function seq_to_indexed<T>(seq: Seq<T>, start: number): Seq<Indexed<T>> {
     } as PrivateSeq<T>
 }
 
-export function seq_from_indexed<T>(seq: Seq<Indexed<T>>): Seq<T> {
+export function indexed_seq_to_seq<T>(seq: Seq<Indexed<T>>): Seq<T> {
     return {
         head: () => maybe_map(seq_head(seq), indexed => indexed.value),
-        tail: () => seq_from_indexed(seq_tail(seq)),
+        tail: () => indexed_seq_to_seq(seq_tail(seq)),
         toString() {
             return seq_to_string(this)
         }
     } as PrivateSeq<T>
 }
 
-export function seq_bind_with_index<T, R>(f: F2<T, number, Seq<R>>): SeqF1<T, R> {
+export function indexed_seq_bind<T, R>(f: F2<T, number, Seq<R>>): SeqF1<T, R> {
     const indexed_f = seq_bind(({ index, value }: Indexed<T>) => f(value, index))
     return (seq): Seq<R> => {
         const indexed = seq_to_indexed(seq, 0)
