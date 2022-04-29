@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { lazy } from "../func"
-import { maybe_map, maybe_value } from "../maybe_union"
+import { maybe_fold, maybe_map, maybe_value } from "../maybe_union"
 import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by } from "../seq"
 
 // You must put eight chess queens on an 8×8 chessboard
@@ -15,7 +15,8 @@ import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_
 function not_in_first_diagonal(queen_positions: Seq<number>): boolean {
     const first = seq_first(queen_positions)
     const first_queen_position = first.head
-    const first_not_diagonal = maybe_map(first_queen_position, not_in_this_diagonal)
+    const empty_is_valid = lazy(true)
+    return maybe_fold(first_queen_position, not_in_this_diagonal, empty_is_valid)
 
     function not_in_this_diagonal(first_position: number) {
         const remaining_positions = seq_to_indexed(first.tail, 1)
@@ -27,9 +28,6 @@ function not_in_first_diagonal(queen_positions: Seq<number>): boolean {
 
         return seq_is_empty(positions_in_diagonal)
     }
-
-    const empty_is_valid = lazy(true)
-    return maybe_value(first_not_diagonal, empty_is_valid)
 }
 
 export function are_queens_valid(queens: Seq<number>): boolean {
