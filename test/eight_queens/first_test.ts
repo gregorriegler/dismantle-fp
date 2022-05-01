@@ -1,7 +1,9 @@
 import { expect } from "chai"
-import { lazy } from "../func"
+import { add, lazy } from "../func"
 import { maybe_lift, maybe_make_or } from "../maybe_union"
-import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by } from "../seq"
+import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by, seq_map, seq_fold, seq_of_empty } from "../seq"
+import { expect_seq_n_values } from "../seq_expects"
+import { seq_permutations } from "./permutations_test"
 
 // You must put eight chess queens on an 8×8 chessboard
 // such that none of them is able to capture any other
@@ -81,12 +83,32 @@ describe("Eight Queens filtering", () => {
 
 })
 
-// describe("Eight Queens", () => {
-//     it("all solutions", () => {
-//         const queens = seq_of_array([99, 1, 2])
-//         const valid = are_queens_valid(queens)
-//         expect(valid).to.equal(false)
-//     })
-// })
+export function seq_size<T>(seq:Seq<T>):number {
+    const counts = seq_map(seq, _ => 1)
+    return seq_fold(counts, add, 0)
+}
+
+describe("Seq (Monad) extension", () => {
+    describe("size", () => {
+        it("size of an empty seq", () => {
+            const seq = seq_of_empty()
+            const size = seq_size(seq)
+            expect(size).to.equal(0)
+        })
+        it("size of a seq", () => {
+            const seq = seq_of_array([1,2,3])
+            const size = seq_size(seq)
+            expect(size).to.equal(3)
+        })
+    })
+})
+
+describe("Eight Queens", () => {
+    it("all solutions", () => {
+        const permutations = seq_permutations(seq_of_array([1,2,3,4,5,6,7,8]))
+        const queens = seq_filter(permutations, are_queens_valid)
+
+    })
+})
 
 // TODO (Peter) calculate all queens and compare with Internet.
