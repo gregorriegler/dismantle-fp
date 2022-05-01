@@ -1,8 +1,7 @@
 import { expect } from "chai"
 import { add, lazy } from "../func"
 import { maybe_lift, maybe_make_or } from "../maybe_union"
-import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by, seq_map, seq_fold, seq_of_empty } from "../seq"
-import { expect_seq_n_values } from "../seq_expects"
+import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by, seq_map, seq_fold, seq_of_empty, seq_size } from "../seq"
 import { seq_permutations } from "./permutations_test"
 
 // You must put eight chess queens on an 8×8 chessboard
@@ -14,7 +13,7 @@ import { seq_permutations } from "./permutations_test"
  2. Which ones are not ok?
  */
 
- export function are_queens_valid(queen_positions: Seq<number>): boolean {
+export function are_queens_valid(queen_positions: Seq<number>): boolean {
     const not_in_any_diagonal = seq_reverse_bind(not_in_first_diagonal)
     const has_not_any_diagonal = not_in_any_diagonal(queen_positions)
     const all = seq_make_fold_by<boolean, boolean>((a, b) => a && b)
@@ -46,7 +45,7 @@ function not_in_first_diagonal(queen_positions: Seq<number>): boolean {
 }
 
 describe("Eight Queens filtering", () => {
-    describe("filtering from first element", () => {
+    describe("from first element", () => {
 
         it("checks a sequence of dimension 1", () => {
             const queens = seq_of_array([1])
@@ -71,9 +70,10 @@ describe("Eight Queens filtering", () => {
             const valid = are_queens_valid(queens)
             expect(valid).to.equal(false)
         })
+
     })
 
-    describe("filtering from second element", () => {
+    describe("from second element", () => {
         it("find lower diagonal in dimension 3", () => {
             const queens = seq_of_array([99, 1, 2])
             const valid = are_queens_valid(queens)
@@ -81,32 +81,26 @@ describe("Eight Queens filtering", () => {
         })
     })
 
-})
-
-export function seq_size<T>(seq:Seq<T>):number {
-    const counts = seq_map(seq, _ => 1)
-    return seq_fold(counts, add, 0)
-}
-
-describe("Seq (Monad) extension", () => {
-    describe("size", () => {
-        it("size of an empty seq", () => {
-            const seq = seq_of_empty()
-            const size = seq_size(seq)
-            expect(size).to.equal(0)
+    describe("real solutions", () => {
+        [
+            [2, 4, 6, 8, 3, 1, 7, 5],
+            [1, 7, 4, 6, 8, 2, 5, 3],
+            [1, 7, 5, 8, 2, 4, 6, 3],
+        ].forEach((positions: number[]) => {
+            it(`check real solution Wikipedia ${positions.join(',')}`, () => {
+                const queens = seq_of_array(positions)
+                const valid = are_queens_valid(queens)
+                expect(valid).to.equal(true)
+            })
         })
-        it("size of a seq", () => {
-            const seq = seq_of_array([1,2,3])
-            const size = seq_size(seq)
-            expect(size).to.equal(3)
-        })
+
     })
 })
 
 // Calculate all queens and compare with internet.
 describe("Eight Queens", () => {
     xit("all solutions", () => {
-        const permutations = seq_permutations(seq_of_array([1,2,3,4,5,6,7,8]))
+        const permutations = seq_permutations(seq_of_array([1, 2, 3, 4, 5, 6, 7, 8]))
         const queens = seq_filter(permutations, are_queens_valid)
         expect(seq_size(queens)).to.equal(92)
     })
