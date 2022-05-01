@@ -14,7 +14,7 @@ function array_map<T, R>(items: T[], mapFn: (value: T, index: number) => R): R[]
     return array_lift_index(mapFn)(items)
 }
 
-function array_bind_with_index<T, R>(mapFn: (value: T, index: number) => R[]): (items: T[]) => R[] {
+function indexed_array_bind<T, R>(mapFn: (value: T, index: number) => R[]): (items: T[]) => R[] {
     return (items) => array_flatten(array_map(items, mapFn))
 }
 
@@ -30,7 +30,7 @@ function array_remover(index: number): <T>(items: T[]) => T[] {
     }
 }
 
-function array_prepender<T>(value: T): (items: T[]) => T[] {
+function array_make_prepend_by<T>(value: T): (items: T[]) => T[] {
     return (items) => [value].concat(items)
 }
 
@@ -40,14 +40,24 @@ export function array_permutations<T>(items: T[]): T[][] {
     if (items.length == 1) {
         return [items]
     }
-    function permutationsWithout(value: T, index: number): T[][] {
-        const remove_current_item = array_remover(index)
+
+    function permutations_without(item: T, at_index: number): T[][] {
+        const current_item = item
+
+        const remove_current_item = array_remover(at_index)
         const remaining_items = remove_current_item(items)
-        const further_permutations = array_permutations(remaining_items)
-        const prepender = array_prepender(value)
-        return array_lift_index(prepender)(further_permutations)
+
+        function recurse_next_permutations() {
+            const further_permutations = array_permutations(remaining_items)
+            const prepender = array_make_prepend_by(item)
+            return array_lift_index(prepender)(further_permutations)
+        }
+
+        const next_permutations = recurse_next_permutations()
+        return next_permutations
     }
-    return array_bind_with_index(permutationsWithout)(items)
+
+    return indexed_array_bind(permutations_without)(items)
 }
 
 describe("array permutations", () => {
