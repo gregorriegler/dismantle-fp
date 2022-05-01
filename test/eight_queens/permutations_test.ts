@@ -36,7 +36,7 @@ function array_prepender<T>(value: T): (items: T[]) => T[] {
 
 // --- array permutations
 
-function array_permutations<T>(items: T[]): T[][] {
+export function array_permutations<T>(items: T[]): T[][] {
     if (items.length == 1) {
         return [items]
     }

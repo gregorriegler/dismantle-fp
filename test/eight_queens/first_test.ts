@@ -1,8 +1,8 @@
 import { expect } from "chai"
-import { add, lazy } from "../func"
+import { lazy } from "../func"
 import { maybe_lift, maybe_make_or } from "../maybe_union"
-import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by, seq_map, seq_fold, seq_of_empty, seq_size } from "../seq"
-import { seq_permutations } from "./permutations_test"
+import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_reverse_bind, seq_is_empty, seq_make_fold_by, seq_map, seq_size } from "../seq"
+import { array_permutations, seq_permutations } from "./permutations_test"
 
 // You must put eight chess queens on an 8×8 chessboard
 // such that none of them is able to capture any other
@@ -98,8 +98,15 @@ describe("Eight Queens filtering", () => {
 })
 
 // Calculate all queens and compare with internet.
-describe("Eight Queens", () => {
-    xit("all solutions", () => {
+describe("Eight Queens", function () {
+    this.timeout(5000)
+    it("all solutions with array_permutations", () => {
+        const permutations = array_permutations([1, 2, 3, 4, 5, 6, 7, 8])
+        const seq = seq_map(seq_of_array(permutations), seq_of_array)
+        const queens = seq_filter(seq, are_queens_valid)
+        expect(seq_size(queens)).to.equal(92)
+    })
+    xit("all solutions with seq_permutations", () => {
         const permutations = seq_permutations(seq_of_array([1, 2, 3, 4, 5, 6, 7, 8]))
         const queens = seq_filter(permutations, are_queens_valid)
         expect(seq_size(queens)).to.equal(92)
