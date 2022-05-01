@@ -99,7 +99,7 @@ describe("Eight Queens filtering", () => {
 
 // Calculate all queens and compare with internet.
 describe("Eight Queens", function () {
-    this.timeout(3000)
+    this.timeout(5000)
     it("all solutions with array_permutations", () => {
         const permutations = array_permutations([1, 2, 3, 4, 5, 6, 7, 8])
         const seq = seq_map(seq_of_array(permutations), seq_of_array)
