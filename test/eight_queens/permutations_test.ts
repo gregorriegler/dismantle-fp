@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { F0, F2, lazy, should_not_call0 } from "../func"
 import { maybe_map, maybe_make_or, maybe_value } from "../maybe_union"
-import { Seq, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, SeqF1, Indexed, seq_bind, seq_to_indexed } from "../seq"
+import { Seq, seq_first, seq_lift, seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, SeqF1, Indexed, seq_bind, seq_to_indexed, seq_size } from "../seq"
 import { expect_seq_empty, expect_seq_n_values } from "../seq_expects"
 
 // --- retrofit array
@@ -127,6 +127,20 @@ describe("Seq permutations", () => {
     it("of [1,2,3]", () => {
         const seq = seq_permutations(seq_of_array([1, 2, 3]))
         expect_seq_seq_n_values(seq, [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]])
+    })
+    describe("by count", function () {
+        this.timeout(5000)
+        it("of [1,2,3,4]", () => {
+            const seq = seq_permutations(seq_of_array([1, 2, 3, 4]))
+            const counts = seq_size(seq)
+            expect(counts).to.equal(4 * 3 * 2)
+        })
+        // approx 3 seconds = too slow
+        xit("of [1,2,3,4,5]", () => {
+            const seq = seq_permutations(seq_of_array([1, 2, 3, 4, 5]))
+            const counts = seq_size(seq)
+            expect(counts).to.equal(5 * 4 * 3 * 2)
+        })
     })
 })
 
