@@ -18,10 +18,6 @@ function array_bind_with_index<T, R>(mapFn: (value: T, index: number) => R[]): (
     return (items) => array_flatten(array_map(items, mapFn))
 }
 
-function array_flatmap<T, R>(items: T[], mapFn: (value: T, index: number) => R[]): R[] {
-    return array_bind_with_index(mapFn)(items)
-}
-
 function array_flatten<T>(items: T[][]): T[] {
     return items.reduce((acc, val) => acc.concat(val), [])
 }
@@ -34,16 +30,8 @@ function array_remover(index: number): <T>(items: T[]) => T[] {
     }
 }
 
-function array_remove<T>(items: T[], index: number): T[] {
-    return array_remover(index)(items)
-}
-
 function array_prepender<T>(value: T): (items: T[]) => T[] {
     return (items) => [value].concat(items)
-}
-
-function array_prepend<T>(items: T[], value: T): T[] {
-    return array_prepender(value)(items)
 }
 
 // --- array permutations
@@ -74,6 +62,21 @@ describe("array permutations", () => {
     it("of [1,2,3]", () => {
         const p = array_permutations([1, 2, 3])
         expect(p).to.deep.equal([[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]])
+    })
+    describe("by count", function () {
+        it("of [1,2,3,4]", () => {
+            const p = array_permutations([1, 2, 3, 4])
+            expect(p.length).to.equal(4 * 3 * 2)
+        })
+        // approx 3 seconds = too slow
+        it("of [1,2,3,4,5]", () => {
+            const p = array_permutations([1, 2, 3, 4, 5])
+            expect(p.length).to.equal(5 * 4 * 3 * 2)
+        })
+        it("of [1,2,3,4,5,6,7,8]", () => {
+            const p = array_permutations([1, 2, 3, 4, 5, 6, 7, 8])
+            expect(p.length).to.equal(8 * 7 * 6 * 5 * 4 * 3 * 2)
+        })
     })
 })
 
