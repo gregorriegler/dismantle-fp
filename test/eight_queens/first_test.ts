@@ -105,7 +105,7 @@ describe("Seq (Monad) extension", () => {
 
 // Calculate all queens and compare with internet.
 describe("Eight Queens", () => {
-    it("all solutions", () => {
+    xit("all solutions", () => {
         const permutations = seq_permutations(seq_of_array([1,2,3,4,5,6,7,8]))
         const queens = seq_filter(permutations, are_queens_valid)
         expect(seq_size(queens)).to.equal(92)
