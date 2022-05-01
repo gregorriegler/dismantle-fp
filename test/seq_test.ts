@@ -118,7 +118,7 @@ describe("Seq (Monad)", () => {
             expect_seq_n_values(mapped, 2, 3)
         })
 
-        xit("lift evaluates once each element", () => {
+        xit("(not implemented yet) lift evaluates once each element", () => {
             const seq = invocation.wrap(seq_of_array([1, 2]))
 
             const lifted = seq_lift((a: number) => (a + 1))
@@ -311,7 +311,7 @@ describe("Seq (Monad)", () => {
             expect(act).to.throw("head was called")
         })
 
-        xit("join evaluates once each element", () => {
+        xit("(not implemented yet) join evaluates once each element", () => {
             const seq1 = invocation.wrap(seq_of_array([1, 2]))
             const seq2 = invocation.wrap(seq_of_array([3, 4]))
 

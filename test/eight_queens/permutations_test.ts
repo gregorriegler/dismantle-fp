@@ -148,8 +148,7 @@ describe("Seq permutations", () => {
             const counts = seq_size(seq)
             expect(counts).to.equal(4 * 3 * 2)
         })
-        // approx 3 seconds = too slow
-        xit("of [1,2,3,4,5]", () => {
+        xit("(slow test 3 seconds) of [1,2,3,4,5]", () => {
             const seq = seq_permutations(seq_of_array([1, 2, 3, 4, 5]))
             const counts = seq_size(seq)
             expect(counts).to.equal(5 * 4 * 3 * 2)
