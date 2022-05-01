@@ -8,7 +8,7 @@ import {
     maybe_of, maybe_make_or,
     maybe_value
 } from "./maybe_union"
-import { F0, F1, F2 } from "./func"
+import { add, F0, F1, F2 } from "./func"
 
 export interface Seq<T> extends Object {
 }
@@ -360,4 +360,9 @@ export function indexed_seq_to_seq<T>(seq: Seq<Indexed<T>>): Seq<T> {
             return seq_to_string(this)
         }
     } as PrivateSeq<T>
+}
+
+export function seq_size<T>(seq: Seq<T>): number {
+    const counts = seq_map(seq, _ => 1)
+    return seq_fold(counts, add, 0)
 }

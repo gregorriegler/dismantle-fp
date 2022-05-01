@@ -1,4 +1,5 @@
-import { seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, seq_to_indexed } from "../seq"
+import { expect } from "chai"
+import { seq_of_array, seq_of_empty, seq_of_singleton, seq_make_prepend_by, seq_make_remove_at, seq_to_indexed, seq_size } from "../seq"
 import { expect_seq_n_values } from "../seq_expects"
 
 describe("Seq (Monad) extension", () => {
@@ -76,6 +77,22 @@ describe("Seq (Monad) extension", () => {
             const indexed = seq_to_indexed(seq, 1)
 
             expect_seq_n_values(indexed, { index: 1, value: 11 }, { index: 2, value: 12 })
+        })
+    })
+    describe("size", () => {
+        it("size of an empty seq", () => {
+            const seq = seq_of_empty()
+
+            const size = seq_size(seq)
+
+            expect(size).to.equal(0)
+        })
+        it("size of a seq", () => {
+            const seq = seq_of_array([1, 2, 3])
+
+            const size = seq_size(seq)
+
+            expect(size).to.equal(3)
         })
     })
 })
