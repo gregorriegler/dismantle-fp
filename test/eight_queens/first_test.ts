@@ -12,32 +12,35 @@ import { Seq, seq_filter, seq_first, seq_of_array, seq_to_indexed, Indexed, seq_
  2. Which ones are not ok?
  */
 
+ export function are_queens_valid(queen_positions: Seq<number>): boolean {
+    const not_in_any_diagonal = seq_reverse_bind(not_in_first_diagonal)
+    const has_not_any_diagonal = not_in_any_diagonal(queen_positions)
+    const all = seq_make_fold_by<boolean, boolean>((a, b) => a && b)
+    const have_all_no_diagonal = all(has_not_any_diagonal, true)
+    return have_all_no_diagonal
+}
+
 function not_in_first_diagonal(queen_positions: Seq<number>): boolean {
     const first = seq_first(queen_positions)
     const first_queen_position = first.head
+
+    const map_no_queen_in_diagonal = maybe_lift(no_queen_in_this_diagonal)
+    const first_queen_has_no_diagonals = map_no_queen_in_diagonal(first_queen_position)
+
     const empty_is_valid = lazy(true)
+    const or_valid = maybe_make_or(empty_is_valid)
+    return or_valid(first_queen_has_no_diagonals)
 
-    const x = maybe_lift(not_in_this_diagonal)(first_queen_position)
-    return maybe_make_or(empty_is_valid)(x)
-
-    function not_in_this_diagonal(first_position: number) {
+    function no_queen_in_this_diagonal(first_position: number) {
         const remaining_positions = seq_to_indexed(first.tail, 1)
-        const positions_in_diagonal = seq_filter(remaining_positions, is_in_diagonal)
+        const positions_in_diagonal = seq_filter(remaining_positions, is_diagonal_to_first)
 
-        function is_in_diagonal({ index, value: position }: Indexed<number>): boolean {
+        function is_diagonal_to_first({ index, value: position }: Indexed<number>): boolean {
             return position == first_position + index || position == first_position - index
         }
 
         return seq_is_empty(positions_in_diagonal)
     }
-}
-
-export function are_queens_valid(queens: Seq<number>): boolean {
-    const not_in_any_diagonal = seq_reverse_bind(not_in_first_diagonal)
-    const has_each_no_diagonal = not_in_any_diagonal(queens)
-    const all = seq_make_fold_by<boolean, boolean>((a, b) => a && b)
-    const have_all_no_diagonal = all(has_each_no_diagonal, true)
-    return have_all_no_diagonal
 }
 
 describe("Eight Queens filtering", () => {
@@ -66,7 +69,6 @@ describe("Eight Queens filtering", () => {
             const valid = are_queens_valid(queens)
             expect(valid).to.equal(false)
         })
-
     })
 
     describe("filtering from second element", () => {
@@ -75,8 +77,16 @@ describe("Eight Queens filtering", () => {
             const valid = are_queens_valid(queens)
             expect(valid).to.equal(false)
         })
-
     })
+
 })
+
+// describe("Eight Queens", () => {
+//     it("all solutions", () => {
+//         const queens = seq_of_array([99, 1, 2])
+//         const valid = are_queens_valid(queens)
+//         expect(valid).to.equal(false)
+//     })
+// })
 
 // TODO (Peter) calculate all queens and compare with Internet.
